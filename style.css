@@ -1,0 +1,14 @@
+body {
+    background-color: blueviolet;
+    font-family: sans-serif;
+}
+
+article {
+    max-width: 300px;
+    border: 1px solid gray;
+    padding: 16px;
+}
+
+img {
+    width: 300px;
+}
