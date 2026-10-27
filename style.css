@@ -12,3 +12,12 @@ article {
 img {
     width: 300px;
 }
+
+.Film {
+    display: flex;
+    gap: 16px;
+}
+
+.nav {
+    gap: 16px;
+}
