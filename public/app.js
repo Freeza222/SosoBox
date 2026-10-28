@@ -44,6 +44,7 @@ console.log(bestFilm(films));
 const liste = document.querySelector("#liste-films");
 
 function renderFilms(films) {
+    liste.textContent = "";
     for (const film of films) {
         const article = document.createElement("article");
         const titre = document.createElement("h2");
@@ -56,5 +57,37 @@ function renderFilms(films) {
         liste.append(article); 
     }
 }
+
+const tries = [...films].sort(function (a, b) {
+    return b.rating - a.rating;
+});
+
+const triesCroissant = [...films].sort(function (a, b) {
+    return a.rating - b.rating;
+})
+
+const bons = films.filter(function (film) {
+    return film.rating >= 8;
+});
+
+const btnTous = document.querySelector("#btn-tous")
+btnTous.addEventListener("click", function() {
+    renderFilms(films);
+})
+
+const btnFil = document.querySelector("#btn-bons");
+btnFil.addEventListener("click", function() {
+    renderFilms(bons);
+})
+
+const btnTri = document.querySelector("#btn-tri");
+btnTri.addEventListener("click", function () {
+    renderFilms(tries);
+});
+
+const btnTriCroissant = document.querySelector("#btn-tri-dec");
+btnTriCroissant.addEventListener("click", function (){
+    renderFilms(triesCroissant)
+})
 
 renderFilms(films);

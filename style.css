@@ -21,3 +21,8 @@ img {
 .nav {
     gap: 16px;
 }
+
+button {
+    color: black;
+    background-color: crimson;
+}
