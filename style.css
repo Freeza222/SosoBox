@@ -13,7 +13,7 @@ img {
     width: 300px;
 }
 
-.Film {
+.film {
     display: flex;
     gap: 16px;
 }
