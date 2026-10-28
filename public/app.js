@@ -1,18 +1,43 @@
 console.log("SosoBox est vivant");
 
 const films = [
-    {title: "Babylon", year: 2023, rating: 10, poster: "img/babylon.jpg"},
-    {title: "Projet Dernière Chance", year: 2026, rating: 10, poster: "img/projet_hail.jpg"},
+    {title: "Babylon", year: 2023, rating: 7, poster: "img/babylon.jpg"},
+    {title: "Projet Dernière Chance", year: 2026, rating: 9.5, poster: "img/projet_hail.jpg"},
+    { title: "Dune", year: 2021, rating: 6, poster: "img/dune.jpg" },
 ];
 
-console.log(films.length);
-console.log(films[0].title);
-films.push({ title: "Dune", year: 2021, rating: 10, poster: "img/dune.jpg" });
-
-let total = films[0].rating + films[1].rating + films[2].rating
-
-for (const film of films) {
-    console.log(film.title);
+function toStars(rating) {
+    return rating / 2;
 }
 
-console.log(total/films.length);
+function format(film) {
+    return `${films.title} (${films.year}) : ${toStars(films.rating)}/5`;
+}
+
+let best = films[0]
+
+for (const film of films) {
+    console.log(format(film));
+}
+
+function bestFilm(films) {
+    let best = films[0];
+    for (const film of films) {
+        if (film.rating > best.rating) {
+            best = film;
+        }
+    }
+    return best;
+}
+
+function average(films) {
+    let total = 0
+
+    for (const film of films) {
+        total = total + toStars(film.rating)
+    }
+    return total/films.length;
+}
+
+console.log(average(films));
+console.log(best.title);
