@@ -1,3 +1,4 @@
+console.log(process.env.TMDB_TOKEN ? "Clé TMDB trouvée" : "Clé TMDB manquante");
 const express = require("express");
 const app = express();
 const films = [
