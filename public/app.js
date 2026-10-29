@@ -1,11 +1,6 @@
 console.log("SosoBox est vivant");
 
-const films = [
-    {title: "Babylon", year: 2023, rating: 7, poster: "img/babylon.jpg"},
-    {title: "Projet Dernière Chance", year: 2026, rating: 9.5, poster: "img/projet_hail.jpg"},
-    { title: "Dune", year: 2021, rating: 6, poster: "img/dune.jpg" },
-    {title: "La La land", year: 2016, rating: 8, poster: "img/lalaland.jpg"}
-];
+let films = [];
 
 function toStars(rating) {
     return rating / 2;
@@ -13,10 +8,6 @@ function toStars(rating) {
 
 function format(film) {
     return `${film.title} (${film.year}) : ${toStars(film.rating)}/5`;
-}
-
-for (const film of films) {
-    console.log(format(film));
 }
 
 function bestFilm(films) {
@@ -38,9 +29,6 @@ function average(films) {
     return total/films.length;
 }
 
-console.log(average(films));
-console.log(bestFilm(films));
-
 const liste = document.querySelector("#liste-films");
 
 function renderFilms(films) {
@@ -58,17 +46,6 @@ function renderFilms(films) {
     }
 }
 
-const tries = [...films].sort(function (a, b) {
-    return b.rating - a.rating;
-});
-
-const triesCroissant = [...films].sort(function (a, b) {
-    return a.rating - b.rating;
-})
-
-const bons = films.filter(function (film) {
-    return film.rating >= 8;
-});
 
 const btnTous = document.querySelector("#btn-tous")
 btnTous.addEventListener("click", function() {
@@ -77,17 +54,32 @@ btnTous.addEventListener("click", function() {
 
 const btnFil = document.querySelector("#btn-bons");
 btnFil.addEventListener("click", function() {
+    const bons = films.filter(function (film) {
+    return film.rating >= 8;
+    });
     renderFilms(bons);
-})
+});
 
 const btnTri = document.querySelector("#btn-tri");
 btnTri.addEventListener("click", function () {
-    renderFilms(tries);
+  const tries = [...films].sort(function (a, b) {
+    return b.rating - a.rating;
+  });
+  renderFilms(tries);
 });
 
 const btnTriCroissant = document.querySelector("#btn-tri-dec");
 btnTriCroissant.addEventListener("click", function (){
+    const triesCroissant = [...films].sort(function (a, b) {
+    return a.rating - b.rating;
+    });
     renderFilms(triesCroissant)
-})
+});
 
-renderFilms(films);
+async function loadFilms() {
+  const res = await fetch("/api/films");
+  films = await res.json();
+  renderFilms(films);
+}
+
+loadFilms();
