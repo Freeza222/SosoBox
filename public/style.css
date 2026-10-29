@@ -26,3 +26,7 @@ button {
     color: black;
     background-color: crimson;
 }
+
+#results { display: flex; flex-wrap: wrap; gap: 1rem; }
+#results article { width: 200px; }
+#results img { width: 100%; }
