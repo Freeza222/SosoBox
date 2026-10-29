@@ -13,6 +13,20 @@ app.get("/api/films", (req, res) => {
   res.json(films);
 });
 
+app.get("/api/search", async (req, res) => {
+  const q = req.query.q;
+  if (!q) return res.status(400).json({error : "Paramètre manquant"})
+  const url = "https://api.themoviedb.org/3/search/movie?language=fr-FR&query=" + encodeURIComponent(q);
+  const tmdb = await fetch(url, {
+    headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
+  });
+  const data = await tmdb.json();
+  if (!tmdb.ok) {
+    return res.status(502).json({ error: data.status_message });
+  }
+  res.json(data.results);
+});
+
 app.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
 });
