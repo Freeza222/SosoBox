@@ -4,8 +4,18 @@ const results = document.getElementById("results");
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  results.textContent = "Recherche en cours...";
   const res = await fetch("/api/search?q=" + encodeURIComponent(input.value));
   const films = await res.json();
+
+  if (!res.ok) {
+    results.textContent = "Erreur : " + films.error;
+    return;
+  }
+  if (films.length === 0) {
+    results.textContent = "Aucun film trouvé pour « " + input.value + " ».";
+    return;
+  }
 
   results.innerHTML = "";
     for (const film of films) {
