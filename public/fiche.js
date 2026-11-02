@@ -40,8 +40,12 @@ async function loadFilm() {
 
   const resume = document.createElement("p");
   resume.textContent = film.overview;
+    const realisateur = film.credits.crew.find((p) => p.job === "Director");
+  const acteurs = film.credits.cast.slice(0, 5).map((a) => a.name).join(", ");
 
-  fiche.append(h1, infos, resume);
+  const equipe = document.createElement("p");
+  equipe.textContent = "De " + (realisateur ? realisateur.name : "inconnu") + ", avec " + acteurs;
+  fiche.append(h1, infos, resume, equipe);
 }
 
 loadFilm();

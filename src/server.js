@@ -30,7 +30,7 @@ app.get("/api/search", async (req, res) => {
 app.get("/api/films/:id", async (req, res) => {
   const id = req.params.id;
   const tmdb = await fetch(
-    "https://api.themoviedb.org/3/movie/" + encodeURIComponent(id) + "?language=fr-FR",
+    "https://api.themoviedb.org/3/movie/" + encodeURIComponent(id) + "?language=fr-FR&append_to_response=credits",
     { headers: { Authorization: "Bearer " + process.env.TMDB_TOKEN } }
   );
   const data = await tmdb.json();
