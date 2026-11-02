@@ -27,6 +27,20 @@ app.get("/api/search", async (req, res) => {
   res.json(data.results);
 });
 
+app.get("/api/films/:id", async (req, res) => {
+  const id = req.params.id;
+  const tmdb = await fetch(
+    "https://api.themoviedb.org/3/movie/" + encodeURIComponent(id) + "?language=fr-FR",
+    { headers: { Authorization: "Bearer " + process.env.TMDB_TOKEN } }
+  );
+  const data = await tmdb.json();
+
+  if (!tmdb.ok) {
+    return res.status(tmdb.status).json({ error: data.status_message });
+  }
+  res.json(data);
+});
+
 app.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
 });

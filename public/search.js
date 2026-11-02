@@ -33,6 +33,9 @@ form.addEventListener("submit", async (event) => {
     const p = document.createElement("p");
     p.textContent = film.release_date.slice(0, 4) + " · " + film.vote_average.toFixed(1) + "/10";
     article.append(h3, p);
-    results.append(article);
+      const lien = document.createElement("a");
+    lien.href = "fiche.html?id=" + film.id;
+    lien.appendChild(article);
+    results.appendChild(lien);
   }
 });
