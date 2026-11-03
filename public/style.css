@@ -27,6 +27,5 @@ button {
     background-color: crimson;
 }
 
-#results { display: flex; flex-wrap: wrap; gap: 1rem; }
-#results article { width: 200px; }
-#results img { width: 100%; }
+.resultats { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, 300px); gap: 1rem; }
+.resultats img { width: 300px; }

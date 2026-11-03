@@ -1,5 +1,6 @@
 console.log(process.env.TMDB_TOKEN ? "Clé TMDB trouvée" : "Clé TMDB manquante");
 const express = require("express");
+const { tmdb } = require("./tmdb");
 const app = express();
 app.set("view engine", "ejs");
 const films = [
@@ -15,26 +16,14 @@ app.get("/api/films", (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  const r = await fetch("https://api.themoviedb.org/3/movie/popular?language=fr-FR", {
-    headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
-  });
-  if (!r.ok) return res.status(502).send("TMDB a échoué");
-  const { results } = await r.json();
+  const { results } = await tmdb("/movie/popular?language=fr-FR");
   res.render("home", { films: results });
 });
 
-app.get("/api/search", async (req, res) => {
-  const q = req.query.q;
-  if (!q) return res.status(400).json({error : "Paramètre manquant"})
-  const url = "https://api.themoviedb.org/3/search/movie?language=fr-FR&query=" + encodeURIComponent(q);
-  const tmdb = await fetch(url, {
-    headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
-  });
-  const data = await tmdb.json();
-  if (!tmdb.ok) {
-    return res.status(502).json({ error: data.status_message });
-  }
-  res.json(data.results);
+app.get("/search", async (req, res) => {
+  const q = req.query.q || "";
+  const films = q ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
+  res.render("search", { q, films });
 });
 
 
