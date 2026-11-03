@@ -1,0 +1,15 @@
+<%- include('partials/header') %>
+
+<article>
+  <% if (film.poster_path) { %>
+    <img src="https://image.tmdb.org/t/p/w342<%= film.poster_path %>" alt="">
+  <% } %>
+  <h2><%= film.title %> (<%= (film.release_date || "").slice(0, 4) %>)</h2>
+  <p><%= film.genres.map(g => g.name).join(", ") %></p>
+  <p><%= film.overview %></p>
+  <% const real = film.credits.crew.find(p => p.job === "Director"); %>
+  <% if (real) { %><p>Réalisateur : <%= real.name %></p><% } %>
+  <p>Avec : <%= film.credits.cast.slice(0, 5).map(a => a.name).join(", ") %></p>
+</article>
+
+<%- include('partials/footer') %>

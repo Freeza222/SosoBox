@@ -27,18 +27,13 @@ app.get("/search", async (req, res) => {
 });
 
 
-app.get("/api/films/:id", async (req, res) => {
-  const id = req.params.id;
-  const tmdb = await fetch(
-    "https://api.themoviedb.org/3/movie/" + encodeURIComponent(id) + "?language=fr-FR&append_to_response=credits",
-    { headers: { Authorization: "Bearer " + process.env.TMDB_TOKEN } }
-  );
-  const data = await tmdb.json();
-
-  if (!tmdb.ok) {
-    return res.status(tmdb.status).json({ error: data.status_message });
+app.get("/films/:id", async (req, res) => {
+  try {
+    const film = await tmdb("/movie/" + encodeURIComponent(req.params.id) + "?language=fr-FR&append_to_response=credits");
+    res.render("film", { film });
+  } catch {
+    res.status(404).send("Film introuvable");
   }
-  res.json(data);
 });
 
 app.listen(3000, () => {

@@ -8,7 +8,7 @@
 <ul class="resultats">
   <% for (const f of films) { %>
     <li>
-  <a href="/fiche.html?id=<%= f.id %>">
+  <a href="/films/<%= f.id %>">
     <% if (f.poster_path) { %>
       <img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="">
     <% } %>
