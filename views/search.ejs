@@ -5,17 +5,6 @@
   <button>Rechercher</button>
 </form>
 
-<ul class="resultats">
-  <% for (const f of films) { %>
-    <li>
-  <a href="/films/<%= f.id %>">
-    <% if (f.poster_path) { %>
-      <img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="">
-    <% } %>
-    <span><%= f.title %> (<%= (f.release_date || "").slice(0, 4) %>)</span>
-  </a>
-</li>
-  <% } %>
-</ul>
+<%- include('partials/grille', { films }) %>
 
 <%- include('partials/footer') %>

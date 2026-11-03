@@ -1,0 +1,12 @@
+<ul class="resultats">
+  <% for (const f of films) { %>
+    <li>
+      <a href="/films/<%= f.id %>">
+        <% if (f.poster_path) { %>
+          <img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="">
+        <% } %>
+        <span><%= f.title %> (<%= (f.release_date || "").slice(0, 4) %>) · <%= f.vote_average.toFixed(1) %>/10</span>
+      </a>
+    </li>
+  <% } %>
+</ul>

@@ -1,10 +1,6 @@
 
 <%- include('partials/header') %>
 
-    <ul>
-      <% for (const f of films) { %>
-      <li><%= f.title %></li>
-      <% } %>
-    </ul>
+    <%- include('partials/grille', { films }) %>
 
 <%- include('partials/footer') %>
