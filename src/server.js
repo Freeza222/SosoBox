@@ -1,6 +1,7 @@
 console.log(process.env.TMDB_TOKEN ? "Clé TMDB trouvée" : "Clé TMDB manquante");
 const express = require("express");
 const app = express();
+app.set("view engine", "ejs");
 const films = [
     {title: "Babylon", year: 2023, rating: 7, poster: "img/babylon.jpg"},
     {title: "Projet Dernière Chance", year: 2026, rating: 9.5, poster: "img/projet_hail.jpg"},
@@ -11,6 +12,15 @@ app.use(express.static("public"));
 
 app.get("/api/films", (req, res) => {
   res.json(films);
+});
+
+app.get("/", async (req, res) => {
+  const r = await fetch("https://api.themoviedb.org/3/movie/popular?language=fr-FR", {
+    headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
+  });
+  if (!r.ok) return res.status(502).send("TMDB a échoué");
+  const { results } = await r.json();
+  res.render("home", { films: results });
 });
 
 app.get("/api/search", async (req, res) => {
@@ -27,13 +37,6 @@ app.get("/api/search", async (req, res) => {
   res.json(data.results);
 });
 
-app.get("/api/populaires", async (req, res) => {
-  const r = await fetch("https://api.themoviedb.org/3/movie/popular?language=fr-FR", {
-    headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
-  });
-  if (!r.ok) return res.status(502).json({ error: "TMDB a échoué" });
-  res.json(await r.json());
-});
 
 app.get("/api/films/:id", async (req, res) => {
   const id = req.params.id;

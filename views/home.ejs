@@ -14,8 +14,10 @@
                 <a href="recherche.html">Rechercher</a>
                 <a href="profil.html">Profil</a>
             </nav>
-    <ul id="populaires">
-
+    <ul>
+      <% for (const f of films) { %>
+      <li><%= f.title %></li>
+      <% } %>
     </ul>
     <script src="populaires.js"></script>
   </body>
