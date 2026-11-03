@@ -27,6 +27,14 @@ app.get("/api/search", async (req, res) => {
   res.json(data.results);
 });
 
+app.get("/api/populaires", async (req, res) => {
+  const r = await fetch("https://api.themoviedb.org/3/movie/popular?language=fr-FR", {
+    headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
+  });
+  if (!r.ok) return res.status(502).json({ error: "TMDB a échoué" });
+  res.json(await r.json());
+});
+
 app.get("/api/films/:id", async (req, res) => {
   const id = req.params.id;
   const tmdb = await fetch(
