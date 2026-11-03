@@ -1,5 +1,6 @@
 console.log(process.env.TMDB_TOKEN ? "Clé TMDB trouvée" : "Clé TMDB manquante");
 const express = require("express");
+const db = require("./db");
 const { tmdb } = require("./tmdb");
 const app = express();
 app.set("view engine", "ejs");
