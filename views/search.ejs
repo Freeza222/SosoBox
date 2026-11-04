@@ -1,23 +1,33 @@
 <%- include('partials/header') %>
 
 <% if (fav) { %><p>Choisis un film à ajouter à tes favoris.</p><% } %>
-<% if (fav) { %><input type="hidden" name="fav" value="1"><% } %>
-<form action="/search">
-  <input name="q" value="<%= q %>">
+
+<form action="/search" style="position:relative">
+  <input name="q" value="<%= q %>" placeholder="Film ou utilisateur" autocomplete="off">
+  <div id="suggestions"></div>
+  <% if (fav) { %><input type="hidden" name="fav" value="1"><% } %>
+  <% if (onglet === "users") { %><input type="hidden" name="onglet" value="users"><% } %>
   <button>Rechercher</button>
 </form>
 
-<% if (q) { %>
-  <h2>Utilisateurs</h2>
-  <% if (gens.length === 0) { %><p>Aucun utilisateur trouvé.</p><% } %>
+<% if (q && !fav) { %>
+  <div class="onglets">
+    <a href="/search?q=<%= encodeURIComponent(q) %>" class="<%= onglet === 'films' ? 'actif' : '' %>">Films</a>
+    <a href="/search?q=<%= encodeURIComponent(q) %>&onglet=users" class="<%= onglet === 'users' ? 'actif' : '' %>">Utilisateurs</a>
+  </div>
+<% } %>
+
+<% if (onglet === "users") { %>
+  <% if (q && gens.length === 0) { %><p>Aucun utilisateur trouvé.</p><% } %>
   <ul>
     <% for (const g of gens) { %>
       <li><a href="/u/<%= encodeURIComponent(g.username) %>"><%= g.username %></a></li>
     <% } %>
   </ul>
-  <h2>Films</h2>
+<% } else { %>
+  <%- include('partials/grille', { films }) %>
 <% } %>
 
-<%- include('partials/grille', { films }) %>
+<script src="/suggestions.js" defer></script>
 
 <%- include('partials/footer') %>

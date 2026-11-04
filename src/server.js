@@ -51,10 +51,11 @@ app.get("/", async (req, res) => {
 app.get("/search", async (req, res) => {
   const q = req.query.q || "";
   const fav = req.query.fav === "1" && !!req.session.userId;
-  const films = q ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
-  const gens = q ? db.prepare("SELECT username FROM users WHERE username LIKE ? LIMIT 20").all("%" + q + "%") : [];
+  const onglet = req.query.onglet === "users" && !fav ? "users" : "films";
+  const films = q && onglet === "films" ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
+  const gens = q && onglet === "users" ? db.prepare("SELECT username FROM users WHERE username LIKE ? LIMIT 20").all("%" + q + "%") : [];
   const deja = fav ? db.prepare("SELECT film_id FROM favorites WHERE user_id = ?").all(req.session.userId).map(r => r.film_id) : [];
-  res.render("search", { q, films, gens, fav, deja });
+  res.render("search", { q, films, gens, fav, deja, onglet });
 });
 
 app.get("/films/:id", async (req, res) => {
@@ -124,8 +125,11 @@ app.post("/films/:id/review", async (req, res) => {
 
 app.get("/u/:username/avatar", (req, res) => {
   const u = db.prepare("SELECT avatar, avatar_type FROM users WHERE username = ?").get(req.params.username);
-  if (!u || !u.avatar) return res.status(404).end();
-  res.type(u.avatar_type).set("X-Content-Type-Options", "nosniff").send(u.avatar);
+  if (!u) return res.status(404).send("Utilisateur introuvable");
+  if (!u.avatar) return res.redirect("/avatar-defaut.svg");
+  res.set("Content-Type", u.avatar_type);
+  res.set("X-Content-Type-Options", "nosniff");
+  res.send(u.avatar);
 });
 
 app.post("/avatar", (req, res) => {
@@ -203,6 +207,17 @@ app.post("/films/:id/favori", async (req, res) => {
     db.prepare("INSERT INTO favorites (user_id, film_id) VALUES (?, ?)").run(req.session.userId, id);
   }
   res.redirect(req.body.retour === "profil" ? "/u/" + encodeURIComponent(res.locals.user.username) : "/films/" + id);
+});
+
+app.get("/api/suggestions", async (req, res) => {
+  const q = (req.query.q || "").trim();
+  if (!q) return res.json([]);
+  const data = await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q));
+  const films = data.results
+    .sort((a, b) => b.popularity - a.popularity)
+    .slice(0, 3)
+    .map(f => ({ id: f.id, title: f.title, year: (f.release_date || "").slice(0, 4), poster: f.poster_path }));
+  res.json(films);
 });
 
 app.listen(3000, () => {

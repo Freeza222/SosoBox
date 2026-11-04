@@ -59,8 +59,6 @@ article img { width: 100%; max-width: 300px; }
 .fil .entete { display: flex; align-items: center; gap: 0.75rem; }
 .fil img { display: block; width: 60px; border: 2px solid var(--bordure); border-radius: 6px; }
 .fil p { margin: 0.75rem 0 0; }
-.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-.avatar-grand { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--bordure); display: block; margin: 0.5rem 0; }
 .bouton { display: inline-block; margin: 0; background: var(--accent); color: white; border-radius: 6px; padding: 0.5rem 1rem; cursor: pointer; }
 .bouton:hover { background: var(--lien); color: var(--fond); }
 .fil a { color: var(--texte); text-decoration: none; font-weight: bold; }
@@ -98,3 +96,41 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 .favoris li { margin: 0; }
 .case-vide { display: flex; align-items: center; justify-content: center; width: 120px; aspect-ratio: 2 / 3; border: 2px dashed var(--bordure); border-radius: 8px; font-size: 2.5rem; color: var(--lien); text-decoration: none; }
 a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
+
+.onglets { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--bordure); margin: 1rem 0; }
+.onglets a { padding: 0.5rem 1rem; color: var(--texte); text-decoration: none; border-bottom: 3px solid transparent; }
+.onglets a:hover { border-bottom-color: var(--bordure); }
+.onglets a.actif { border-bottom-color: var(--accent); font-weight: bold; }
+
+
+#suggestions {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  z-index: 10;
+}
+#suggestions:empty { display: none; }
+.sugg {
+  display: flex; align-items: center; gap: .6em;
+  padding: .4em .6em;
+  color: var(--texte);
+  text-decoration: none;
+}
+.sugg:hover { background: var(--bordure); }
+.sugg img { width: 32px; height: 48px; object-fit: cover; border-radius: 3px; }
+
+.avatar-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.avatar-grand {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}

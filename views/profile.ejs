@@ -1,9 +1,7 @@
 <%- include('partials/header') %>
 
 <h2><%= profil.username %></h2>
-<% if (profil.has_avatar) { %>
   <img class="avatar-grand" src="/u/<%= encodeURIComponent(profil.username) %>/avatar" alt="">
-<% } %>
 <% if (user && user.id === profil.id) { %>
   <form method="post" action="/avatar" enctype="multipart/form-data">
   <label class="bouton">

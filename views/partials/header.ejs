@@ -15,7 +15,7 @@
   </nav>
   <div class="compte">
     <% if (user) { %>
-      <% if (user.has_avatar) { %><img class="avatar" src="/u/<%= encodeURIComponent(user.username) %>/avatar" alt=""><% } %>
+      <a href="/u/<%= user.username %>"><img class="avatar-nav" src="/u/<%= user.username %>/avatar" alt="Mon profil"></a>
       <a href="/u/<%= encodeURIComponent(user.username) %>"><%= user.username %></a>
       <form method="post" action="/logout"><button>Déconnexion</button></form>
     <% } else { %>
