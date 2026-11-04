@@ -8,7 +8,7 @@
   <body>
     <h1>SosoBox</h1>
     <% if (user) { %>
-      <span><%= user.username %></span>
+      <a href="/u/<%= encodeURIComponent(user.username) %>"><%= user.username %></a>
       <form method="post" action="/logout"><button>Déconnexion</button></form>
     <% } else { %>
       <a href="/login">Connexion</a>

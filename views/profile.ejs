@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+
+<h2><%= profil.username %></h2>
+<p><%= avis.length %> film(s) noté(s)</p>
+
+<ul class="resultats">
+  <% for (const f of avis) { %>
+    <li>
+      <a href="/films/<%= f.id %>">
+        <% if (f.poster_path) { %>
+          <img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="">
+        <% } %>
+        <span><%= f.title %> (<%= f.year || "" %>) · <%= f.rating / 2 %>/5</span>
+      </a>
+    </li>
+  <% } %>
+</ul>
+
+<%- include('partials/footer') %>

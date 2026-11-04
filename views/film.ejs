@@ -30,7 +30,7 @@
 <ul>
   <% for (const a of avis) { %>
     <li>
-      <strong><%= a.username %></strong> : <%= a.rating / 2 %>/5
+      <strong><a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a></strong> : <%= a.rating / 2 %>/5
       <% if (a.watched_on) { %>(vu le <%= a.watched_on %>)<% } %>
       <p><%= a.body %></p>
     </li>

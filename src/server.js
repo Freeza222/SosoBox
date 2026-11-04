@@ -104,6 +104,15 @@ app.post("/films/:id/review", async (req, res) => {
   res.redirect("/films/" + id);
 });
 
+app.get("/u/:username", (req, res) => {
+  const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(req.params.username);
+  if (!profil) return res.status(404).send("Utilisateur introuvable");
+  const avis = db.prepare(`SELECT f.id, f.title, f.year, f.poster_path, r.rating
+    FROM reviews r JOIN films f ON f.id = r.film_id
+    WHERE r.user_id = ? ORDER BY r.id DESC`).all(profil.id);
+  res.render("profile", { profil, avis });
+});
+
 app.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
 });
