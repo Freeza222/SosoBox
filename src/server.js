@@ -23,7 +23,6 @@ app.use((req, res, next) => {
     : null;
   next();
 });
-
 app.post("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
@@ -58,14 +57,15 @@ app.post("/register", async (req, res) => {
     return res.status(400).render("register", { erreur: "Tous les champs sont requis, mot de passe de 8 caractères minimum." });
   }
   const hash = await bcrypt.hash(password, 10);
+    let info;
   try {
-    db.prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)").run(username, email, hash);
+    info = db.prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)").run(username, email, hash);
   } catch {
     return res.status(400).render("register", { erreur: "Pseudo ou e-mail déjà utilisé." });
   }
+  req.session.userId = info.lastInsertRowid;
   res.redirect("/");
 });
-
 app.get("/login", (req, res) => res.render("login", { erreur: null }));
 
 app.post("/login", async (req, res) => {
