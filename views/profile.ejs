@@ -14,7 +14,10 @@
 <p>
   <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"><%= abonnes %> abonné(s)</a> ·
   <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><%= abonnements %> abonnement(s)</a>
-  <p><a href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Liste à voir</a></p>
+  <p>
+  <a href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Watchlist</a> ·
+  <a href="/u/<%= encodeURIComponent(profil.username) %>/stats">Statistiques</a>
+</p>
 </p>
 <% if (user && user.id !== profil.id) { %>
   <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow">

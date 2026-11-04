@@ -160,3 +160,17 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .favoris img, .case-vide { width: 100%; }
   .case-vide { font-size: 1.5rem; }
 }
+
+.stat-ligne {
+  display: grid;
+  grid-template-columns: 2.5em 1fr 2em;
+  align-items: center;
+  gap: .5em;
+  margin: .2em 0;
+}
+.stat-barre {
+  height: 1em;
+  min-width: 2px;
+  background: var(--accent);
+  border-radius: 4px;
+}

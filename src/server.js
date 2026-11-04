@@ -158,6 +158,28 @@ app.get("/u/:username/a-voir", (req, res) => {
   res.render("films-vus", { profil, films, titre: "À voir pour " + profil.username });
 });
 
+app.get("/u/:username/stats", (req, res) => {
+  const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(req.params.username);
+  if (!profil) return res.status(404).send("Utilisateur introuvable");
+
+  const total = db.prepare("SELECT COUNT(*) AS n, AVG(rating) AS moy FROM reviews WHERE user_id = ?")
+    .get(profil.id);
+
+  const compte = Array(11).fill(0); // case 1 à 10 = demi-étoiles, comme rating
+  for (const r of db.prepare("SELECT rating, COUNT(*) AS n FROM reviews WHERE user_id = ? GROUP BY rating").all(profil.id)) {
+    compte[r.rating] = r.n;
+  }
+
+  const parAnnee = db.prepare(`
+    SELECT substr(watched_on, 1, 4) AS annee, COUNT(*) AS n
+    FROM reviews
+    WHERE user_id = ? AND watched_on IS NOT NULL AND watched_on != ''
+    GROUP BY annee ORDER BY annee DESC
+  `).all(profil.id);
+
+  res.render("stats", { profil, total, compte, parAnnee });
+});
+
 app.post("/avatar", (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   upload(req, res, (err) => {

@@ -1,0 +1,29 @@
+<%- include("partials/header") %>
+
+<h2>Statistiques de <%= profil.username %></h2>
+<p>
+  <%= total.n %> film(s) noté(s)
+  <% if (total.n) { %> · moyenne <%= (total.moy / 2).toFixed(1) %>/5<% } %>
+</p>
+
+<h3>Répartition des notes</h3>
+<% const max = Math.max(1, ...compte); %>
+<% for (let note = 1; note <= 10; note++) { %>
+  <div class="stat-ligne">
+    <span><%= note / 2 %></span>
+    <div class="stat-barre" style="width: <%= compte[note] / max * 100 %>%"></div>
+    <span><%= compte[note] %></span>
+  </div>
+<% } %>
+
+<h3>Films vus par année</h3>
+<% if (parAnnee.length === 0) { %>
+  <p>Aucune date de visionnage renseignée.</p>
+<% } %>
+<ul>
+  <% for (const a of parAnnee) { %>
+    <li><%= a.annee %> : <%= a.n %> film(s)</li>
+  <% } %>
+</ul>
+
+<%- include("partials/footer") %>
