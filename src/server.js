@@ -17,6 +17,13 @@ app.use(session({
   saveUninitialized: false,
 }));
 
+app.use((req, res, next) => {
+  res.locals.user = req.session.userId
+    ? db.prepare("SELECT id, username FROM users WHERE id = ?").get(req.session.userId) || null
+    : null;
+  next();
+});
+
 app.post("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
