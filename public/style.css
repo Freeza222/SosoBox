@@ -94,3 +94,7 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 .favoris { list-style: none; padding: 0; display: flex; gap: 1rem; }
 .favoris img { display: block; width: 120px; border: 2px solid var(--bordure); border-radius: 8px; }
 .favoris a:hover img { border-color: var(--lien); }
+
+.favoris li { margin: 0; }
+.case-vide { display: flex; align-items: center; justify-content: center; width: 120px; aspect-ratio: 2 / 3; border: 2px dashed var(--bordure); border-radius: 8px; font-size: 2.5rem; color: var(--lien); text-decoration: none; }
+a.case-vide:hover { border-color: var(--lien); background: var(--carte); }

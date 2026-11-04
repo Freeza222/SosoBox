@@ -7,6 +7,16 @@
         <% } %>
         <span><%= f.title %> (<%= (f.release_date || "").slice(0, 4) %>) · <%= f.vote_average.toFixed(1) %>/10</span>
       </a>
+      <% if (locals.fav) { %>
+        <% if (locals.deja.includes(f.id)) { %>
+          <span>Déjà en favori</span>
+        <% } else { %>
+          <form method="post" action="/films/<%= f.id %>/favori">
+            <input type="hidden" name="retour" value="profil">
+            <button class="petit">Ajouter en favori</button>
+          </form>
+  <% } %>
+<% } %>
     </li>
   <% } %>
 </ul>

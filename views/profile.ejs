@@ -12,7 +12,7 @@
   </label>
 </form>
 <% } %>
-<p><%= avis.length %> film(s) noté(s)</p>
+<p><%= total %> film(s) noté(s)</p>
 <p>
   <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"><%= abonnes %> abonné(s)</a> ·
   <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><%= abonnements %> abonnement(s)</a>
@@ -24,16 +24,24 @@
 <% } %>
 
 <h3>Films préférés</h3>
-<% if (favoris.length === 0) { %><p>Aucun film favori pour l'instant.</p><% } %>
 <ul class="favoris">
-  <% for (const f of favoris) { %>
+  <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
     <li>
-      <a href="/films/<%= f.id %>">
-        <% if (f.poster_path) { %><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"><% } %>
-      </a>
+      <% if (f) { %>
+        <a href="/films/<%= f.id %>">
+          <% if (f.poster_path) { %><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"><% } %>
+        </a>
+      <% } else if (user && user.id === profil.id) { %>
+        <a class="case-vide" href="/search?fav=1">+</a>
+      <% } else { %>
+        <span class="case-vide"></span>
+      <% } %>
     </li>
   <% } %>
 </ul>
+
+<h3>Derniers films vus</h3>
+<% if (avis.length === 0) { %><p>Aucun film noté pour l'instant.</p><% } %>
 
 <ul class="resultats">
   <% for (const f of avis) { %>

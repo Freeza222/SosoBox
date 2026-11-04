@@ -1,5 +1,7 @@
 <%- include('partials/header') %>
 
+<% if (fav) { %><p>Choisis un film à ajouter à tes favoris.</p><% } %>
+<% if (fav) { %><input type="hidden" name="fav" value="1"><% } %>
 <form action="/search">
   <input name="q" value="<%= q %>">
   <button>Rechercher</button>
