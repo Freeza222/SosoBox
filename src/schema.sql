@@ -33,3 +33,10 @@ CREATE TABLE IF NOT EXISTS follows (
   PRIMARY KEY (follower_id, followed_id),
   CHECK (follower_id <> followed_id)
 );
+
+CREATE TABLE IF NOT EXISTS favorites (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  film_id INTEGER NOT NULL REFERENCES films(id),
+  UNIQUE (user_id, film_id)
+);

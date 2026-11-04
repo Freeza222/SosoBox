@@ -13,7 +13,12 @@
 </article>
 
 <% if (user) { %>
+  <div class="barre-film">
   <button type="button" onclick="document.getElementById('avis').showModal()">Noter ce film</button>
+  <form method="post" action="/films/<%= film.id %>/favori">
+    <button class="secondaire"><%= favori ? "★ Retirer des favoris" : "☆ Ajouter aux favoris" %></button>
+  </form>
+</div>
 
 <dialog id="avis">
   <form method="post" action="/films/<%= film.id %>/review">

@@ -86,3 +86,11 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 
 .petit { padding: 0.15rem 0.5rem; font-size: 0.75rem; background: transparent; border: 1px solid var(--bordure); color: var(--lien); }
 .petit:hover { background: var(--accent); color: white; }
+
+
+.barre-film { display: flex; gap: 0.5rem; margin: 1rem 0; }
+.barre-film form { margin: 0; }
+
+.favoris { list-style: none; padding: 0; display: flex; gap: 1rem; }
+.favoris img { display: block; width: 120px; border: 2px solid var(--bordure); border-radius: 8px; }
+.favoris a:hover img { border-color: var(--lien); }

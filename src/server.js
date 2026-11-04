@@ -26,6 +26,11 @@ app.use((req, res, next) => {
   next();
 });
 
+function copierFilm(film) {
+  db.prepare("INSERT OR IGNORE INTO films (id, title, year, poster_path) VALUES (?, ?, ?, ?)")
+    .run(film.id, film.title, Number((film.release_date || "").slice(0, 4)) || null, film.poster_path);
+}
+
 app.post("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
@@ -61,7 +66,8 @@ app.get("/films/:id", async (req, res) => {
     FROM reviews r JOIN users u ON u.id = r.user_id
     WHERE r.film_id = ? ORDER BY r.id DESC`).all(film.id);
   const moy = db.prepare("SELECT AVG(rating) AS m FROM reviews WHERE film_id = ?").get(film.id).m;
-  res.render("film", { film, avis, moy });
+  const favori = !!db.prepare("SELECT 1 FROM favorites WHERE user_id = ? AND film_id = ?").get(req.session.userId, film.id);
+  res.render("film", { film, avis, moy, favori });
 });
 
 app.get("/register", (req, res) => res.render("register", { erreur: null }));
@@ -106,8 +112,7 @@ app.post("/films/:id/review", async (req, res) => {
   } catch {
     return res.status(404).send("Film introuvable");
   }
-  db.prepare("INSERT OR IGNORE INTO films (id, title, year, poster_path) VALUES (?, ?, ?, ?)")
-    .run(film.id, film.title, Number((film.release_date || "").slice(0, 4)) || null, film.poster_path);
+  copierFilm(film);
   db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on) VALUES (?, ?, ?, ?, ?)
     ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on`)
     .run(req.session.userId, id, rating, req.body.body || "", req.body.watched_on || null);
@@ -141,7 +146,9 @@ app.get("/u/:username", (req, res) => {
     const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
   const abonnes = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?").get(profil.id).n;
   const abonnements = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?").get(profil.id).n;
-  res.render("profile", { profil, avis, suit, abonnes, abonnements });
+  const favoris = db.prepare(`SELECT f.id, f.title, f.poster_path FROM favorites fa
+  JOIN films f ON f.id = fa.film_id WHERE fa.user_id = ? ORDER BY fa.id`).all(profil.id);
+  res.render("profile", { profil, avis, suit, abonnes, abonnements, favoris });
 });
 
 app.post("/films/:id/review/delete", (req, res) => {
@@ -172,6 +179,26 @@ app.get("/u/:username/:liste", (req, res) => {
     : "SELECT u.username FROM follows f JOIN users u ON u.id = f.followed_id WHERE f.follower_id = ? ORDER BY f.created_at DESC";
   const gens = db.prepare(sql).all(profil.id);
   res.render("people", { profil, liste, gens });
+});
+
+app.post("/films/:id/favori", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).send("Film invalide");
+  const del = db.prepare("DELETE FROM favorites WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
+  if (del.changes === 0) {
+    const n = db.prepare("SELECT COUNT(*) AS n FROM favorites WHERE user_id = ?").get(req.session.userId).n;
+    if (n >= 4) return res.status(400).send("4 films favoris maximum : retire-en un d'abord.");
+    let film;
+    try {
+      film = await tmdb("/movie/" + id + "?language=fr-FR");
+    } catch {
+      return res.status(404).send("Film introuvable");
+    }
+    copierFilm(film);
+    db.prepare("INSERT INTO favorites (user_id, film_id) VALUES (?, ?)").run(req.session.userId, id);
+  }
+  res.redirect("/films/" + id);
 });
 
 app.listen(3000, () => {
