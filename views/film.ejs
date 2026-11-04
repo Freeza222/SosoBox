@@ -13,12 +13,25 @@
 </article>
 
 <% if (user) { %>
+  <button type="button" onclick="document.getElementById('avis').showModal()">Noter ce film</button>
+
+<dialog id="avis">
   <form method="post" action="/films/<%= film.id %>/review">
-    <label>Note (1 à 10, chaque point = une demi-étoile) <input name="rating" type="number" min="1" max="10" required></label>
+    <h3><%= film.title %></h3>
+    <div class="notes">
+      <% for (let i = 1; i <= 10; i++) { %>
+        <input type="radio" name="rating" id="n<%= i %>" value="<%= i %>" required>
+        <label for="n<%= i %>"><%= i / 2 %></label>
+      <% } %>
+    </div>
     <label>Vu le <input name="watched_on" type="date"></label>
-    <label>Critique <textarea name="body"></textarea></label>
-    <button>Enregistrer mon avis</button>
+    <label>Critique <textarea name="body" rows="4"></textarea></label>
+    <div class="actions">
+      <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
+      <button>Enregistrer</button>
+    </div>
   </form>
+</dialog>
 <% } else { %>
   <p><a href="/login">Connecte-toi</a> pour noter ce film.</p>
 <% } %>
@@ -29,13 +42,13 @@
 
 <ul>
   <% for (const a of avis) { %>
-    <% if (user && user.username === a.username) { %>
-      <form method="post" action="/films/<%= film.id %>/review/delete"><button>Supprimer mon avis</button></form>
-    <% } %>
     <li>
       <strong><a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a></strong> : <%= a.rating / 2 %>/5
       <% if (a.watched_on) { %>(vu le <%= a.watched_on %>)<% } %>
       <p><%= a.body %></p>
+      <% if (user && user.username === a.username) { %>
+        <form method="post" action="/films/<%= film.id %>/review/delete"><button class="petit">Supprimer</button></form>
+      <% } %>
     </li>
   <% } %>
 </ul>

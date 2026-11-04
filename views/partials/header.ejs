@@ -4,19 +4,23 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/style.css"/>
     <title>SosoBox</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   </head>
   <body>
-    <h1>SosoBox</h1>
+    <header class="barre">
+  <a class="logo" href="/"><img src="/logo-dark.svg" alt="" width="36" height="36"> SosoBox</a>
+  <nav>
+    <a href="/">Accueil</a>
+    <a href="/search">Rechercher</a>
+  </nav>
+  <div class="compte">
     <% if (user) { %>
+      <% if (user.has_avatar) { %><img class="avatar" src="/u/<%= encodeURIComponent(user.username) %>/avatar" alt=""><% } %>
       <a href="/u/<%= encodeURIComponent(user.username) %>"><%= user.username %></a>
       <form method="post" action="/logout"><button>Déconnexion</button></form>
     <% } else { %>
       <a href="/login">Connexion</a>
       <a href="/register">Inscription</a>
     <% } %>
-    <section class="nav">
-            <nav>
-                <a href="/">Accueil</a>
-                <a href="/search">Rechercher</a>
-            </nav>
-    </section>
+  </div>
+</header>

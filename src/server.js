@@ -1,6 +1,8 @@
 console.log(process.env.TMDB_TOKEN ? "Clé TMDB trouvée" : "Clé TMDB manquante");
 const express = require("express");
 const db = require("./db");
+const multer = require("multer");
+const upload = multer({ limits: { fileSize: 1024 * 1024 } }).single("avatar");
 const bcrypt = require("bcrypt");
 const { tmdb } = require("./tmdb");
 const session = require("express-session");
@@ -19,10 +21,11 @@ app.use(session({
 
 app.use((req, res, next) => {
   res.locals.user = req.session.userId
-    ? db.prepare("SELECT id, username FROM users WHERE id = ?").get(req.session.userId) || null
+    ? db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar FROM users WHERE id = ?").get(req.session.userId) || null
     : null;
   next();
 });
+
 app.post("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
 });
@@ -30,7 +33,7 @@ app.post("/logout", (req, res) => {
 app.get("/", async (req, res) => {
   const { results } = await tmdb("/movie/popular?language=fr-FR");
   const fil = req.session.userId
-    ? db.prepare(`SELECT u.username, f.id AS film_id, f.title, r.rating, r.body
+    ? db.prepare(`SELECT u.username, f.id AS film_id, f.title, f.poster_path, r.rating, r.body
         FROM reviews r
         JOIN users u ON u.id = r.user_id
         JOIN films f ON f.id = r.film_id
@@ -39,12 +42,13 @@ app.get("/", async (req, res) => {
     : [];
   res.render("home", { films: results, fil });
 });
+
 app.get("/search", async (req, res) => {
   const q = req.query.q || "";
   const films = q ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
-  res.render("search", { q, films });
+  const gens = q ? db.prepare("SELECT username FROM users WHERE username LIKE ? LIMIT 20").all("%" + q + "%") : [];
+  res.render("search", { q, films, gens });
 });
-
 
 app.get("/films/:id", async (req, res) => {
   let film;
@@ -110,8 +114,26 @@ app.post("/films/:id/review", async (req, res) => {
   res.redirect("/films/" + id);
 });
 
+app.get("/u/:username/avatar", (req, res) => {
+  const u = db.prepare("SELECT avatar, avatar_type FROM users WHERE username = ?").get(req.params.username);
+  if (!u || !u.avatar) return res.status(404).end();
+  res.type(u.avatar_type).set("X-Content-Type-Options", "nosniff").send(u.avatar);
+});
+
+app.post("/avatar", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  upload(req, res, (err) => {
+    const f = req.file;
+    if (err || !f || !["image/jpeg", "image/png", "image/webp"].includes(f.mimetype)) {
+      return res.status(400).send("Image invalide (JPG, PNG ou WebP, 1 Mo maximum)");
+    }
+    db.prepare("UPDATE users SET avatar = ?, avatar_type = ? WHERE id = ?").run(f.buffer, f.mimetype, req.session.userId);
+    res.redirect("/u/" + encodeURIComponent(res.locals.user.username));
+  });
+});
+
 app.get("/u/:username", (req, res) => {
-  const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(req.params.username);
+  const profil = db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
   const avis = db.prepare(`SELECT f.id, f.title, f.year, f.poster_path, r.rating
     FROM reviews r JOIN films f ON f.id = r.film_id
@@ -149,7 +171,7 @@ app.get("/u/:username/:liste", (req, res) => {
     ? "SELECT u.username FROM follows f JOIN users u ON u.id = f.follower_id WHERE f.followed_id = ? ORDER BY f.created_at DESC"
     : "SELECT u.username FROM follows f JOIN users u ON u.id = f.followed_id WHERE f.follower_id = ? ORDER BY f.created_at DESC";
   const gens = db.prepare(sql).all(profil.id);
-  res.render("gens", { profil, liste, gens });
+  res.render("people", { profil, liste, gens });
 });
 
 app.listen(3000, () => {

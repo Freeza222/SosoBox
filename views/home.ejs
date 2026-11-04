@@ -6,14 +6,23 @@
     <% if (fil.length === 0) { %>
         <p>Rien pour l'instant : suis des gens depuis leur profil.</p>
     <% } %>
-    <ul>
-    <% for (const a of fil) { %>
-      <li>
-        <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a>
-        a noté <a href="/films/<%= a.film_id %>"><%= a.title %></a> : <%= a.rating / 2 %>/5
-        <% if (a.body) { %><p><%= a.body %></p><% } %>
-      </li>
-    <% } %>
+    <ul class="fil">
+  <% for (const a of fil) { %>
+    <li>
+      <div class="entete">
+            <a href="/films/<%= a.film_id %>">
+            <% if (a.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w342<%= a.poster_path %>" alt="">
+            <% } %>
+            </a>
+            <div>
+            <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a>
+            a noté <a href="/films/<%= a.film_id %>"><%= a.title %></a> : <%= a.rating / 2 %>/5
+            </div>
+        </div>
+      <% if (a.body) { %><p><%= a.body %></p><% } %>
+    </li>
+        <% } %>
     </ul>
     <h2>Films populaires</h2>
     <% } %>

@@ -1,0 +1,12 @@
+<%- include('partials/header') %>
+
+<h2><%= liste === "abonnes" ? "Abonnés" : "Abonnements" %> de <a href="/u/<%= encodeURIComponent(profil.username) %>"><%= profil.username %></a></h2>
+
+<% if (gens.length === 0) { %><p>Personne pour l'instant.</p><% } %>
+<ul>
+  <% for (const g of gens) { %>
+    <li><a href="/u/<%= encodeURIComponent(g.username) %>"><%= g.username %></a></li>
+  <% } %>
+</ul>
+
+<%- include('partials/footer') %>
