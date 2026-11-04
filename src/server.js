@@ -132,6 +132,18 @@ app.get("/u/:username/avatar", (req, res) => {
   res.send(u.avatar);
 });
 
+app.get("/u/:username/films", (req, res) => {
+  const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(req.params.username);
+  if (!profil) return res.status(404).send("Utilisateur introuvable");
+  const films = db.prepare(`
+    SELECT f.id, f.title, f.year, f.poster_path, r.rating
+    FROM reviews r JOIN films f ON f.id = r.film_id
+    WHERE r.user_id = ?
+    ORDER BY r.watched_on DESC, r.id DESC
+  `).all(profil.id);
+  res.render("films-vus", { profil, films });
+});
+
 app.post("/avatar", (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   upload(req, res, (err) => {

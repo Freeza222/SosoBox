@@ -10,7 +10,7 @@
   </label>
 </form>
 <% } %>
-<p><%= total %> film(s) noté(s)</p>
+<p><a href="/u/<%= encodeURIComponent(profil.username) %>/films"><%= total %> film(s) noté(s)</a></p>
 <p>
   <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"><%= abonnes %> abonné(s)</a> ·
   <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><%= abonnements %> abonnement(s)</a>
