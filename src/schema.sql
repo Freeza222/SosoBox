@@ -6,3 +6,20 @@ CREATE TABLE IF NOT EXISTS users (
   bio TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS films (
+  id INTEGER PRIMARY KEY,
+  title TEXT NOT NULL,
+  year INTEGER,
+  poster_path TEXT
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  film_id INTEGER NOT NULL REFERENCES films(id),
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 10),
+  body TEXT NOT NULL DEFAULT '',
+  watched_on TEXT,
+  UNIQUE (user_id, film_id)
+);
