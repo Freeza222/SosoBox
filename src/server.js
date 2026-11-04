@@ -3,11 +3,23 @@ const express = require("express");
 const db = require("./db");
 const bcrypt = require("bcrypt");
 const { tmdb } = require("./tmdb");
+const session = require("express-session");
 const app = express();
+
+
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.post("/logout", (req, res) => {
+  req.session.destroy(() => res.redirect("/"));
+});
 
 app.get("/", async (req, res) => {
   const { results } = await tmdb("/movie/popular?language=fr-FR");
@@ -47,6 +59,17 @@ app.post("/register", async (req, res) => {
   res.redirect("/");
 });
 
+app.get("/login", (req, res) => res.render("login", { erreur: null }));
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username || "");
+  if (!user || !(await bcrypt.compare(password || "", user.password_hash))) {
+    return res.status(401).render("login", { erreur: "Pseudo ou mot de passe incorrect." });
+  }
+  req.session.userId = user.id;
+  res.redirect("/");
+});
 
 app.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
