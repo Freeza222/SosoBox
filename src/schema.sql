@@ -40,3 +40,10 @@ CREATE TABLE IF NOT EXISTS favorites (
   film_id INTEGER NOT NULL REFERENCES films(id),
   UNIQUE (user_id, film_id)
 );
+
+CREATE TABLE IF NOT EXISTS watchlist (
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  film_id INTEGER NOT NULL REFERENCES films(id),
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, film_id)
+);

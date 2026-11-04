@@ -70,7 +70,9 @@ app.get("/films/:id", async (req, res) => {
     WHERE r.film_id = ? ORDER BY r.id DESC`).all(film.id);
   const moy = db.prepare("SELECT AVG(rating) AS m FROM reviews WHERE film_id = ?").get(film.id).m;
   const favori = !!db.prepare("SELECT 1 FROM favorites WHERE user_id = ? AND film_id = ?").get(req.session.userId, film.id);
-  res.render("film", { film, avis, moy, favori });
+  const aVoir = !!(req.session.userId && db.prepare("SELECT 1 FROM watchlist WHERE user_id = ? AND film_id = ?")
+  .get(req.session.userId, Number(req.params.id)));
+  res.render("film", { film, avis, moy, favori, aVoir });
 });
 
 app.get("/register", (req, res) => res.render("register", { erreur: null }));
@@ -141,7 +143,19 @@ app.get("/u/:username/films", (req, res) => {
     WHERE r.user_id = ?
     ORDER BY r.watched_on DESC, r.id DESC
   `).all(profil.id);
-  res.render("films-vus", { profil, films });
+  res.render("films-vus", { profil, films, titre: "Films vus par " + profil.username });
+});
+
+app.get("/u/:username/a-voir", (req, res) => {
+  const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(req.params.username);
+  if (!profil) return res.status(404).send("Utilisateur introuvable");
+  const films = db.prepare(`
+    SELECT f.id, f.title, f.year, f.poster_path
+    FROM watchlist w JOIN films f ON f.id = w.film_id
+    WHERE w.user_id = ?
+    ORDER BY w.created_at DESC
+  `).all(profil.id);
+  res.render("films-vus", { profil, films, titre: "À voir pour " + profil.username });
 });
 
 app.post("/avatar", (req, res) => {
@@ -219,6 +233,24 @@ app.post("/films/:id/favori", async (req, res) => {
     db.prepare("INSERT INTO favorites (user_id, film_id) VALUES (?, ?)").run(req.session.userId, id);
   }
   res.redirect(req.body.retour === "profil" ? "/u/" + encodeURIComponent(res.locals.user.username) : "/films/" + id);
+});
+
+app.post("/films/:id/a-voir", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const filmId = Number(req.params.id);
+  if (!Number.isInteger(filmId)) return res.status(404).send("Film introuvable");
+
+  const suppr = db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?")
+    .run(req.session.userId, filmId);
+  if (suppr.changes === 0) {
+    // copie locale du film, comme pour les favoris
+    const f = await tmdb("/movie/" + filmId + "?language=fr-FR");
+    db.prepare("INSERT OR IGNORE INTO films (id, title, year, poster_path) VALUES (?, ?, ?, ?)")
+      .run(f.id, f.title, (f.release_date || "").slice(0, 4), f.poster_path);
+    db.prepare("INSERT INTO watchlist (user_id, film_id) VALUES (?, ?)")
+      .run(req.session.userId, filmId);
+  }
+  res.redirect("/films/" + filmId);
 });
 
 app.get("/api/suggestions", async (req, res) => {
