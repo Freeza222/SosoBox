@@ -134,3 +134,29 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   border-radius: 50%;
   object-fit: cover;
 }
+
+@media (max-width: 600px) {
+  body { margin: 0 .6em; }
+
+  /* barre : le logo d'abord, les liens passent à la ligne en dessous */
+  .barre { flex-wrap: wrap; gap: .5em; }
+  .barre nav { flex-wrap: wrap; gap: .8rem; }
+
+  /* accueil et recherche : 2 affiches par ligne */
+  .resultats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8em; }
+  .resultats img { width: 100%; height: auto; }
+
+  /* fenêtre de notation : elle tient dans l'écran, les notes sur 2 lignes */
+  dialog { width: auto; max-width: 95vw; box-sizing: border-box; }
+  dialog input, dialog textarea { width: 100%; box-sizing: border-box; }
+  .notes { flex-wrap: wrap; }
+
+    /* logo plus petit pour laisser de la place aux liens */
+  .logo { font-size: 1.1rem; gap: .3rem; }
+  .logo img { width: 24px; height: 24px; }
+
+  /* 4 favoris sur une ligne, cases "+" comprises */
+  .favoris { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+  .favoris img, .case-vide { width: 100%; }
+  .case-vide { font-size: 1.5rem; }
+}
