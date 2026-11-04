@@ -29,9 +29,16 @@ app.post("/logout", (req, res) => {
 
 app.get("/", async (req, res) => {
   const { results } = await tmdb("/movie/popular?language=fr-FR");
-  res.render("home", { films: results });
+  const fil = req.session.userId
+    ? db.prepare(`SELECT u.username, f.id AS film_id, f.title, r.rating, r.body
+        FROM reviews r
+        JOIN users u ON u.id = r.user_id
+        JOIN films f ON f.id = r.film_id
+        WHERE r.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)
+        ORDER BY r.id DESC LIMIT 20`).all(req.session.userId)
+    : [];
+  res.render("home", { films: results, fil });
 });
-
 app.get("/search", async (req, res) => {
   const q = req.query.q || "";
   const films = q ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
@@ -52,7 +59,6 @@ app.get("/films/:id", async (req, res) => {
   const moy = db.prepare("SELECT AVG(rating) AS m FROM reviews WHERE film_id = ?").get(film.id).m;
   res.render("film", { film, avis, moy });
 });
-
 
 app.get("/register", (req, res) => res.render("register", { erreur: null }));
 
@@ -110,7 +116,40 @@ app.get("/u/:username", (req, res) => {
   const avis = db.prepare(`SELECT f.id, f.title, f.year, f.poster_path, r.rating
     FROM reviews r JOIN films f ON f.id = r.film_id
     WHERE r.user_id = ? ORDER BY r.id DESC`).all(profil.id);
-  res.render("profile", { profil, avis });
+    const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
+  const abonnes = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?").get(profil.id).n;
+  const abonnements = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?").get(profil.id).n;
+  res.render("profile", { profil, avis, suit, abonnes, abonnements });
+});
+
+app.post("/films/:id/review/delete", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const id = Number(req.params.id);
+  db.prepare("DELETE FROM reviews WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
+  res.redirect("/films/" + id);
+});
+
+app.post("/u/:username/follow", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const cible = db.prepare("SELECT id FROM users WHERE username = ?").get(req.params.username);
+  if (!cible || cible.id === req.session.userId) return res.status(400).send("Impossible");
+  const del = db.prepare("DELETE FROM follows WHERE follower_id = ? AND followed_id = ?").run(req.session.userId, cible.id);
+  if (del.changes === 0) {
+    db.prepare("INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)").run(req.session.userId, cible.id);
+  }
+  res.redirect("/u/" + encodeURIComponent(req.params.username));
+});
+
+app.get("/u/:username/:liste", (req, res) => {
+  const { username, liste } = req.params;
+  if (liste !== "abonnes" && liste !== "abonnements") return res.status(404).send("Page introuvable");
+  const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(username);
+  if (!profil) return res.status(404).send("Utilisateur introuvable");
+  const sql = liste === "abonnes"
+    ? "SELECT u.username FROM follows f JOIN users u ON u.id = f.follower_id WHERE f.followed_id = ? ORDER BY f.created_at DESC"
+    : "SELECT u.username FROM follows f JOIN users u ON u.id = f.followed_id WHERE f.follower_id = ? ORDER BY f.created_at DESC";
+  const gens = db.prepare(sql).all(profil.id);
+  res.render("gens", { profil, liste, gens });
 });
 
 app.listen(3000, () => {

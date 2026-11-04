@@ -29,6 +29,9 @@
 
 <ul>
   <% for (const a of avis) { %>
+    <% if (user && user.username === a.username) { %>
+      <form method="post" action="/films/<%= film.id %>/review/delete"><button>Supprimer mon avis</button></form>
+    <% } %>
     <li>
       <strong><a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a></strong> : <%= a.rating / 2 %>/5
       <% if (a.watched_on) { %>(vu le <%= a.watched_on %>)<% } %>

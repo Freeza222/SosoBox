@@ -1,6 +1,23 @@
 
 <%- include('partials/header') %>
 
+    <% if (user) { %>
+        <h2>Avis de tes abonnements</h2>
+    <% if (fil.length === 0) { %>
+        <p>Rien pour l'instant : suis des gens depuis leur profil.</p>
+    <% } %>
+    <ul>
+    <% for (const a of fil) { %>
+      <li>
+        <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a>
+        a noté <a href="/films/<%= a.film_id %>"><%= a.title %></a> : <%= a.rating / 2 %>/5
+        <% if (a.body) { %><p><%= a.body %></p><% } %>
+      </li>
+    <% } %>
+    </ul>
+    <h2>Films populaires</h2>
+    <% } %>
+
     <%- include('partials/grille', { films }) %>
 
 <%- include('partials/footer') %>

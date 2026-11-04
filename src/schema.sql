@@ -23,3 +23,11 @@ CREATE TABLE IF NOT EXISTS reviews (
   watched_on TEXT,
   UNIQUE (user_id, film_id)
 );
+
+CREATE TABLE IF NOT EXISTS follows (
+  follower_id INTEGER NOT NULL REFERENCES users(id),
+  followed_id INTEGER NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (follower_id, followed_id),
+  CHECK (follower_id <> followed_id)
+);
