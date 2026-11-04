@@ -78,6 +78,27 @@ app.post("/login", async (req, res) => {
   res.redirect("/");
 });
 
+app.post("/films/:id/review", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const id = Number(req.params.id);
+  const rating = Number(req.body.rating);
+  if (!Number.isInteger(id) || !Number.isInteger(rating) || rating < 1 || rating > 10) {
+    return res.status(400).send("Note invalide");
+  }
+  let film;
+  try {
+    film = await tmdb("/movie/" + id + "?language=fr-FR");
+  } catch {
+    return res.status(404).send("Film introuvable");
+  }
+  db.prepare("INSERT OR IGNORE INTO films (id, title, year, poster_path) VALUES (?, ?, ?, ?)")
+    .run(film.id, film.title, Number((film.release_date || "").slice(0, 4)) || null, film.poster_path);
+  db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on) VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on`)
+    .run(req.session.userId, id, rating, req.body.body || "", req.body.watched_on || null);
+  res.redirect("/films/" + id);
+});
+
 app.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
 });

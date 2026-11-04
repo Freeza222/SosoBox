@@ -12,4 +12,15 @@
   <p>Avec : <%= film.credits.cast.slice(0, 5).map(a => a.name).join(", ") %></p>
 </article>
 
+<% if (user) { %>
+  <form method="post" action="/films/<%= film.id %>/review">
+    <label>Note (1 à 10, chaque point = une demi-étoile) <input name="rating" type="number" min="1" max="10" required></label>
+    <label>Vu le <input name="watched_on" type="date"></label>
+    <label>Critique <textarea name="body"></textarea></label>
+    <button>Enregistrer mon avis</button>
+  </form>
+<% } else { %>
+  <p><a href="/login">Connecte-toi</a> pour noter ce film.</p>
+<% } %>
+
 <%- include('partials/footer') %>
