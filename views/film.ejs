@@ -23,4 +23,18 @@
   <p><a href="/login">Connecte-toi</a> pour noter ce film.</p>
 <% } %>
 
+<% if (moy) { %>
+  <p>Note moyenne : <%= (moy / 2).toFixed(1) %>/5 (<%= avis.length %> avis)</p>
+<% } %>
+
+<ul>
+  <% for (const a of avis) { %>
+    <li>
+      <strong><%= a.username %></strong> : <%= a.rating / 2 %>/5
+      <% if (a.watched_on) { %>(vu le <%= a.watched_on %>)<% } %>
+      <p><%= a.body %></p>
+    </li>
+  <% } %>
+</ul>
+
 <%- include('partials/footer') %>

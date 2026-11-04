@@ -40,12 +40,17 @@ app.get("/search", async (req, res) => {
 
 
 app.get("/films/:id", async (req, res) => {
+  let film;
   try {
-    const film = await tmdb("/movie/" + encodeURIComponent(req.params.id) + "?language=fr-FR&append_to_response=credits");
-    res.render("film", { film });
+    film = await tmdb("/movie/" + encodeURIComponent(req.params.id) + "?language=fr-FR&append_to_response=credits");
   } catch {
-    res.status(404).send("Film introuvable");
+    return res.status(404).send("Film introuvable");
   }
+  const avis = db.prepare(`SELECT u.username, r.rating, r.body, r.watched_on
+    FROM reviews r JOIN users u ON u.id = r.user_id
+    WHERE r.film_id = ? ORDER BY r.id DESC`).all(film.id);
+  const moy = db.prepare("SELECT AVG(rating) AS m FROM reviews WHERE film_id = ?").get(film.id).m;
+  res.render("film", { film, avis, moy });
 });
 
 
