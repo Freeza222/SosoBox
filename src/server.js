@@ -141,6 +141,7 @@ app.post("/films/:id/review", async (req, res) => {
   db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on) VALUES (?, ?, ?, ?, ?)
     ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on`)
     .run(req.session.userId, id, rating, req.body.body || "", req.body.watched_on || null);
+      db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
   res.redirect("/films/" + id);
 });
 
