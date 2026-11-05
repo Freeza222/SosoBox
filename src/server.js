@@ -36,7 +36,11 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  const { results } = await tmdb("/movie/popular?language=fr-FR");
+  const [populaires, mieuxNotes, auCinema] = await Promise.all([
+  tmdb("/movie/popular?language=fr-FR&region=FR"),
+  tmdb("/movie/top_rated?language=fr-FR"),
+  tmdb("/movie/now_playing?language=fr-FR&region=FR"),
+]);
   const fil = req.session.userId
     ? db.prepare(`SELECT u.username, f.id AS film_id, f.title, f.poster_path, r.rating, r.body
         FROM reviews r
@@ -45,7 +49,14 @@ app.get("/", async (req, res) => {
         WHERE r.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)
         ORDER BY r.id DESC LIMIT 20`).all(req.session.userId)
     : [];
-  res.render("home", { films: results, fil });
+  res.render("home", {
+  fil,
+  rangees: [
+    { titre: "Populaires", films: populaires.results },
+    { titre: "Les mieux notés", films: mieuxNotes.results },
+    { titre: "Au cinéma", films: auCinema.results },
+  ],
+});
 });
 
 app.get("/search", async (req, res) => {

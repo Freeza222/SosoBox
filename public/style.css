@@ -135,6 +135,24 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   object-fit: cover;
 }
 
+.rangee {
+  display: flex;
+  gap: .8rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: .3rem 0 .8rem;
+  scrollbar-color: var(--accent) transparent;
+}
+.rangee a { flex: 0 0 140px; scroll-snap-align: start; }
+.rangee img {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid var(--bordure);
+  transition: transform .2s, border-color .2s;
+}
+.rangee a:hover img { transform: translateY(-4px); border-color: var(--lien); }
+
 @media (max-width: 600px) {
   body { margin: 0 .6em; }
 
@@ -159,6 +177,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .favoris { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
   .favoris img, .case-vide { width: 100%; }
   .case-vide { font-size: 1.5rem; }
+
+  .rangee a { flex-basis: 110px; }
 }
 
 .stat-ligne {
@@ -174,3 +194,25 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   background: var(--accent);
   border-radius: 4px;
 }
+
+/* ===== ESSAI palette ===== */
+:root {
+  --fond: #502774;
+  --carte: #2A1E4D;
+  --accent: #5A3B8C;
+  --lien: #8B7CC7;
+  --texte: #C9C2E3;
+  --bordure: #3A3A52;
+}
+
+/* plan B : halo violet en haut de la page */
+body {
+  background: radial-gradient(ellipse at top, #5A3B8C66, transparent 60%) fixed, var(--fond);
+}
+
+/* plan B : boutons en pilule */
+button, .bouton, .secondaire { border-radius: 999px; }
+
+/* plan B : affiches arrondies qui se soulèvent au survol */
+.resultats img, .favoris img { border-radius: 12px; transition: transform .2s; }
+.resultats a:hover img, .favoris a:hover img { transform: translateY(-4px); }
