@@ -1,5 +1,13 @@
 <%- include('partials/header') %>
 
+<div class="mur">
+  <div class="mur-affiches" aria-hidden="true">
+    <% for (const f of locals.affiches || []) { %>
+      <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="">
+    <% } %>
+  </div>
+  <div class="carte-connexion">
+
 <h2>Connexion</h2>
 <% if (erreur) { %><p><%= erreur %></p><% } %>
 <form method="post" action="/login">
@@ -7,5 +15,9 @@
   <label>Mot de passe <input name="password" type="password" required></label>
   <button>Se connecter</button>
 </form>
+
+    <p class="alt">Pas encore de compte ? <a href="/register">Inscris-toi</a></p>
+  </div>
+</div>
 
 <%- include('partials/footer') %>

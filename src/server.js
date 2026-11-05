@@ -86,6 +86,12 @@ app.get("/films/:id", async (req, res) => {
   res.render("film", { film, avis, moy, favori, aVoir });
 });
 
+app.use(["/login", "/register"], async (req, res, next) => {
+  const data = await tmdb("/movie/popular?language=fr-FR&region=FR").catch(() => null);
+  res.locals.affiches = data ? data.results.filter(f => f.poster_path) : [];
+  next();
+});
+
 app.get("/register", (req, res) => res.render("register", { erreur: null }));
 
 app.post("/register", async (req, res) => {
