@@ -249,6 +249,35 @@ button, .bouton, .secondaire { border-radius: 999px; }
 .chiffres a { text-align: center; color: var(--lien); text-decoration: none; font-size: .85rem; }
 .chiffres b { display: block; font-size: 1.4rem; color: var(--texte); }
 
+.film-entete {
+  position: relative;
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  gap: 1.25rem;
+  margin: -90px 1.5rem 1.5rem;
+}
+.film-affiche { width: 150px; border-radius: 12px; border: 4px solid var(--fond); }
+.film-infos { flex: 1; min-width: 200px; }
+.film-infos h2 { margin: 0; font-size: 1.8rem; }
+.film-infos p { margin: .3rem 0 0; color: var(--lien); }
+.film-note { text-align: center; color: var(--lien); font-size: .85rem; }
+.film-note b { display: block; font-size: 2rem; color: var(--texte); }
+
+.barre-film { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.barre-film form { margin: 0; }
+.synopsis { max-width: 70ch; }
+
+.acteur { flex: 0 0 90px; scroll-snap-align: start; text-align: center; font-size: .85rem; }
+.acteur img, .acteur-vide {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: .3rem;
+}
+.acteur-vide { background: var(--bordure); }
+
+
 @media (max-width: 600px) {
   body { margin: 0 .6em; }
 
@@ -277,4 +306,8 @@ button, .bouton, .secondaire { border-radius: 999px; }
   .chiffres { width: 100%; justify-content: space-around; }
 
   .rangee a { flex-basis: 110px; }
+
+    .film-entete { margin: -50px .5rem 1rem; gap: .8rem; }
+  .film-affiche { width: 100px; }
+  .film-infos h2 { font-size: 1.3rem; }
 }

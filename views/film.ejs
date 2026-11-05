@@ -1,16 +1,26 @@
 <%- include('partials/header') %>
 
-<article>
+<div class="banniere" <% if (film.backdrop_path) { %>style="background-image: url('https://image.tmdb.org/t/p/w1280<%= film.backdrop_path %>')"<% } %>></div>
+
+<% const real = film.credits.crew.find(p => p.job === "Director"); %>
+<div class="film-entete">
   <% if (film.poster_path) { %>
-    <img src="https://image.tmdb.org/t/p/w342<%= film.poster_path %>" alt="">
+    <img class="film-affiche" src="https://image.tmdb.org/t/p/w342<%= film.poster_path %>" alt="">
   <% } %>
-  <h2><%= film.title %> (<%= (film.release_date || "").slice(0, 4) %>)</h2>
-  <p><%= film.genres.map(g => g.name).join(", ") %></p>
-  <p><%= film.overview %></p>
-  <% const real = film.credits.crew.find(p => p.job === "Director"); %>
-  <% if (real) { %><p>Réalisateur : <%= real.name %></p><% } %>
-  <p>Avec : <%= film.credits.cast.slice(0, 5).map(a => a.name).join(", ") %></p>
-</article>
+  <div class="film-infos">
+    <h2><%= film.title %></h2>
+    <p>
+      <%= (film.release_date || "").slice(0, 4) %>
+      <% if (film.runtime) { %> · <%= Math.floor(film.runtime / 60) %> h <%= String(film.runtime % 60).padStart(2, "0") %><% } %>
+      · <%= film.genres.map(g => g.name).join(", ") %>
+      <% if (real) { %> · <%= real.name %><% } %>
+    </p>
+  </div>
+  <div class="film-note">
+    <b><%= moy ? (moy / 2).toFixed(1) : "–" %></b>
+    <%= avis.length %> avis
+  </div>
+</div>
 
 <% if (user) { %>
   <div class="barre-film">
@@ -23,37 +33,53 @@
     </form>
   </div>
 
-<dialog id="avis">
-  <form method="post" action="/films/<%= film.id %>/review">
-    <h3><%= film.title %></h3>
-    <div class="notes">
-      <% for (let i = 1; i <= 10; i++) { %>
-        <input type="radio" name="rating" id="n<%= i %>" value="<%= i %>" required>
-        <label for="n<%= i %>"><%= i / 2 %></label>
-      <% } %>
-    </div>
-    <label>Vu le <input name="watched_on" type="date"></label>
-    <label>Critique <textarea name="body" rows="4"></textarea></label>
-    <div class="actions">
-      <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
-      <button>Enregistrer</button>
-    </div>
-  </form>
-</dialog>
+  <dialog id="avis">
+    <form method="post" action="/films/<%= film.id %>/review">
+      <h3><%= film.title %></h3>
+      <div class="notes">
+        <% for (let i = 1; i <= 10; i++) { %>
+          <input type="radio" name="rating" id="n<%= i %>" value="<%= i %>" required>
+          <label for="n<%= i %>"><%= i / 2 %></label>
+        <% } %>
+      </div>
+      <label>Vu le <input name="watched_on" type="date"></label>
+      <label>Critique <textarea name="body" rows="4"></textarea></label>
+      <div class="actions">
+        <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
+        <button>Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
 <% } else { %>
   <p><a href="/login">Connecte-toi</a> pour noter ce film.</p>
 <% } %>
 
-<% if (moy) { %>
-  <p>Note moyenne : <%= (moy / 2).toFixed(1) %>/5 (<%= avis.length %> avis)</p>
+<p class="synopsis"><%= film.overview %></p>
+
+<% if (film.credits.cast.length > 0) { %>
+  <h3>Casting</h3>
+  <div class="rangee">
+    <% for (const a of film.credits.cast.slice(0, 15)) { %>
+      <div class="acteur">
+        <% if (a.profile_path) { %>
+          <img src="https://image.tmdb.org/t/p/w185<%= a.profile_path %>" alt="" loading="lazy">
+        <% } else { %>
+          <span class="acteur-vide"></span>
+        <% } %>
+        <%= a.name %>
+      </div>
+    <% } %>
+  </div>
 <% } %>
 
-<ul>
+<h3>Avis</h3>
+<% if (avis.length === 0) { %><p>Personne n'a encore noté ce film.</p><% } %>
+<ul class="fil">
   <% for (const a of avis) { %>
     <li>
-      <strong><a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a></strong> : <%= a.rating / 2 %>/5
+      <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a> : <%= a.rating / 2 %>/5
       <% if (a.watched_on) { %>(vu le <%= a.watched_on %>)<% } %>
-      <p><%= a.body %></p>
+      <% if (a.body) { %><p><%= a.body %></p><% } %>
       <% if (user && user.username === a.username) { %>
         <form method="post" action="/films/<%= film.id %>/review/delete"><button class="petit">Supprimer</button></form>
       <% } %>
