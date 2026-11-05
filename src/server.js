@@ -115,12 +115,30 @@ app.post("/register", async (req, res) => {
 
 app.get("/login", (req, res) => res.render("login", { erreur: null }));
 
+const essais = new Map();
+const FENETRE = 15 * 60 * 1000;
+function tropDEssais(ip) {
+  const e = essais.get(ip);
+  return !!e && Date.now() - e.debut < FENETRE && e.n >= 5;
+}
+
+function noterEchec(ip) {
+  const e = essais.get(ip);
+  if (!e || Date.now() - e.debut >= FENETRE) essais.set(ip, { n: 1, debut: Date.now() });
+  else e.n++;
+}
+
 app.post("/login", async (req, res) => {
+    if (tropDEssais(req.ip)) {
+    return res.status(429).render("login", { erreur: "Trop de tentatives. Réessaie dans 15 minutes." });
+  }
   const { username, password } = req.body;
   const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username || "");
   if (!user || !(await bcrypt.compare(password || "", user.password_hash))) {
+    noterEchec(req.ip);
     return res.status(401).render("login", { erreur: "Pseudo ou mot de passe incorrect." });
   }
+  essais.delete(req.ip);
   req.session.userId = user.id;
   res.redirect("/");
 });
