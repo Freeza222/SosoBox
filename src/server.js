@@ -281,6 +281,22 @@ app.post("/films/:id/favori", async (req, res) => {
   res.redirect(req.body.retour === "profil" ? "/u/" + encodeURIComponent(res.locals.user.username) : "/films/" + id);
 });
 
+app.post("/favoris/echanger", (req, res) => {
+  if (!req.session.userId) return res.status(401).end();
+  const trouver = db.prepare("SELECT id FROM favorites WHERE user_id = ? AND film_id = ?");
+  const a = trouver.get(req.session.userId, Number(req.body.a));
+  const b = trouver.get(req.session.userId, Number(req.body.b));
+  if (!a || !b || a.id === b.id) return res.status(400).end();
+
+  const changerId = db.prepare("UPDATE favorites SET id = ? WHERE id = ?");
+  db.transaction(() => {
+    changerId.run(-a.id, a.id); // tmp = a
+    changerId.run(a.id, b.id);  // a = b
+    changerId.run(b.id, -a.id); // b = tmp
+  })();
+  res.end();
+});
+
 app.post("/films/:id/a-voir", async (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   const filmId = Number(req.params.id);

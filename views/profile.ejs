@@ -14,14 +14,20 @@
     <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><b><%= abonnements %></b>abonnements</a>
   </div>
 </div>
-  <p>
-  <p style="display: flex; gap: .5rem">
+
+<p style="display: flex; flex-wrap: wrap; gap: .5rem">
   <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Watchlist</a>
   <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/stats">Statistiques</a>
 </p>
-</p>
-</p>
-<% if (user && user.id !== profil.id) { %>
+
+<% if (user && user.id === profil.id) { %>
+  <form method="post" action="/avatar" enctype="multipart/form-data">
+    <label class="bouton">
+      Changer ma photo
+      <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">
+    </label>
+  </form>
+<% } else if (user) { %>
   <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow">
     <button><%= suit ? "Ne plus suivre" : "Suivre" %></button>
   </form>
@@ -30,7 +36,7 @@
 <h3>Films préférés</h3>
 <ul class="favoris">
   <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
-    <li>
+    <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
       <% if (f) { %>
         <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
         <% if (user && user.id === profil.id) { %>
@@ -63,10 +69,34 @@
     </li>
   <% } %>
 </ul>
+
 <% if (user && user.id === profil.id) { %>
-  <form method="post" action="/logout">
-    <button>Déconnexion</button>
+  <form method="post" action="/logout" style="margin-top: 2rem">
+    <button class="secondaire">Déconnexion</button>
   </form>
+
+  <script>
+    let source = null;
+    document.querySelectorAll(".favoris li[data-film]").forEach(li => {
+      li.draggable = true;
+      li.addEventListener("dragstart", e => {
+        source = li;
+        li.classList.add("glisse");
+        e.dataTransfer.setData("text/plain", "");
+      });
+      li.addEventListener("dragend", () => li.classList.remove("glisse"));
+      li.addEventListener("dragover", e => e.preventDefault());
+      li.addEventListener("drop", async e => {
+        e.preventDefault();
+        if (!source || source === li) return;
+        await fetch("/favoris/echanger", {
+          method: "POST",
+          body: new URLSearchParams({ a: source.dataset.film, b: li.dataset.film }),
+        });
+        location.reload();
+      });
+    });
+  </script>
 <% } %>
 
 <%- include('partials/footer') %>

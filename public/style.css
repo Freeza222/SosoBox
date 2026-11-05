@@ -88,11 +88,10 @@ label { display: block; margin-bottom: .75rem; }
   display: flex;
   gap: .8rem;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
   padding: .3rem 0 .8rem;
   scrollbar-color: var(--accent) transparent;
 }
-.rangee a { flex: 0 0 140px; scroll-snap-align: start; }
+.rangee a { flex: 0 0 140px; }
 .rangee img {
   display: block;
   width: 100%;
@@ -184,6 +183,8 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 
 .favoris { list-style: none; padding: 0; display: flex; gap: 1rem; }
 .favoris li { position: relative; margin: 0; }
+.favoris li[data-film] { cursor: grab; }
+.glisse { opacity: .4; }
 .favoris img { display: block; width: 120px; border: 2px solid var(--bordure); border-radius: 12px; transition: transform .2s; }
 .favoris a:hover img { border-color: var(--lien); transform: translateY(-4px); }
 .retirer {
@@ -225,7 +226,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .barre-film form { margin: 0; }
 .synopsis { max-width: 70ch; }
 
-.acteur { flex: 0 0 90px; scroll-snap-align: start; text-align: center; font-size: .85rem; }
+.acteur { flex: 0 0 90px; text-align: center; font-size: .85rem; }
 .acteur img, .acteur-vide {
   display: block;
   width: 100%;
