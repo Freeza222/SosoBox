@@ -75,26 +75,49 @@
     <button class="secondaire">Déconnexion</button>
   </form>
 
-  <script>
-    let source = null;
-    document.querySelectorAll(".favoris li[data-film]").forEach(li => {
-      li.draggable = true;
-      li.addEventListener("dragstart", e => {
-        source = li;
+   <script>
+    const cases = [...document.querySelectorAll(".favoris li[data-film]")];
+    let source = null, cible = null, bouge = false, x0 = 0, y0 = 0;
+
+    function finir() {
+      cases.forEach(c => c.classList.remove("glisse", "cible"));
+      source = null;
+    }
+
+    cases.forEach(li => {
+      li.addEventListener("pointerdown", e => {
+        if (e.target.closest(".retirer")) return; // laisse marcher le bouton ×
+        source = li; cible = null; bouge = false;
+        x0 = e.clientX; y0 = e.clientY;
+        li.setPointerCapture(e.pointerId);
+      });
+
+      li.addEventListener("pointermove", e => {
+        if (source !== li) return;
+        if (!bouge && Math.hypot(e.clientX - x0, e.clientY - y0) < 8) return; // simple clic
+        bouge = true;
         li.classList.add("glisse");
-        e.dataTransfer.setData("text/plain", "");
+        const dessous = document.elementFromPoint(e.clientX, e.clientY);
+        cible = dessous && dessous.closest(".favoris li[data-film]");
+        cases.forEach(c => c.classList.toggle("cible", c === cible && c !== li));
       });
-      li.addEventListener("dragend", () => li.classList.remove("glisse"));
-      li.addEventListener("dragover", e => e.preventDefault());
-      li.addEventListener("drop", async e => {
-        e.preventDefault();
-        if (!source || source === li) return;
-        await fetch("/favoris/echanger", {
-          method: "POST",
-          body: new URLSearchParams({ a: source.dataset.film, b: li.dataset.film }),
-        });
-        location.reload();
+
+      li.addEventListener("pointerup", async () => {
+        if (source !== li) return;
+        const a = li, b = cible;
+        finir();
+        if (bouge && b && b !== a) {
+          await fetch("/favoris/echanger", {
+            method: "POST",
+            body: new URLSearchParams({ a: a.dataset.film, b: b.dataset.film }),
+          });
+          location.reload();
+        }
       });
+
+      li.addEventListener("pointercancel", finir);
+      li.addEventListener("dragstart", e => e.preventDefault()); // coupe le glisser natif de l'image
+      li.addEventListener("click", e => { if (bouge) e.preventDefault(); }, true); // pas d'ouverture du film après un glisser
     });
   </script>
 <% } %>

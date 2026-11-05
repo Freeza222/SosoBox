@@ -183,7 +183,13 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 
 .favoris { list-style: none; padding: 0; display: flex; gap: 1rem; }
 .favoris li { position: relative; margin: 0; }
-.favoris li[data-film] { cursor: grab; }
+.favoris li[data-film] {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.cible img { border-color: var(--lien); transform: scale(1.05); }
 .glisse { opacity: .4; }
 .favoris img { display: block; width: 120px; border: 2px solid var(--bordure); border-radius: 12px; transition: transform .2s; }
 .favoris a:hover img { border-color: var(--lien); transform: translateY(-4px); }
@@ -269,9 +275,22 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .carte-connexion button { width: 100%; margin-top: .5rem; }
 .alt { text-align: center; margin-bottom: 0; }
 
+.gens { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .75rem; }
+.gens a {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .6rem .8rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  color: var(--texte);
+  text-decoration: none;
+  font-weight: bold;
+  transition: border-color .2s;
+}
+.gens a:hover { border-color: var(--lien); }
+.gens img { width: 44px; height: 44px; }
 
 
-/* ===== Téléphone (toujours en dernier) ===== */
 @media (max-width: 600px) {
   body { margin: 0 .6em; }
 

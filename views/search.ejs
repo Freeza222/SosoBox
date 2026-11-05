@@ -11,19 +11,22 @@
 </form>
 
 <% if (q && !fav) { %>
-  <% if (!fav) { %>
   <div class="onglets">
     <a href="/search?q=<%= encodeURIComponent(q) %>" class="<%= onglet === 'films' ? 'actif' : '' %>">Films</a>
     <a href="/search?q=<%= encodeURIComponent(q) %>&onglet=users" class="<%= onglet === 'users' ? 'actif' : '' %>">Utilisateurs</a>
   </div>
 <% } %>
-<% } %>
 
 <% if (onglet === "users") { %>
   <% if (q && gens.length === 0) { %><p>Aucun utilisateur trouvé.</p><% } %>
-  <ul>
+  <ul class="gens">
     <% for (const g of gens) { %>
-      <li><a href="/u/<%= encodeURIComponent(g.username) %>"><%= g.username %></a></li>
+      <li>
+        <a href="/u/<%= encodeURIComponent(g.username) %>">
+          <img class="avatar-nav" src="/u/<%= encodeURIComponent(g.username) %>/avatar" alt="" loading="lazy">
+          <%= g.username %>
+        </a>
+      </li>
     <% } %>
   </ul>
 <% } else { %>

@@ -1,12 +1,22 @@
 <%- include('partials/header') %>
 
-<h2>Inscription</h2>
-<% if (erreur) { %><p><%= erreur %></p><% } %>
-<form method="post" action="/register">
-  <label>Pseudo <input name="username" required></label>
-  <label>E-mail <input name="email" type="email" required></label>
-  <label>Mot de passe <input name="password" type="password" minlength="8" required></label>
-  <button>Créer mon compte</button>
-</form>
+<div class="mur">
+  <div class="mur-affiches" aria-hidden="true">
+    <% for (const f of locals.affiches || []) { %>
+      <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="">
+    <% } %>
+  </div>
+  <div class="carte-connexion">
+    <h2>Inscription</h2>
+    <% if (erreur) { %><p><%= erreur %></p><% } %>
+    <form method="post" action="/register">
+      <label>Pseudo <input name="username" required></label>
+      <label>E-mail <input name="email" type="email" required></label>
+      <label>Mot de passe <input name="password" type="password" minlength="8" required></label>
+      <button>Créer mon compte</button>
+    </form>
+    <p class="alt">Déjà un compte ? <a href="/login">Connecte-toi</a></p>
+  </div>
+</div>
 
 <%- include('partials/footer') %>
