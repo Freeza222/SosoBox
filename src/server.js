@@ -157,8 +157,9 @@ app.post("/pseudo", (req, res) => {
   if (nouveau.length < 3 || nouveau.length > 20) {
     return res.status(400).send("Le pseudo doit faire entre 3 et 20 caractères.");
   }
+  const bio = (req.body.bio || "").trim().slice(0, 160) || null;
   try {
-    db.prepare("UPDATE users SET username = ? WHERE id = ?").run(nouveau, req.session.userId);
+    db.prepare("UPDATE users SET username = ?, bio = ? WHERE id = ?").run(nouveau, bio, req.session.userId);
   } catch (e) {
     if (e.code === "SQLITE_CONSTRAINT_UNIQUE") return res.status(400).send("Ce pseudo est déjà pris.");
     throw e;

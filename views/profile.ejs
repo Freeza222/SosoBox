@@ -29,13 +29,14 @@
         <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">
       </label>
     </form>
-    <button type="button" class="secondaire" onclick="document.getElementById('pseudo').showModal()">Modifier mon pseudo</button>
+    <button type="button" class="secondaire" onclick="document.getElementById('pseudo').showModal()">Modifier mon profil</button>
   </div>
 
   <dialog id="pseudo">
     <form method="post" action="/pseudo">
-      <h3>Modifier mon pseudo</h3>
+      <h3>Modifier mon profil</h3>
       <label>Nouveau pseudo <input name="username" value="<%= profil.username %>" required minlength="3" maxlength="20"></label>
+      <label>Bio <textarea name="bio" rows="3" maxlength="160" placeholder="Fan de SF et de Nolan"><%= profil.bio || "" %></textarea></label>
       <div class="actions">
         <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
         <button>Enregistrer</button>
