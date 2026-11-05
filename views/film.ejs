@@ -24,7 +24,7 @@
 
 <% if (user) { %>
   <div class="barre-film">
-    <button type="button" onclick="document.getElementById('avis').showModal()">Noter ce film</button>
+    <button type="button" onclick="document.getElementById('avis').showModal()"><%= monAvis ? "Modifier mon avis" : "Noter ce film" %></button>
     <form method="post" action="/films/<%= film.id %>/favori">
       <button class="secondaire"><%= favori ? "★ Retirer des favoris" : "☆ Ajouter aux favoris" %></button>
     </form>
@@ -38,12 +38,12 @@
       <h3><%= film.title %></h3>
       <div class="notes">
         <% for (let i = 1; i <= 10; i++) { %>
-          <input type="radio" name="rating" id="n<%= i %>" value="<%= i %>" required>
+            <input type="radio" name="rating" id="n<%= i %>" value="<%= i %>" required <%= monAvis && monAvis.rating === i ? "checked" : "" %>>
           <label for="n<%= i %>"><%= i / 2 %></label>
         <% } %>
       </div>
-      <label>Vu le <input name="watched_on" type="date"></label>
-      <label>Critique <textarea name="body" rows="4"></textarea></label>
+      <label>Vu le <input name="watched_on" type="date" value="<%= monAvis ? monAvis.watched_on || "" : "" %>">
+      <label>Critique <textarea name="body" rows="4"><%= monAvis ? monAvis.body || "" : "" %></textarea></label>
       <div class="actions">
         <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
         <button>Enregistrer</button>
