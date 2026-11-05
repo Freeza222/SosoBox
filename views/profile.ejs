@@ -16,7 +16,7 @@
 </div>
   <p>
   <p style="display: flex; gap: .5rem">
-  <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Liste à voir</a>
+  <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Watchlist</a>
   <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/stats">Statistiques</a>
 </p>
 </p>
@@ -32,10 +32,14 @@
   <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
     <li>
       <% if (f) { %>
-        <a href="/films/<%= f.id %>">
-          <% if (f.poster_path) { %><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"><% } %>
-        </a>
-      <% } else if (user && user.id === profil.id) { %>
+        <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
+        <% if (user && user.id === profil.id) { %>
+          <form method="post" action="/films/<%= f.id %>/favori">
+            <input type="hidden" name="retour" value="profil">
+            <button class="retirer" aria-label="Retirer <%= f.title %> des favoris">×</button>
+          </form>
+        <% } %>
+      <% } else if (user && user.id === profil.id && i === favoris.length) { %>
         <a class="case-vide" href="/search?fav=1">+</a>
       <% } else { %>
         <span class="case-vide"></span>
@@ -59,6 +63,10 @@
     </li>
   <% } %>
 </ul>
-<form method="post" action="/logout"><button>Déconnexion</button></form>
+<% if (user && user.id === profil.id) { %>
+  <form method="post" action="/logout">
+    <button>Déconnexion</button>
+  </form>
+<% } %>
 
 <%- include('partials/footer') %>

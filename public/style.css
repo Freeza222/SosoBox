@@ -111,6 +111,17 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 .favoris a:hover img { border-color: var(--lien); }
 
 .favoris li { margin: 0; }
+.favoris li { position: relative; }
+.retirer {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; padding: 0;
+  border-radius: 50%;
+  background: rgba(14, 11, 29, .8);
+  color: var(--texte);
+  font-size: 1.1rem; line-height: 1;
+}
+.retirer:hover { background: var(--accent); }
+
 .case-vide { display: flex; align-items: center; justify-content: center; width: 120px; aspect-ratio: 2 / 3; border: 2px dashed var(--bordure); border-radius: 8px; font-size: 2.5rem; color: var(--lien); text-decoration: none; }
 a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 
@@ -209,8 +220,9 @@ button, .bouton, .secondaire { border-radius: 999px; }
 
 .banniere {
   position: relative;
-  height: 220px;
-  background: var(--accent) center / cover;
+  aspect-ratio: 3 / 1;
+  max-height: 280px;
+  background: var(--accent) center 25% / cover;
   margin: 0;
   border-radius: 16px;
   overflow: hidden;

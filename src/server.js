@@ -166,7 +166,7 @@ app.get("/u/:username/a-voir", (req, res) => {
     WHERE w.user_id = ?
     ORDER BY w.created_at DESC
   `).all(profil.id);
-  res.render("films-vus", { profil, films, titre: "À voir pour " + profil.username });
+  res.render("films-vus", { profil, films, titre: "Watchlist de " + profil.username });
 });
 
 app.get("/u/:username/stats", (req, res) => {

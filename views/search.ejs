@@ -3,7 +3,7 @@
 <% if (fav) { %><p>Choisis un film à ajouter à tes favoris.</p><% } %>
 
 <form action="/search" style="position:relative">
-  <input name="q" value="<%= q %>" placeholder="Film ou utilisateur" autocomplete="off">
+  <input name="q" value="<%= q %>" placeholder="<%= fav ? 'Chercher un film à ajouter' : 'Film ou utilisateur' %>" autocomplete="off">
   <div id="suggestions"></div>
   <% if (fav) { %><input type="hidden" name="fav" value="1"><% } %>
   <% if (onglet === "users") { %><input type="hidden" name="onglet" value="users"><% } %>
@@ -11,10 +11,12 @@
 </form>
 
 <% if (q && !fav) { %>
+  <% if (!fav) { %>
   <div class="onglets">
     <a href="/search?q=<%= encodeURIComponent(q) %>" class="<%= onglet === 'films' ? 'actif' : '' %>">Films</a>
     <a href="/search?q=<%= encodeURIComponent(q) %>&onglet=users" class="<%= onglet === 'users' ? 'actif' : '' %>">Utilisateurs</a>
   </div>
+<% } %>
 <% } %>
 
 <% if (onglet === "users") { %>
