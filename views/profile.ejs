@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 
+<div class="etroit">
 <div class="banniere" <% if (banniere) { %>style="background-image: url('https://image.tmdb.org/t/p/w1280<%= banniere %>')"<% } %>></div>
 
 <div class="profil-entete">
@@ -41,7 +42,7 @@
       </div>
     </form>
   </dialog>
-  
+
 <% } else if (user) { %>
   <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow">
     <button><%= suit ? "Ne plus suivre" : "Suivre" %></button>
@@ -137,4 +138,5 @@
   </script>
 <% } %>
 
+</div>
 <%- include('partials/footer') %>

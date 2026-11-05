@@ -17,6 +17,7 @@ body {
   margin: 0 auto;
   padding: 1rem;
 }
+.etroit { max-width: 1000px; margin: 0 auto; }
 
 a { color: var(--lien); }
 img { max-width: 100%; }
