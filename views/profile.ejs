@@ -1,22 +1,24 @@
 <%- include('partials/header') %>
 
-<h2><%= profil.username %></h2>
+<div class="banniere" <% if (banniere) { %>style="background-image: url('https://image.tmdb.org/t/p/w1280<%= banniere %>')"<% } %>></div>
+
+<div class="profil-entete">
   <img class="avatar-grand" src="/u/<%= encodeURIComponent(profil.username) %>/avatar" alt="">
-<% if (user && user.id === profil.id) { %>
-  <form method="post" action="/avatar" enctype="multipart/form-data">
-  <label class="bouton">
-    Changer ma photo
-    <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">
-  </label>
-</form>
-<% } %>
-<p><a href="/u/<%= encodeURIComponent(profil.username) %>/films"><%= total %> film(s) noté(s)</a></p>
-<p>
-  <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"><%= abonnes %> abonné(s)</a> ·
-  <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><%= abonnements %> abonnement(s)</a>
+  <div class="profil-nom">
+    <h2><%= profil.username %></h2>
+    <% if (profil.bio) { %><p><%= profil.bio %></p><% } %>
+  </div>
+  <div class="chiffres">
+    <a href="/u/<%= encodeURIComponent(profil.username) %>/films"><b><%= total %></b>films</a>
+    <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"><b><%= abonnes %></b>abonnés</a>
+    <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><b><%= abonnements %></b>abonnements</a>
+  </div>
+</div>
   <p>
-  <a href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Watchlist</a> ·
-  <a href="/u/<%= encodeURIComponent(profil.username) %>/stats">Statistiques</a>
+  <p style="display: flex; gap: .5rem">
+  <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Liste à voir</a>
+  <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/stats">Statistiques</a>
+</p>
 </p>
 </p>
 <% if (user && user.id !== profil.id) { %>

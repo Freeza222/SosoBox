@@ -203,19 +203,26 @@ app.post("/avatar", (req, res) => {
   });
 });
 
-app.get("/u/:username", (req, res) => {
-  const profil = db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar FROM users WHERE username = ?").get(req.params.username);
+app.get("/u/:username", async (req, res) => {
+  const profil = db.prepare("SELECT id, username, bio, avatar IS NOT NULL AS has_avatar FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
   const avis = db.prepare(`SELECT f.id, f.title, f.year, f.poster_path, r.rating
   FROM reviews r JOIN films f ON f.id = r.film_id
   WHERE r.user_id = ? ORDER BY r.id DESC LIMIT 5`).all(profil.id);
   const total = db.prepare("SELECT COUNT(*) AS n FROM reviews WHERE user_id = ?").get(profil.id).n;
-    const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
+  const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
   const abonnes = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?").get(profil.id).n;
   const abonnements = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?").get(profil.id).n;
   const favoris = db.prepare(`SELECT f.id, f.title, f.poster_path FROM favorites fa
   JOIN films f ON f.id = fa.film_id WHERE fa.user_id = ? ORDER BY fa.id`).all(profil.id);
-  res.render("profile", { profil, avis, suit, abonnes, abonnements, favoris, total });
+
+  let banniere = null;
+  if (favoris.length > 0) {
+    const f = await tmdb("/movie/" + favoris[0].id + "?language=fr-FR").catch(() => null);
+    banniere = f && f.backdrop_path;
+  }
+
+  res.render("profile", { profil, avis, suit, abonnes, abonnements, favoris, total, banniere });
 });
 
 app.post("/films/:id/review/delete", (req, res) => {
