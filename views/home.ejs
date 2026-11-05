@@ -1,41 +1,48 @@
-
 <%- include('partials/header') %>
 
-    <% if (user) { %>
-        <h2>Avis de tes abonnements</h2>
-    <% if (fil.length === 0) { %>
+<div class="<%= user ? 'accueil' : '' %>">
+  <% if (user) { %>
+    <aside class="accueil-fil">
+      <h2>Avis de tes abonnements</h2>
+      <% if (fil.length === 0) { %>
         <p>Rien pour l'instant : suis des gens depuis leur profil.</p>
-    <% } %>
-    <ul class="fil">
-  <% for (const a of fil) { %>
-    <li>
-      <div class="entete">
-            <a href="/films/<%= a.film_id %>">
-            <% if (a.poster_path) { %>
-                <img src="https://image.tmdb.org/t/p/w342<%= a.poster_path %>" alt="">
-            <% } %>
+      <% } %>
+      <ul class="fil">
+        <% for (const a of fil) { %>
+                    <li class="avis">
+            <a class="avis-affiche" href="/films/<%= a.film_id %>">
+              <% if (a.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= a.poster_path %>" alt="">
+              <% } %>
             </a>
-            <div>
-            <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a>
-            a noté <a href="/films/<%= a.film_id %>"><%= a.title %></a> : <%= a.rating / 2 %>/5
+            <div class="avis-texte">
+              <a href="/films/<%= a.film_id %>"><%= a.title %></a>
+              <div class="etoiles" role="img" aria-label="<%= a.rating / 2 %> sur 5">
+                <%= "★".repeat(Math.floor(a.rating / 2)) + (a.rating % 2 ? "½" : "") %>
+              </div>
+              <% if (a.body) { %><p class="avis-critique"><%= a.body %></p><% } %>
+              <div class="avis-par">par <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a></div>
             </div>
-        </div>
-      <% if (a.body) { %><p><%= a.body %></p><% } %>
-    </li>
+          </li>
         <% } %>
-    </ul>
-    <% } %>
+      </ul>
+    </aside>
+  <% } %>
+
+  <section class="accueil-rangees">
     <% for (const r of rangees) { %>
-    <h2><%= r.titre %></h2>
-        <div class="rangee">
-            <% for (const f of r.films) { %>
-                <a href="/films/<%= f.id %>" title="<%= f.title %>">
-                    <% if (f.poster_path) { %>
-                        <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="<%= f.title %>" loading="lazy">
-                    <% } %>
-                </a>
+      <h2><%= r.titre %></h2>
+      <div class="rangee">
+        <% for (const f of r.films) { %>
+          <a href="/films/<%= f.id %>" title="<%= f.title %>">
+            <% if (f.poster_path) { %>
+              <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="<%= f.title %>" loading="lazy">
             <% } %>
-        </div>
+          </a>
+        <% } %>
+      </div>
     <% } %>
+  </section>
+</div>
 
 <%- include('partials/footer') %>

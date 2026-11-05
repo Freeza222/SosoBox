@@ -21,12 +21,27 @@
 </p>
 
 <% if (user && user.id === profil.id) { %>
-  <form method="post" action="/avatar" enctype="multipart/form-data">
-    <label class="bouton">
-      Changer ma photo
-      <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">
-    </label>
-  </form>
+  <div style="display: flex; flex-wrap: wrap; gap: .5rem">
+    <form method="post" action="/avatar" enctype="multipart/form-data">
+      <label class="bouton">
+        Changer ma photo
+        <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">
+      </label>
+    </form>
+    <button type="button" class="secondaire" onclick="document.getElementById('pseudo').showModal()">Modifier mon pseudo</button>
+  </div>
+
+  <dialog id="pseudo">
+    <form method="post" action="/pseudo">
+      <h3>Modifier mon pseudo</h3>
+      <label>Nouveau pseudo <input name="username" value="<%= profil.username %>" required minlength="3" maxlength="20"></label>
+      <div class="actions">
+        <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
+        <button>Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+  
 <% } else if (user) { %>
   <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow">
     <button><%= suit ? "Ne plus suivre" : "Suivre" %></button>

@@ -13,7 +13,7 @@ body {
   color: var(--texte);
   font-family: system-ui, sans-serif;
   line-height: 1.5;
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -104,16 +104,27 @@ label { display: block; margin-bottom: .75rem; }
 /* ===== Fil d'avis (accueil, fiche film) ===== */
 .fil { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; }
 .fil li { background: var(--carte); border: 1px solid var(--bordure); border-radius: 8px; padding: .75rem; }
-.fil .entete { display: flex; align-items: center; gap: .75rem; }
 .fil img { display: block; width: 60px; border: 2px solid var(--bordure); border-radius: 6px; }
 .fil p { margin: .75rem 0 0; }
 .fil a { color: var(--texte); text-decoration: none; font-weight: bold; }
 .fil a:hover { text-decoration: underline; }
+.fil .avis { display: flex; gap: .75rem; }
+.avis-texte { min-width: 0; }
+.etoiles { letter-spacing: 1px; }
+.fil .avis-critique {
+  margin: .25rem 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.avis-par { font-size: .85rem; color: var(--lien); }
 
 /* ===== Fenêtre de notation ===== */
 dialog { background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); border-radius: 12px; padding: 1.5rem; width: min(90vw, 640px); }
 dialog::backdrop { background: rgba(0, 0, 0, .6); }
-dialog textarea, dialog input[type="date"] { width: 100%; }
+dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
 .notes { position: relative; display: flex; gap: .25rem; margin-bottom: 1rem; }
 .notes input { position: absolute; opacity: 0; }
 .notes label { flex: 1; text-align: center; margin: 0; padding: .4rem 0; border: 1px solid var(--bordure); border-radius: 999px; cursor: pointer; }
@@ -314,4 +325,21 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .film-entete { margin: -50px .5rem 1rem; gap: .8rem; }
   .film-affiche { width: 100px; }
   .film-infos h2 { font-size: 1.3rem; }
+}
+
+/* ===== Grand écran ===== */
+@media (min-width: 1200px) {
+  .accueil {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 2rem;
+    align-items: start;
+  }
+  .accueil-rangees { grid-column: 1; grid-row: 1; }
+  .accueil-fil {
+    grid-column: 2; grid-row: 1;
+    position: sticky; top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
 }

@@ -151,6 +151,21 @@ app.get("/u/:username/avatar", (req, res) => {
   res.send(u.avatar);
 });
 
+app.post("/pseudo", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const nouveau = (req.body.username || "").trim();
+  if (nouveau.length < 3 || nouveau.length > 20) {
+    return res.status(400).send("Le pseudo doit faire entre 3 et 20 caractères.");
+  }
+  try {
+    db.prepare("UPDATE users SET username = ? WHERE id = ?").run(nouveau, req.session.userId);
+  } catch (e) {
+    if (e.code === "SQLITE_CONSTRAINT_UNIQUE") return res.status(400).send("Ce pseudo est déjà pris.");
+    throw e;
+  }
+  res.redirect("/u/" + encodeURIComponent(nouveau));
+});
+
 app.get("/u/:username/films", (req, res) => {
   const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
