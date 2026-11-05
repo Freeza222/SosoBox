@@ -9,16 +9,16 @@
   </head>
   <body>
     <header class="barre">
+  <div class="barre-gauche"><a class="pilule" href="/">Accueil</a></div>
+
   <a class="logo" href="/"><img src="/logo-dark.svg" alt="" width="36" height="36"> SosoBox</a>
-  <nav>
-    <a href="/">Accueil</a>
-    <a href="/search">Rechercher</a>
-  </nav>
+
+  <div class="barre-droite"><a class="pilule" href="/search">Rechercher</a></div>
+
   <div class="compte">
     <% if (user) { %>
-      <a href="/u/<%= user.username %>"><img class="avatar-nav" src="/u/<%= user.username %>/avatar" alt="Mon profil"></a>
+      <a href="/u/<%= encodeURIComponent(user.username) %>"><img class="avatar-nav" src="/u/<%= encodeURIComponent(user.username) %>/avatar" alt="Mon profil"></a>
       <a href="/u/<%= encodeURIComponent(user.username) %>"><%= user.username %></a>
-      <form method="post" action="/logout"><button>Déconnexion</button></form>
     <% } else { %>
       <a href="/login">Connexion</a>
       <a href="/register">Inscription</a>

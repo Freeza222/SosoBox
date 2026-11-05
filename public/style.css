@@ -18,14 +18,33 @@ body {
   padding: 1rem;
 }
 
+.barre {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: .8rem 0;
+  border-bottom: 1px solid var(--bordure);
+  margin-bottom: 1.5rem;
+}
+.barre-gauche { justify-self: end; }
+.barre-droite { grid-column: 3; grid-row: 1; justify-self: start; }
+.compte {
+  grid-column: 3; grid-row: 1; justify-self: end;
+  display: flex; align-items: center; gap: .6rem;
+}
+.pilule {
+  padding: .35rem 1rem;
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--texte);
+  text-decoration: none;
+}
+.pilule:hover { background: var(--accent); }
+
+
 a { color: var(--lien); }
 
-.barre { display: flex; align-items: center; gap: 1.5rem; padding: 0.75rem 0; border-bottom: 1px solid var(--bordure); margin-bottom: 1.5rem; }
-.logo { font-size: 1.5rem; font-weight: bold; color: var(--texte); text-decoration: none; }
-.barre nav { display: flex; gap: 1rem; }
-.barre nav a { text-decoration: none; }
-.barre nav a:hover { text-decoration: underline; }
-.compte { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
 .compte form { margin: 0; }
 
 button {
@@ -85,9 +104,6 @@ dialog textarea, dialog input[type="date"] { width: 100%; }
 .petit { padding: 0.15rem 0.5rem; font-size: 0.75rem; background: transparent; border: 1px solid var(--bordure); color: var(--lien); }
 .petit:hover { background: var(--accent); color: white; }
 
-
-.barre-film { display: flex; gap: 0.5rem; margin: 1rem 0; }
-.barre-film form { margin: 0; }
 
 .favoris { list-style: none; padding: 0; display: flex; gap: 1rem; }
 .favoris img { display: block; width: 120px; border: 2px solid var(--bordure); border-radius: 8px; }
@@ -153,33 +169,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 }
 .rangee a:hover img { transform: translateY(-4px); border-color: var(--lien); }
 
-@media (max-width: 600px) {
-  body { margin: 0 .6em; }
-
-  /* barre : le logo d'abord, les liens passent à la ligne en dessous */
-  .barre { flex-wrap: wrap; gap: .5em; }
-  .barre nav { flex-wrap: wrap; gap: .8rem; }
-
-  /* accueil et recherche : 2 affiches par ligne */
-  .resultats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8em; }
-  .resultats img { width: 100%; height: auto; }
-
-  /* fenêtre de notation : elle tient dans l'écran, les notes sur 2 lignes */
-  dialog { width: auto; max-width: 95vw; box-sizing: border-box; }
-  dialog input, dialog textarea { width: 100%; box-sizing: border-box; }
-  .notes { flex-wrap: wrap; }
-
-    /* logo plus petit pour laisser de la place aux liens */
-  .logo { font-size: 1.1rem; gap: .3rem; }
-  .logo img { width: 24px; height: 24px; }
-
-  /* 4 favoris sur une ligne, cases "+" comprises */
-  .favoris { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
-  .favoris img, .case-vide { width: 100%; }
-  .case-vide { font-size: 1.5rem; }
-
-  .rangee a { flex-basis: 110px; }
-}
 
 .stat-ligne {
   display: grid;
@@ -216,3 +205,31 @@ button, .bouton, .secondaire { border-radius: 999px; }
 /* plan B : affiches arrondies qui se soulèvent au survol */
 .resultats img, .favoris img { border-radius: 12px; transition: transform .2s; }
 .resultats a:hover img, .favoris a:hover img { transform: translateY(-4px); }
+
+
+
+@media (max-width: 600px) {
+  body { margin: 0 .6em; }
+
+  /* accueil et recherche : 2 affiches par ligne */
+  .resultats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8em; }
+  .resultats img { width: 100%; height: auto; }
+
+  /* fenêtre de notation : elle tient dans l'écran, les notes sur 2 lignes */
+  dialog { width: auto; max-width: 95vw; box-sizing: border-box; }
+  dialog input, dialog textarea { width: 100%; box-sizing: border-box; }
+  .notes { flex-wrap: wrap; }
+
+  .barre .compte { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+
+    /* logo plus petit pour laisser de la place aux liens */
+  .logo { font-size: 1.1rem; gap: .3rem; }
+  .logo img { width: 24px; height: 24px; }
+
+  /* 4 favoris sur une ligne, cases "+" comprises */
+  .favoris { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+  .favoris img, .case-vide { width: 100%; }
+  .case-vide { font-size: 1.5rem; }
+
+  .rangee a { flex-basis: 110px; }
+}
