@@ -9,6 +9,9 @@
   </head>
   <body>
     <header class="barre">
+        <% if (chemin !== "/") { %>
+            <button type="button" class="retour" aria-label="Retour" onclick="history.length > 1 ? history.back() : location.href = '/'">←</button>
+        <% } %>
   <div class="barre-gauche"><a class="pilule" href="/">Accueil</a></div>
 
   <a class="logo" href="/"><img src="/logo-dark.svg" alt="" width="36" height="36"> SosoBox</a>

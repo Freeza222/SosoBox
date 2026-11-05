@@ -23,6 +23,7 @@ app.use((req, res, next) => {
   res.locals.user = req.session.userId
     ? db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar FROM users WHERE id = ?").get(req.session.userId) || null
     : null;
+    res.locals.chemin = req.path;
   next();
 });
 

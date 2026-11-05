@@ -32,7 +32,8 @@ img { max-width: 100%; }
   border-bottom: 1px solid var(--bordure);
   margin-bottom: 1.5rem;
 }
-.barre-gauche { justify-self: end; }
+.barre-gauche { grid-column: 1; grid-row: 1; justify-self: end; }
+.barre .logo { grid-column: 2; grid-row: 1; }
 .barre-droite { grid-column: 3; grid-row: 1; justify-self: start; }
 .compte {
   grid-column: 3; grid-row: 1; justify-self: end;
@@ -49,6 +50,16 @@ img { max-width: 100%; }
   text-decoration: none;
 }
 .pilule:hover { background: var(--accent); }
+
+.retour {
+  grid-column: 1; grid-row: 1; justify-self: start;
+  width: 36px; height: 36px; padding: 0;
+  border-radius: 50%;
+  background: var(--carte);
+  color: var(--texte);
+  font-size: 1.2rem; line-height: 1;
+}
+.retour:hover { background: var(--accent); color: white; }
 
 /* ===== Boutons et formulaires ===== */
 button, .bouton {
@@ -307,6 +318,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   body { margin: 0 .6em; }
 
   .barre .compte { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+  .barre .retour { grid-row: 2; }
   .logo { font-size: 1.1rem; gap: .3rem; }
   .logo img { width: 24px; height: 24px; }
 
