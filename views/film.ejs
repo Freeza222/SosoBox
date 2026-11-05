@@ -81,7 +81,7 @@
       <% if (a.watched_on) { %>(vu le <%= a.watched_on %>)<% } %>
       <% if (a.body) { %><p><%= a.body %></p><% } %>
       <% if (user && user.username === a.username) { %>
-        <form method="post" action="/films/<%= film.id %>/review/delete"><button class="petit">Supprimer</button></form>
+          <form method="post" action="/films/<%= film.id %>/review/delete" onsubmit="return confirm('Supprimer ton avis sur ce film ?')"><button class="petit">Supprimer</button></form>
       <% } %>
     </li>
   <% } %>
