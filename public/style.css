@@ -305,6 +305,30 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 }
 .acteur-vide { background: var(--bordure); }
 
+/* ===== Liquid glass (rangées de l'accueil) ===== */
+.verre {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem .5rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .14);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .25),
+    inset 0 -1px 0 rgba(255, 255, 255, .05),
+    0 10px 30px rgba(0, 0, 0, .35);
+}
+.verre::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .18), transparent 40%);
+  pointer-events: none;
+}
+.verre h2 { margin: 0 0 .75rem; }
+
 /* ===== Connexion / inscription ===== */
 .mur {
   position: relative;
@@ -377,6 +401,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .film-entete { margin: -50px .5rem 1rem; gap: .8rem; }
   .film-affiche { width: 100px; }
   .film-infos h2 { font-size: 1.3rem; }
+
+    .verre { padding: .8rem .8rem .3rem; border-radius: 18px; }
 
     .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
 }

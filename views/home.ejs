@@ -31,16 +31,18 @@
 
   <section class="accueil-rangees">
     <% for (const r of rangees) { %>
-      <h2><%= r.titre %></h2>
-      <div class="rangee">
-        <% for (const f of r.films) { %>
-          <a href="/films/<%= f.id %>" title="<%= f.title %>">
-            <% if (f.poster_path) { %>
-              <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="<%= f.title %>" loading="lazy">
-            <% } %>
-          </a>
-        <% } %>
-      </div>
+      <section class="verre">
+        <h2><%= r.titre %></h2>
+        <div class="rangee">
+          <% for (const f of r.films) { %>
+            <a href="/films/<%= f.id %>" title="<%= f.title %>">
+              <% if (f.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="<%= f.title %>" loading="lazy">
+              <% } %>
+            </a>
+          <% } %>
+        </div>
+      </section>
     <% } %>
   </section>
 </div>
