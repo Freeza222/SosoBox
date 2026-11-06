@@ -1,6 +1,6 @@
 # SosoBox
 
-Mon petit Letterboxd perso : je note les films que je vois, j'écris ce que j'en ai pensé, et je suis ce que regardent mes amis.
+Mon Letterboxd perso : je note les films que je vois, j'écris ce que j'en ai pensé, et je suis ce que regardent mes amis.
 
 **https://sosobox.duckdns.org**
 
