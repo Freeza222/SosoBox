@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const { tmdb } = require("./tmdb");
 const session = require("express-session");
 const app = express();
+app.set("trust proxy", 1); // le proxy HTTPS de l'hébergeur est devant nous
 
 
 app.set("view engine", "ejs");
@@ -14,7 +15,7 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET, cookie: { secure: process.env.NODE_ENV === "production", sameSite: "lax" },
   resave: false,
   saveUninitialized: false,
 }));
@@ -364,6 +365,5 @@ app.get("/api/suggestions", async (req, res) => {
   res.json(films);
 });
 
-app.listen(3000, () => {
-  console.log("Serveur lancé sur http://localhost:3000");
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Serveur lancé sur http://localhost:" + PORT));
