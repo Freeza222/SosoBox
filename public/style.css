@@ -437,7 +437,9 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 
   .resultats { grid-template-columns: repeat(2, 1fr); gap: .8em; }
   .resultats img { width: 100%; height: auto; }
-  .rangee a { flex-basis: 110px; }
+  .rangee a { flex-basis: 88px; }
+  .rangee { gap: .55rem; }
+  .rangee img { border-radius: 9px; }
 
   dialog { width: auto; max-width: 95vw; }
   .notes { flex-wrap: wrap; }
@@ -452,7 +454,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .film-affiche { width: 100px; }
   .film-infos h2 { font-size: 1.3rem; }
 
-    .verre { padding: .8rem .8rem .3rem; border-radius: 18px; }
+  .verre { padding: .6rem .6rem .2rem; border-radius: 16px; margin-bottom: 1rem; }
+  .verre h2 { font-size: 1rem; margin-bottom: .5rem; }
 
     .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
 }
