@@ -152,7 +152,8 @@ dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
 .onglets a.actif { border-bottom-color: var(--accent); font-weight: bold; }
 
 #suggestions {
-  position: absolute; left: 0; right: 0; top: 100%;
+  position: absolute; left: 0; right: 0; top: calc(100% + .4rem);
+  overflow: hidden;
   background: var(--carte);
   border: 1px solid var(--bordure);
   border-radius: 8px;
@@ -167,6 +168,44 @@ dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
 }
 .sugg:hover { background: var(--bordure); }
 .sugg img { width: 32px; height: 48px; object-fit: cover; border-radius: 3px; }
+
+.tuiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0 2rem; }
+.tuile {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 80px; padding: .5rem;
+  border-radius: 12px;
+  font-weight: bold; text-align: center; text-decoration: none;
+  color: var(--texte);
+  transition: transform .2s;
+}
+.tuile:hover { transform: translateY(-3px); }
+.tuile-0 { background: var(--accent); }
+.tuile-1 { background: var(--lien); color: #0E0B1D; }
+.tuile-2 { background: var(--bordure); }
+.tuile-3 { background: var(--carte); border: 1px solid var(--accent); }
+.tuile-4 { background: var(--texte); color: #0E0B1D; }
+
+.recherche {
+  position: relative;
+  display: flex; align-items: center;
+  max-width: 640px;
+  margin: 1.5rem auto 2rem;
+  padding: .3rem .3rem .3rem 1.2rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  border-radius: 999px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.recherche:focus-within { border-color: var(--lien); box-shadow: 0 0 0 4px rgba(139, 124, 199, .25); }
+.recherche svg { flex: none; margin-right: .6rem; color: var(--lien); }
+.recherche input {
+  flex: 1; min-width: 0;
+  padding: .6rem 0;
+  background: none; border: 0; outline: none;
+  color: var(--texte); font-size: 1.05rem;
+}
+.recherche input::placeholder { color: var(--lien); }
+.recherche button { padding: .6rem 1.4rem; }
 
 /* ===== Bannière (profil, fiche film) ===== */
 .banniere {
@@ -338,6 +377,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .film-entete { margin: -50px .5rem 1rem; gap: .8rem; }
   .film-affiche { width: 100px; }
   .film-infos h2 { font-size: 1.3rem; }
+
+    .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
 }
 
 /* ===== Grand écran ===== */

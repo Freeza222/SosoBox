@@ -1,9 +1,12 @@
 <%- include('partials/header') %>
 
-<% if (fav) { %><p>Choisis un film à ajouter à tes favoris.</p><% } %>
+<% if (fav) { %><p style="text-align: center">Choisis un film à ajouter à tes favoris.</p><% } %>
 
-<form action="/search" style="position:relative">
-  <input name="q" value="<%= q %>" placeholder="<%= fav ? 'Chercher un film à ajouter' : 'Film ou utilisateur' %>" autocomplete="off">
+<form action="/search" class="recherche">
+  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+  </svg>
+  <input name="q" value="<%= q %>" placeholder="<%= fav ? 'Chercher un film à ajouter' : 'Un film, un ami…' %>" autocomplete="off" aria-label="Rechercher">
   <div id="suggestions"></div>
   <% if (fav) { %><input type="hidden" name="fav" value="1"><% } %>
   <% if (onglet === "users") { %><input type="hidden" name="onglet" value="users"><% } %>
@@ -17,20 +20,43 @@
   </div>
 <% } %>
 
-<% if (onglet === "users") { %>
-  <% if (q && gens.length === 0) { %><p>Aucun utilisateur trouvé.</p><% } %>
-  <ul class="gens">
-    <% for (const g of gens) { %>
-      <li>
-        <a href="/u/<%= encodeURIComponent(g.username) %>">
-          <img class="avatar-nav" src="/u/<%= encodeURIComponent(g.username) %>/avatar" alt="" loading="lazy">
-          <%= g.username %>
-        </a>
-      </li>
-    <% } %>
-  </ul>
+<% if (q) { %>
+  <% if (onglet === "users") { %>
+    <% if (gens.length === 0) { %><p>Aucun utilisateur trouvé.</p><% } %>
+    <ul class="gens">
+      <% for (const g of gens) { %>
+        <li>
+          <a href="/u/<%= encodeURIComponent(g.username) %>">
+            <img class="avatar-nav" src="/u/<%= encodeURIComponent(g.username) %>/avatar" alt="" loading="lazy">
+            <%= g.username %>
+          </a>
+        </li>
+      <% } %>
+    </ul>
+  <% } else { %>
+    <%- include('partials/grille', { films }) %>
+  <% } %>
+<% } else if (genreChoisi) { %>
+  <p><a class="pilule" href="/search<%= fav ? '?fav=1' : '' %>">← Tous les genres</a></p>
+  <h2><%= genreChoisi.name %></h2>
+  <%- include('partials/grille', { films: genreFilms }) %>
 <% } else { %>
-  <%- include('partials/grille', { films }) %>
+  <div class="tuiles">
+    <% genres.forEach((genre, i) => { %>
+      <a class="tuile tuile-<%= i % 5 %>" href="/search?genre=<%= genre.id %><%= fav ? '&fav=1' : '' %>"><%= genre.name %></a>
+    <% }) %>
+  </div>
+
+  <h2>Tendances de la semaine</h2>
+  <div class="rangee">
+    <% for (const f of tendances) { %>
+      <a href="/films/<%= f.id %>" title="<%= f.title %>">
+        <% if (f.poster_path) { %>
+          <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="<%= f.title %>" loading="lazy">
+        <% } %>
+      </a>
+    <% } %>
+  </div>
 <% } %>
 
 <script src="/suggestions.js" defer></script>

@@ -38,27 +38,42 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  const [populaires, mieuxNotes, auCinema] = await Promise.all([
-  tmdb("/movie/popular?language=fr-FR&region=FR"),
-  tmdb("/movie/top_rated?language=fr-FR"),
-  tmdb("/movie/now_playing?language=fr-FR&region=FR"),
-]);
-  const fil = req.session.userId
-    ? db.prepare(`SELECT u.username, f.id AS film_id, f.title, f.poster_path, r.rating, r.body
-        FROM reviews r
-        JOIN users u ON u.id = r.user_id
-        JOIN films f ON f.id = r.film_id
-        WHERE r.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)
-        ORDER BY r.id DESC LIMIT 20`).all(req.session.userId)
-    : [];
-  res.render("home", {
-  fil,
-  rangees: [
-    { titre: "Populaires", films: populaires.results },
-    { titre: "Les mieux notés", films: mieuxNotes.results },
-    { titre: "Au cinéma", films: auCinema.results },
-  ],
-});
+  const fil = req.session.userId ? db.prepare(`
+    SELECT u.username, r.film_id, r.rating, r.body, f.title, f.poster_path
+    FROM reviews r
+    JOIN follows fo ON fo.followed_id = r.user_id
+    JOIN users u ON u.id = r.user_id
+    JOIN films f ON f.id = r.film_id
+    WHERE fo.follower_id = ?
+    ORDER BY r.id DESC LIMIT 20
+  `).all(req.session.userId) : [];
+
+  const RANGEES = [
+    ["Tendances de la semaine", "/trending/movie/week?language=fr-FR"],
+    ["Populaires", "/movie/popular?language=fr-FR&region=FR"],
+    ["Au cinéma", "/movie/now_playing?language=fr-FR&region=FR"],
+    ["Bientôt au cinéma", "/movie/upcoming?language=fr-FR&region=FR"],
+    ["Les mieux notés", "/movie/top_rated?language=fr-FR"],
+    ["Action", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=28"],
+    ["Comédie", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=35"],
+    ["Horreur", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=27"],
+    ["Science-Fiction", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=878"],
+    ["Animation", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=16"],
+  ];
+
+  const rangees = await Promise.all(RANGEES.map(async ([titre, chemin]) => {
+    const data = await tmdb(chemin).catch(() => null);
+    return { titre, films: data ? data.results : [] };
+  }));
+
+  const plusVus = db.prepare(`
+    SELECT f.id, f.title, f.poster_path, COUNT(*) AS n
+    FROM reviews r JOIN films f ON f.id = r.film_id
+    GROUP BY f.id ORDER BY n DESC, AVG(r.rating) DESC LIMIT 20
+  `).all();
+  if (plusVus.length > 0) rangees.splice(1, 0, { titre: "Les plus vus sur SosoBox", films: plusVus });
+
+  res.render("home", { fil, rangees: rangees.filter(r => r.films.length > 0) });
 });
 
 app.get("/search", async (req, res) => {
@@ -68,7 +83,21 @@ app.get("/search", async (req, res) => {
   const films = q && onglet === "films" ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
   const gens = q && onglet === "users" ? db.prepare("SELECT username FROM users WHERE username LIKE ? LIMIT 20").all("%" + q + "%") : [];
   const deja = fav ? db.prepare("SELECT film_id FROM favorites WHERE user_id = ?").all(req.session.userId).map(r => r.film_id) : [];
-  res.render("search", { q, films, gens, fav, deja, onglet });
+    let genres = [], tendances = [], genreChoisi = null, genreFilms = [];
+  if (!q) {
+    const [g, t] = await Promise.all([
+      tmdb("/genre/movie/list?language=fr-FR"),
+      tmdb("/trending/movie/week?language=fr-FR"),
+    ]);
+    const GENRES = [28, 35, 18, 27, 878];
+    genres = GENRES.map(id => g.genres.find(x => x.id === id)).filter(Boolean);
+    tendances = t.results;
+    genreChoisi = genres.find(x => x.id === Number(req.query.genre)) || null;
+    if (genreChoisi) {
+      genreFilms = (await tmdb("/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=" + genreChoisi.id)).results;
+    }
+  }
+  res.render("search", { q, onglet, fav, films, gens, genres, tendances, genreChoisi, genreFilms });
 });
 
 app.get("/films/:id", async (req, res) => {
