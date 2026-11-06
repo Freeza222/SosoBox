@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
+    <script src="/ciel.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -11,6 +12,13 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   </head>
   <body>
+  <div class="ciel" aria-hidden="true">
+  <div class="nebuleuse"><span></span><span></span><span></span></div>
+  <div class="couche petite" data-nombre="350"></div>
+  <div class="couche moyenne" data-nombre="120"></div>
+  <div class="couche grande" data-nombre="40"></div>
+  <span class="filante"></span><span class="filante"></span><span class="filante"></span>
+  </div>
     <header class="barre">
         <% if (chemin !== "/") { %>
             <button type="button" class="retour" aria-label="Retour" onclick="retour()">←</button>

@@ -1,5 +1,5 @@
 :root {
-  --fond: #502774;
+  --fond: #1f0f40;
   --carte: #2A1E4D;
   --accent: #5A3B8C;
   --lien: #8B7CC7;
@@ -9,7 +9,7 @@
 * { box-sizing: border-box; }
 
 body {
-  background: radial-gradient(ellipse at top, #5A3B8C66, transparent 60%) fixed, var(--fond);
+  background: #160a2e;
   color: var(--texte);
   font-family: system-ui, sans-serif;
   line-height: 1.5;
@@ -328,6 +328,57 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   pointer-events: none;
 }
 .verre h2 { margin: 0 0 .75rem; }
+
+
+/* ===== Ciel étoilé ===== */
+.ciel {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 120%, #3a1d6e 0%, #1f0f40 45%, #0d0620 100%);
+}
+.nebuleuse span { position: absolute; border-radius: 50%; filter: blur(80px); animation: derive 40s ease-in-out infinite alternate; }
+.nebuleuse span:nth-child(1) { width: 60vmax; height: 40vmax; top: -10%; left: -15%; background: #5A3B8C; opacity: .45; }
+.nebuleuse span:nth-child(2) { width: 50vmax; height: 35vmax; top: 30%; right: -20%; background: #7B2FB0; opacity: .35; animation-duration: 55s; animation-delay: -20s; }
+.nebuleuse span:nth-child(3) { width: 45vmax; height: 30vmax; bottom: -15%; left: 20%; background: #8B7CC7; opacity: .25; animation-duration: 48s; animation-delay: -10s; }
+@keyframes derive {
+  from { transform: translate(0, 0) scale(1) rotate(0deg); }
+  to   { transform: translate(8vw, 6vh) scale(1.15) rotate(12deg); }
+}
+
+.couche {
+  position: absolute; top: 0; left: 0; border-radius: 50%;
+  box-shadow: var(--etoiles);
+  animation: monte linear infinite, scintille ease-in-out infinite alternate;
+}
+.couche::after {
+  content: ""; position: absolute; top: 2000px; left: 0;
+  width: inherit; height: inherit; border-radius: 50%;
+  box-shadow: var(--etoiles);
+}
+.petite  { width: 1px; height: 1px; animation-duration: 200s, 3s; }
+.moyenne { width: 2px; height: 2px; animation-duration: 140s, 4.5s; animation-delay: 0s, -1s; }
+.grande  { width: 3px; height: 3px; animation-duration: 90s, 6s; animation-delay: 0s, -3s; filter: drop-shadow(0 0 3px #e0d0ff); }
+@keyframes monte { to { transform: translateY(-2000px); } }
+@keyframes scintille { from { opacity: .45; } to { opacity: 1; } }
+
+.filante {
+  position: absolute; width: 140px; height: 2px; border-radius: 999px; opacity: 0;
+  background: linear-gradient(90deg, #fff, rgba(224, 208, 255, .6) 30%, transparent);
+  filter: drop-shadow(0 0 6px #e0d0ff);
+  animation: file 11s ease-in infinite;
+}
+.filante:nth-of-type(1) { top: 8%;  left: 80%; }
+.filante:nth-of-type(2) { top: 25%; left: 55%; animation-delay: -4s; animation-duration: 14s; }
+.filante:nth-of-type(3) { top: 5%;  left: 35%; animation-delay: -8s; animation-duration: 17s; }
+@keyframes file {
+  0%   { opacity: 0; transform: rotate(-35deg) translateX(0); }
+  2%   { opacity: 1; }
+  8%   { opacity: 0; transform: rotate(-35deg) translateX(-600px); }
+  100% { opacity: 0; transform: rotate(-35deg) translateX(-600px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ciel *, .ciel *::after { animation: none !important; }
+}
 
 /* ===== Connexion / inscription ===== */
 .mur {
