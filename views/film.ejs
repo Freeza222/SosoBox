@@ -25,9 +25,13 @@
 <% if (user) { %>
   <div class="barre-film">
     <button type="button" onclick="document.getElementById('avis').showModal()"><%= monAvis ? "Modifier mon avis" : "Noter ce film" %></button>
-    <form method="post" action="/films/<%= film.id %>/favori">
-      <button class="secondaire"><%= favori ? "★ Retirer des favoris" : "☆ Ajouter aux favoris" %></button>
-    </form>
+      <% if (favori || nbFavoris < 4) { %>
+        <form method="post" action="/films/<%= film.id %>/favori">
+          <button class="secondaire"><%= favori ? "★ Retirer des favoris" : "☆ Ajouter aux favoris" %></button>
+        </form>
+      <% } else { %>
+        <a class="pilule" href="/u/<%= encodeURIComponent(user.username) %>">4 favoris max · gérer mes favoris</a>
+    <% } %>
     <form method="post" action="/films/<%= film.id %>/a-voir">
       <button class="secondaire"><%= aVoir ? "Déjà dans ma Watchlist" : "+ Watchlist" %></button>
     </form>

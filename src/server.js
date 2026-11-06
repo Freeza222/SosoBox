@@ -87,7 +87,8 @@ app.get("/films/:id", async (req, res) => {
   .get(req.session.userId, Number(req.params.id)));
   const monAvis = db.prepare("SELECT rating, body, watched_on FROM reviews WHERE user_id = ? AND film_id = ?")
   .get(req.session.userId, film.id);
-  res.render("film", { film, avis, moy, favori, aVoir, monAvis });
+  const nbFavoris = db.prepare("SELECT COUNT(*) AS n FROM favorites WHERE user_id = ?").get(req.session.userId).n;
+  res.render("film", { film, avis, moy, favori, aVoir, monAvis, nbFavoris });
 });
 
 app.use(["/login", "/register"], async (req, res, next) => {
