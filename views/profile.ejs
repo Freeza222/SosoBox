@@ -26,9 +26,29 @@
     <form method="post" action="/avatar" enctype="multipart/form-data">
       <label class="bouton">
         Changer ma photo
-        <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">
+          <input type="file" id="champ-photo" accept="image/jpeg,image/png,image/webp" hidden>
       </label>
     </form>
+      <script>
+        document.getElementById("champ-photo").addEventListener("change", async e => {
+        const fichier = e.target.files[0];
+        if (!fichier) return;
+
+        const image = await createImageBitmap(fichier, { imageOrientation: "from-image" });
+        const echelle = Math.min(1, 512 / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(image.width * echelle);
+        canvas.height = Math.round(image.height * echelle);
+        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        const jpeg = await new Promise(ok => canvas.toBlob(ok, "image/jpeg", 0.85));
+        const donnees = new FormData();
+        donnees.append("avatar", jpeg, "photo.jpg");
+        const reponse = await fetch("/avatar", { method: "POST", body: donnees });
+        if (!reponse.ok) alert("La photo n'a pas pu être envoyée.");
+        location.reload();
+      });
+  </script>
     <button type="button" class="secondaire" onclick="document.getElementById('pseudo').showModal()">Modifier mon profil</button>
   </div>
 
