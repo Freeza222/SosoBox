@@ -29,7 +29,6 @@ img { max-width: 100%; }
   align-items: center;
   gap: 1rem;
   padding: .8rem 0;
-  border-bottom: 1px solid var(--bordure);
   margin-bottom: 1.5rem;
 }
 .barre-gauche { grid-column: 1; grid-row: 1; justify-self: end; }
