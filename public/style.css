@@ -535,6 +535,9 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .gens a:hover { border-color: var(--lien); }
 .gens img { width: 44px; height: 44px; }
 
+/* ===== Rester connecté ===== */
+.carte-connexion .rester { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.carte-connexion .rester input { display: inline; width: auto; margin: 0; accent-color: var(--lien); }
 
 @media (max-width: 600px) {
   body { margin: 0 .6em; }

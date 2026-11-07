@@ -185,6 +185,7 @@ app.post("/login", async (req, res) => {
   }
   essais.delete(req.ip);
   req.session.userId = user.id;
+  if (req.body.rester) req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
   res.redirect("/");
 });
 
