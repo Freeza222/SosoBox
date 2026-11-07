@@ -17,7 +17,7 @@ C'est un projet perso, sans but commercial, que j'ai construit pour apprendre le
 
 Le tout marche aussi bien sur téléphone que sur ordinateur.
 
-## Sous le capot
+## En dessous
 
 Node.js, Express, EJS, SQLite et du CSS fait main. Les infos des films viennent de l'API TMDB.
 
