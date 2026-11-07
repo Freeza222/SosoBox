@@ -152,12 +152,23 @@ label { display: block; margin-bottom: .75rem; }
 dialog { background: var(--carte); color: var(--texte); border: 1px solid var(--bordure); border-radius: 12px; padding: 1.5rem; width: min(90vw, 640px); }
 dialog::backdrop { background: rgba(0, 0, 0, .6); }
 dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
-.notes { position: relative; display: flex; gap: .25rem; margin-bottom: 1rem; }
-.notes input { position: absolute; opacity: 0; }
-.notes label { flex: 1; text-align: center; margin: 0; padding: .4rem 0; border: 1px solid var(--bordure); border-radius: 999px; cursor: pointer; }
-.notes label:hover { border-color: var(--lien); }
-.notes input:checked + label { background: var(--accent); border-color: var(--accent); color: white; }
-.notes input:focus-visible + label { outline: 2px solid var(--lien); }
+.etoiles-note { display: inline-flex; flex-direction: row-reverse; margin-bottom: 1rem; }
+.etoiles-note input { position: absolute; opacity: 0; width: 0; height: 0; }
+.etoiles-note label { width: 20px; height: 40px; margin: 0; overflow: hidden; cursor: pointer; color: rgba(255, 255, 255, .22); transition: color .15s; }
+.etoiles-note svg { display: block; width: 40px; height: 40px; fill: currentColor; }
+.etoiles-note label.droite svg { margin-left: -20px; }
+.etoiles-note label.droite { margin-right: 6px; }
+
+/* la note choisie et tout ce qui est avant */
+.etoiles-note input:checked ~ label { color: var(--lien); }
+/* au survol : on montre la note qu'on s'apprête à donner */
+.etoiles-note:hover input ~ label { color: rgba(255, 255, 255, .22); }
+.etoiles-note:hover label:hover,
+.etoiles-note:hover label:hover ~ label { color: #ECE6FF; }
+/* navigation au clavier */
+.etoiles-note input:focus-visible + label { outline: 2px solid var(--lien); outline-offset: 2px; border-radius: 4px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1rem; }
 
 /* ===== Recherche ===== */
@@ -484,7 +495,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .rangee img { border-radius: 9px; }
 
   dialog { width: auto; max-width: 95vw; }
-  .notes { flex-wrap: wrap; }
 
   .profil-entete { margin-top: -50px; }
   .chiffres { width: 100%; justify-content: space-around; }
