@@ -821,7 +821,9 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 @media (prefers-reduced-motion: reduce) { .bande { animation: none; } }
 
 .hero-contenu { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; text-align: center; }
-.hero-bandes .logo-geant { position: static; transform: none; margin: 0; font-size: clamp(3.5rem, 10vw, 10rem); }
+.logo-bloc { display: flex; align-items: center; justify-content: center; gap: .3em; margin: 0; font-size: clamp(2.6rem, 7.5vw, 7.5rem); transform: translateX(-.15em); /* compense la pente de l'italique */ }
+.logo-icone { height: 1.25em; width: auto; filter: drop-shadow(0 12px 40px rgba(124, 58, 237, .55)); }
+.hero-bandes .logo-geant { position: static; transform: none; margin: 0; font-size: 1em; }
 .hero-contenu .recherche { width: min(560px, 100%); margin: 0; }
 
 @media (max-width: 600px) {
