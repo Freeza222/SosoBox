@@ -772,3 +772,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 }
 
 .sugg img.rond { width: 32px; height: 32px; border-radius: 50%; }
+
+/* ===== Rangées glissables à la souris ===== */
+.rangee { cursor: grab; }
+.rangee.tire { cursor: grabbing; user-select: none; }
+.rangee.tire img { transform: none; } /* pas d'effet de survol pendant qu'on tire */
