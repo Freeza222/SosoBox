@@ -133,7 +133,7 @@ app.get("/search", async (req, res) => {
         if (genreChoisi) {
       const url = "/discover/movie?language=fr-FR&sort_by=vote_count.desc&with_genres=" + genreChoisi.id + "&page=";
       const pages = await Promise.all([1, 2].map(p => tmdb(url + p).catch(() => null)));
-      genreFilms = pages.flatMap(d => (d ? d.results : [])).slice(0, 28);
+      genreFilms = pages.flatMap(d => (d ? d.results : [])).slice(0, 35);
     }
   }
   res.render("search", { q, onglet, fav, films, gens, genres, tendances, genreChoisi, genreFilms });
