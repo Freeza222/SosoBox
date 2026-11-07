@@ -476,14 +476,16 @@ app.post("/films/:id/a-voir", async (req, res) => {
 });
 
 app.get("/api/suggestions", async (req, res) => {
-  const q = (req.query.q || "").trim();
-  if (!q) return res.json([]);
-  const data = await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q));
+  const q = (req.query.q || "").trim().slice(0, 50);
+  if (!q) return res.json({ films: [], gens: [] });
+  const gens = db.prepare("SELECT username FROM users WHERE username LIKE ? ORDER BY length(username) LIMIT 3")
+    .all("%" + q + "%");
+  const data = await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => ({ results: [] }));
   const films = data.results
     .sort((a, b) => b.popularity - a.popularity)
     .slice(0, 3)
     .map(f => ({ id: f.id, title: f.title, year: (f.release_date || "").slice(0, 4), poster: f.poster_path }));
-  res.json(films);
+  res.json({ films, gens });
 });
 
 const PORT = process.env.PORT || 3000;

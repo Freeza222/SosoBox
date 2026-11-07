@@ -770,3 +770,5 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .ligne-genre { padding: 0 .75rem; gap: .5rem; }
   .ligne-genre b { font-size: 1.1rem; }
 }
+
+.sugg img.rond { width: 32px; height: 32px; border-radius: 50%; }
