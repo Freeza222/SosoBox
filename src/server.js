@@ -9,12 +9,42 @@ const session = require("express-session");
 const app = express();
 app.set("trust proxy", 1);
 
+// Sessions rangées dans SQLite : elles survivent aux redémarrages
+db.exec("CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NOT NULL, expire INTEGER NOT NULL)");
+db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now()); // ménage au démarrage
+
+class SqliteStore extends session.Store {
+  get(sid, cb) {
+    try {
+      const ligne = db.prepare("SELECT data FROM sessions WHERE sid = ? AND expire > ?").get(sid, Date.now());
+      cb(null, ligne ? JSON.parse(ligne.data) : null);
+    } catch (e) { cb(e); }
+  }
+  set(sid, sess, cb) {
+    try {
+      // cookie avec date : on garde jusqu'à cette date ; sinon 1 jour suffit
+      const expire = sess.cookie.expires ? new Date(sess.cookie.expires).getTime() : Date.now() + 24 * 60 * 60 * 1000;
+      db.prepare(`INSERT INTO sessions (sid, data, expire) VALUES (?, ?, ?)
+                  ON CONFLICT(sid) DO UPDATE SET data = excluded.data, expire = excluded.expire`)
+        .run(sid, JSON.stringify(sess), expire);
+      cb(null);
+    } catch (e) { cb(e); }
+  }
+  destroy(sid, cb) {
+    try {
+      db.prepare("DELETE FROM sessions WHERE sid = ?").run(sid);
+      cb(null);
+    } catch (e) { cb(e); }
+  }
+  touch(sid, sess, cb) { this.set(sid, sess, cb); } // prolonge la date quand tu reviens
+}
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(session({
+  store: new SqliteStore(),
   secret: process.env.SESSION_SECRET, cookie: { secure: process.env.NODE_ENV === "production", sameSite: "lax" },
   resave: false,
   saveUninitialized: false,
