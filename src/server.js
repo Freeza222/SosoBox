@@ -117,7 +117,21 @@ app.get("/films/:id", async (req, res) => {
   const monAvis = db.prepare("SELECT rating, body, watched_on FROM reviews WHERE user_id = ? AND film_id = ?")
   .get(req.session.userId, film.id);
   const nbFavoris = db.prepare("SELECT COUNT(*) AS n FROM favorites WHERE user_id = ?").get(req.session.userId).n;
-  res.render("film", { film, avis, moy, favori, aVoir, monAvis, nbFavoris });
+    const repartition = Array(11).fill(0); // cases 1 à 10 = demi-étoiles
+  for (const r of db.prepare("SELECT rating, COUNT(*) AS n FROM reviews WHERE film_id = ? GROUP BY rating").all(film.id)) {
+    repartition[r.rating] = r.n;
+  }
+  const maxRep = Math.max(1, ...repartition);
+
+  const amis = db.prepare(`
+    SELECT u.username, r.rating
+    FROM reviews r
+    JOIN follows fo ON fo.followed_id = r.user_id
+    JOIN users u ON u.id = r.user_id
+    WHERE fo.follower_id = ? AND r.film_id = ?
+    ORDER BY r.id DESC LIMIT 5
+  `).all(req.session.userId, film.id);
+  res.render("film", { film, avis, moy, favori, aVoir, monAvis, nbFavoris, repartition, maxRep, amis });
 });
 
 app.use(["/login", "/register"], async (req, res, next) => {
@@ -281,9 +295,12 @@ app.post("/avatar", (req, res) => {
 app.get("/u/:username", async (req, res) => {
   const profil = db.prepare("SELECT id, username, bio, avatar IS NOT NULL AS has_avatar FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
-  const avis = db.prepare(`SELECT f.id, f.title, f.year, f.poster_path, r.rating
-  FROM reviews r JOIN films f ON f.id = r.film_id
-  WHERE r.user_id = ? ORDER BY r.id DESC LIMIT 5`).all(profil.id);
+  const journal = db.prepare(`
+    SELECT f.id, f.title, f.poster_path, r.rating, r.watched_on
+    FROM reviews r JOIN films f ON f.id = r.film_id
+    WHERE r.user_id = ? AND r.watched_on IS NOT NULL AND r.watched_on != ''
+    ORDER BY r.watched_on DESC, r.id DESC LIMIT 12
+  `).all(profil.id);
   const total = db.prepare("SELECT COUNT(*) AS n FROM reviews WHERE user_id = ?").get(profil.id).n;
   const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
   const abonnes = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?").get(profil.id).n;

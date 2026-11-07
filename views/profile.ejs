@@ -22,33 +22,13 @@
 </p>
 
 <% if (user && user.id === profil.id) { %>
-  <div style="display: flex; flex-wrap: wrap; gap: .5rem">
+  <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem">
     <form method="post" action="/avatar" enctype="multipart/form-data">
       <label class="bouton">
         Changer ma photo
-          <input type="file" id="champ-photo" accept="image/jpeg,image/png,image/webp" hidden>
+        <input type="file" id="champ-photo" accept="image/jpeg,image/png,image/webp" hidden>
       </label>
     </form>
-      <script>
-        document.getElementById("champ-photo").addEventListener("change", async e => {
-        const fichier = e.target.files[0];
-        if (!fichier) return;
-
-        const image = await createImageBitmap(fichier, { imageOrientation: "from-image" });
-        const echelle = Math.min(1, 512 / Math.max(image.width, image.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(image.width * echelle);
-        canvas.height = Math.round(image.height * echelle);
-        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        const jpeg = await new Promise(ok => canvas.toBlob(ok, "image/jpeg", 0.85));
-        const donnees = new FormData();
-        donnees.append("avatar", jpeg, "photo.jpg");
-        const reponse = await fetch("/avatar", { method: "POST", body: donnees });
-        if (!reponse.ok) alert("La photo n'a pas pu être envoyée.");
-        location.reload();
-      });
-  </script>
     <button type="button" class="secondaire" onclick="document.getElementById('pseudo').showModal()">Modifier mon profil</button>
   </div>
 
@@ -63,101 +43,126 @@
       </div>
     </form>
   </dialog>
-
 <% } else if (user) { %>
-  <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow">
+  <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow" style="margin-bottom: 1.5rem">
     <button><%= suit ? "Ne plus suivre" : "Suivre" %></button>
   </form>
 <% } %>
 
-<h3>Films préférés</h3>
-<ul class="favoris">
-  <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
-    <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
-      <% if (f) { %>
-        <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
-        <% if (user && user.id === profil.id) { %>
-          <form method="post" action="/films/<%= f.id %>/favori">
-            <input type="hidden" name="retour" value="profil">
-            <button class="retirer" aria-label="Retirer <%= f.title %> des favoris">×</button>
-          </form>
-        <% } %>
-      <% } else if (user && user.id === profil.id && i === favoris.length) { %>
-        <a class="case-vide" href="/search?fav=1">+</a>
-      <% } else { %>
-        <span class="case-vide"></span>
+<div class="profil-grille">
+  <section class="verre">
+    <h2>Top 4</h2>
+    <ul class="favoris">
+      <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
+        <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
+          <% if (f) { %>
+            <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
+            <span class="rang" aria-hidden="true"><%= i + 1 %></span>
+            <% if (user && user.id === profil.id) { %>
+              <form method="post" action="/films/<%= f.id %>/favori">
+                <input type="hidden" name="retour" value="profil">
+                <button class="retirer" aria-label="Retirer <%= f.title %> des favoris">×</button>
+              </form>
+            <% } %>
+          <% } else if (user && user.id === profil.id && i === favoris.length) { %>
+            <a class="case-vide" href="/search?fav=1">+</a>
+          <% } else { %>
+            <span class="case-vide"></span>
+          <% } %>
+        </li>
       <% } %>
-    </li>
-  <% } %>
-</ul>
+    </ul>
+  </section>
 
-<h3>Derniers films vus</h3>
-<% if (avis.length === 0) { %><p>Aucun film noté pour l'instant.</p><% } %>
-
-<ul class="resultats">
-  <% for (const f of avis) { %>
-    <li>
-      <a href="/films/<%= f.id %>">
-        <% if (f.poster_path) { %>
-          <img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="">
+  <section class="verre">
+    <h2>Journal</h2>
+    <% if (journal.length === 0) { %>
+      <p>Rien pour l'instant. Remplis la date « Vu le » quand tu notes un film pour remplir le journal.</p>
+    <% } %>
+    <ol class="journal">
+      <% let moisPrecedent = ""; %>
+      <% for (const j of journal) { %>
+        <% const date = new Date(j.watched_on + "T12:00:00"); %>
+        <% const mois = date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }); %>
+        <% if (mois !== moisPrecedent) { moisPrecedent = mois; %>
+          <li class="journal-mois"><%= mois %></li>
         <% } %>
-        <span><%= f.title %> (<%= f.year || "" %>) · <%= f.rating / 2 %>/5</span>
-      </a>
-    </li>
-  <% } %>
-</ul>
+        <li class="journal-ligne">
+          <span class="journal-jour"><%= String(date.getDate()).padStart(2, "0") %></span>
+          <a href="/films/<%= j.id %>">
+            <% if (j.poster_path) { %><img src="https://image.tmdb.org/t/p/w92<%= j.poster_path %>" alt="" loading="lazy"><% } %>
+            <span class="titre"><%= j.title %></span>
+          </a>
+          <span class="etoiles"><%= "★".repeat(Math.floor(j.rating / 2)) + (j.rating % 2 ? "½" : "") %></span>
+        </li>
+      <% } %>
+    </ol>
+    <p style="margin-bottom: 0"><a href="/u/<%= encodeURIComponent(profil.username) %>/films">Tous les films vus</a></p>
+  </section>
+</div>
 
 <% if (user && user.id === profil.id) { %>
   <form method="post" action="/logout" style="margin-top: 2rem">
     <button class="secondaire">Déconnexion</button>
   </form>
 
-   <script>
+  <script>
+    // Photo de profil réduite avant l'envoi
+    document.getElementById("champ-photo").addEventListener("change", async e => {
+      const fichier = e.target.files[0];
+      if (!fichier) return;
+      const image = await createImageBitmap(fichier, { imageOrientation: "from-image" });
+      const echelle = Math.min(1, 512 / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(image.width * echelle);
+      canvas.height = Math.round(image.height * echelle);
+      canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+      const jpeg = await new Promise(ok => canvas.toBlob(ok, "image/jpeg", 0.85));
+      const donnees = new FormData();
+      donnees.append("avatar", jpeg, "photo.jpg");
+      const reponse = await fetch("/avatar", { method: "POST", body: donnees });
+      if (!reponse.ok) alert("La photo n'a pas pu être envoyée.");
+      location.reload();
+    });
+
+    // Favoris glissables (souris et doigt)
     const cases = [...document.querySelectorAll(".favoris li[data-film]")];
     let source = null, cible = null, bouge = false, x0 = 0, y0 = 0;
-
     function finir() {
       cases.forEach(c => c.classList.remove("glisse", "cible"));
       source = null;
     }
-
     cases.forEach(li => {
       li.addEventListener("pointerdown", e => {
-        if (e.target.closest(".retirer")) return; // laisse marcher le bouton ×
+        if (e.target.closest(".retirer")) return;
         source = li; cible = null; bouge = false;
         x0 = e.clientX; y0 = e.clientY;
         li.setPointerCapture(e.pointerId);
       });
-
       li.addEventListener("pointermove", e => {
         if (source !== li) return;
-        if (!bouge && Math.hypot(e.clientX - x0, e.clientY - y0) < 8) return; // simple clic
+        if (!bouge && Math.hypot(e.clientX - x0, e.clientY - y0) < 8) return;
         bouge = true;
         li.classList.add("glisse");
         const dessous = document.elementFromPoint(e.clientX, e.clientY);
         cible = dessous && dessous.closest(".favoris li[data-film]");
         cases.forEach(c => c.classList.toggle("cible", c === cible && c !== li));
       });
-
       li.addEventListener("pointerup", async () => {
         if (source !== li) return;
         const a = li, b = cible;
         finir();
         if (bouge && b && b !== a) {
-          await fetch("/favoris/echanger", {
-            method: "POST",
-            body: new URLSearchParams({ a: a.dataset.film, b: b.dataset.film }),
-          });
+          await fetch("/favoris/echanger", { method: "POST", body: new URLSearchParams({ a: a.dataset.film, b: b.dataset.film }) });
           location.reload();
         }
       });
-
       li.addEventListener("pointercancel", finir);
-      li.addEventListener("dragstart", e => e.preventDefault()); // coupe le glisser natif de l'image
-      li.addEventListener("click", e => { if (bouge) e.preventDefault(); }, true); // pas d'ouverture du film après un glisser
+      li.addEventListener("dragstart", e => e.preventDefault());
+      li.addEventListener("click", e => { if (bouge) e.preventDefault(); }, true);
     });
   </script>
 <% } %>
-
 </div>
+
 <%- include('partials/footer') %>
