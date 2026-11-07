@@ -363,7 +363,9 @@ app.post("/u/:username/follow", (req, res) => {
   if (del.changes === 0) {
     db.prepare("INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)").run(req.session.userId, cible.id);
   }
-  res.redirect("/u/" + encodeURIComponent(req.params.username));
+  const retour = req.body.retour || "";
+  const retourOk = /^\/u\/[^/]+\/(abonnes|abonnements)$/.test(retour); // liste blanche
+  res.redirect(retourOk ? retour : "/u/" + encodeURIComponent(req.params.username));
 });
 
 app.get("/u/:username/:liste", (req, res) => {
@@ -372,10 +374,20 @@ app.get("/u/:username/:liste", (req, res) => {
   const profil = db.prepare("SELECT id, username FROM users WHERE username = ?").get(username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
   const sql = liste === "abonnes"
-    ? "SELECT u.username FROM follows f JOIN users u ON u.id = f.follower_id WHERE f.followed_id = ? ORDER BY f.created_at DESC"
-    : "SELECT u.username FROM follows f JOIN users u ON u.id = f.followed_id WHERE f.follower_id = ? ORDER BY f.created_at DESC";
-  const gens = db.prepare(sql).all(profil.id);
-  res.render("people", { profil, liste, gens });
+    ? `SELECT u.id, u.username,
+         (SELECT COUNT(*) FROM reviews r WHERE r.user_id = u.id) AS films,
+         EXISTS (SELECT 1 FROM follows x WHERE x.follower_id = ? AND x.followed_id = u.id) AS suivi
+       FROM follows f JOIN users u ON u.id = f.follower_id
+       WHERE f.followed_id = ? ORDER BY f.created_at DESC`
+    : `SELECT u.id, u.username,
+         (SELECT COUNT(*) FROM reviews r WHERE r.user_id = u.id) AS films,
+         EXISTS (SELECT 1 FROM follows x WHERE x.follower_id = ? AND x.followed_id = u.id) AS suivi
+       FROM follows f JOIN users u ON u.id = f.followed_id
+       WHERE f.follower_id = ? ORDER BY f.created_at DESC`;
+  const gens = db.prepare(sql).all(req.session.userId ?? 0, profil.id); // 0 = pas connecté : suivi vaut 0
+  const nbAbonnes = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?").get(profil.id).n;
+  const nbAbonnements = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?").get(profil.id).n;
+  res.render("people", { profil, liste, gens, nbAbonnes, nbAbonnements });
 });
 
 app.post("/films/:id/favori", async (req, res) => {

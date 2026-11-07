@@ -1,12 +1,37 @@
 <%- include('partials/header') %>
 
-<h2><%= liste === "abonnes" ? "Abonnés" : "Abonnements" %> de <a href="/u/<%= encodeURIComponent(profil.username) %>"><%= profil.username %></a></h2>
+<div class="etroit gens-page">
+  <a class="gens-moi" href="/u/<%= encodeURIComponent(profil.username) %>">
+    <img src="/u/<%= encodeURIComponent(profil.username) %>/avatar" alt="">
+    <span><%= profil.username %></span>
+  </a>
 
-<% if (gens.length === 0) { %><p>Personne pour l'instant.</p><% } %>
-<ul>
-  <% for (const g of gens) { %>
-    <li><a href="/u/<%= encodeURIComponent(g.username) %>"><%= g.username %></a></li>
+  <nav class="bascule" aria-label="Abonnés ou abonnements">
+    <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"
+       class="<%= liste === 'abonnes' ? 'actif' : '' %>" <%- liste === "abonnes" ? 'aria-current="page"' : "" %>>Abonnés · <%= nbAbonnes %></a>
+    <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"
+       class="<%= liste === 'abonnements' ? 'actif' : '' %>" <%- liste === "abonnements" ? 'aria-current="page"' : "" %>>Abonnements · <%= nbAbonnements %></a>
+  </nav>
+
+  <% if (gens.length === 0) { %>
+    <p class="gens-vide"><%= liste === "abonnes" ? "Personne ne suit encore ce profil." : "Ce profil ne suit encore personne." %></p>
   <% } %>
-</ul>
+
+  <ul class="cercles">
+    <% for (const p of gens) { const lien = "/u/" + encodeURIComponent(p.username); %>
+      <li>
+        <a href="<%= lien %>" aria-label="Profil de <%= p.username %>"><img src="<%= lien %>/avatar" alt="" loading="lazy"></a>
+        <a class="nom" href="<%= lien %>"><%= p.username %></a>
+        <small><%= p.films %> film<%= p.films > 1 ? "s" : "" %></small>
+        <% if (user && user.id !== p.id) { %>
+          <form method="post" action="<%= lien %>/follow">
+            <input type="hidden" name="retour" value="/u/<%= encodeURIComponent(profil.username) %>/<%= liste %>">
+            <button class="<%= p.suivi ? 'secondaire' : '' %>"><%= p.suivi ? "Suivi" : "Suivre" %></button>
+          </form>
+        <% } %>
+      </li>
+    <% } %>
+  </ul>
+</div>
 
 <%- include('partials/footer') %>

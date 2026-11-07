@@ -698,3 +698,27 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   background: linear-gradient(100deg, var(--carte) 30%, #3d2e6b 50%, var(--carte) 70%) 0 0 / 300% 100%;
   background: var(--carte);
 }
+
+/* ===== Abonnés / abonnements ===== */
+.gens-page { display: flex; flex-direction: column; align-items: center; gap: 1.8rem; }
+.gens-moi { display: flex; flex-direction: column; align-items: center; gap: .5rem; font-size: 1.6rem; font-weight: 800; color: #ECE6FF; text-decoration: none; }
+.gens-moi img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--lien); }
+
+.bascule { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12); }
+.bascule a { display: inline-flex; align-items: center; height: 40px; padding: 0 20px; border-radius: 999px; font-weight: 600; color: #A99CDB; text-decoration: none; }
+.bascule a.actif { background: var(--lien); color: var(--fond); }
+
+.gens-vide { color: #A99CDB; }
+.cercles { list-style: none; padding: 0; margin: 0; width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 2.5rem 1.5rem; }
+.cercles li { display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center; }
+.cercles img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: 0 14px 30px rgba(0, 0, 0, .5); transition: transform .2s; }
+.cercles a:hover img { transform: translateY(-4px); }
+.cercles .nom { font-weight: 700; color: #ECE6FF; text-decoration: none; }
+.cercles small { margin-top: -.4rem; color: #A99CDB; }
+.cercles form { margin: 0; }
+.cercles button { padding: .4rem 1.1rem; font-size: .85rem; }
+
+@media (max-width: 600px) {
+  .cercles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem .75rem; }
+  .cercles img { width: 84px; height: 84px; }
+}
