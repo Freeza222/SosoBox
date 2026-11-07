@@ -80,8 +80,10 @@ img { max-width: 100%; }
   border-radius: 50%;
   background: var(--carte);
   color: var(--texte);
-  font-size: 1.2rem; line-height: 1;
+  display: grid; place-items: center;
 }
+.retour svg { display: block; transition: transform .2s; }
+.retour:hover svg { transform: translateX(-2px); }
 .retour:hover { background: var(--accent); color: white; }
 .dock { display: none; }
 
