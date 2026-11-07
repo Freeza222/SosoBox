@@ -92,11 +92,14 @@ app.get("/", async (req, res) => {
     ["Science-Fiction", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=878"],
     ["Animation", "/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=16"],
   ];
-
+  const promesseClassiques = tmdb("/discover/movie?language=fr-FR&sort_by=vote_count.desc").catch(() => null);
   const rangees = await Promise.all(RANGEES.map(async ([titre, chemin]) => {
     const data = await tmdb(chemin).catch(() => null);
     return { titre, films: data ? data.results : [] };
   }));
+  const affiches = films => films.filter(f => f.poster_path).map(f => f.poster_path);
+  const bandeHaut = affiches(rangees[0].films);                          // tendances de la semaine
+  const bandeBas = affiches(((await promesseClassiques) || {}).results || []); // classiques
 
   const plusVus = db.prepare(`
     SELECT f.id, f.title, f.poster_path, COUNT(*) AS n
@@ -105,7 +108,7 @@ app.get("/", async (req, res) => {
   `).all();
   if (plusVus.length > 0) rangees.splice(1, 0, { titre: "Les plus vus sur SosoBox", films: plusVus });
 
-  res.render("home", { fil, rangees: rangees.filter(r => r.films.length > 0) });
+  res.render("home", { fil, rangees: rangees.filter(r => r.films.length > 0), bandeHaut, bandeBas });
 });
 
 app.get("/search", async (req, res) => {

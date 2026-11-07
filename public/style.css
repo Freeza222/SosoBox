@@ -471,7 +471,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   color: rgba(236, 230, 255, .9);
   text-shadow: 0 10px 60px rgba(139, 124, 199, .5);
 }
-.espace-logo { height: 55vh; }
 
 /* ===== Connexion / inscription ===== */
 .mur {
@@ -801,3 +800,31 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   text-shadow: 0 0 2px #0d0620, 0 2px 14px rgba(13, 6, 32, .95);
 }
 .accueil h2 { color: #ffffff; }
+
+/* ===== Accueil : logo entre deux bandes d'affiches qui défilent ===== */
+.hero-bandes { display: flex; flex-direction: column; gap: 2rem; padding: 2rem 0 3rem; overflow: clip; }
+
+.bande-cadre {
+  transform: rotate(-3deg) scale(1.05);
+  overflow: hidden;
+  /* les bords s'effacent au lieu de couper net */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.bande { display: flex; gap: 14px; width: max-content; will-change: transform; }
+.bande img { width: 118px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 10px; box-shadow: 0 10px 24px rgba(0, 0, 0, .4); filter: saturate(.7) brightness(.85); }
+
+/* décalage d'une moitié exacte (+ un demi-écart) : la 2e copie prend la place de la 1re */
+@keyframes defile { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 7px)); } }
+.vers-gauche { animation: defile 80s linear infinite; }
+.vers-droite { animation: defile 80s linear infinite reverse; }
+@media (prefers-reduced-motion: reduce) { .bande { animation: none; } }
+
+.hero-contenu { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; text-align: center; }
+.hero-bandes .logo-geant { position: static; transform: none; margin: 0; font-size: clamp(3.5rem, 10vw, 10rem); }
+.hero-contenu .recherche { width: min(560px, 100%); margin: 0; }
+
+@media (max-width: 600px) {
+  .bande img { width: 84px; }
+  .hero-bandes { gap: 1.2rem; padding: 1rem 0 2rem; }
+}

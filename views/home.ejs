@@ -1,6 +1,26 @@
 <%- include('partials/header') %>
 
-<div class="espace-logo"></div>
+<section class="hero-bandes">
+  <div class="bande-cadre" aria-hidden="true">
+    <div class="bande vers-gauche">
+      <% for (const p of [...bandeHaut, ...bandeHaut]) { %><img src="https://image.tmdb.org/t/p/w185<%= p %>" alt=""><% } %>
+    </div>
+  </div>
+
+  <div class="hero-contenu">
+    <h1 class="logo-geant">SosoBox</h1>
+    <form class="recherche" action="/search" role="search">
+      <input name="q" placeholder="Un film, un ami…" aria-label="Rechercher">
+      <button>Chercher</button>
+    </form>
+  </div>
+
+  <div class="bande-cadre" aria-hidden="true">
+    <div class="bande vers-droite">
+      <% for (const p of [...bandeBas, ...bandeBas]) { %><img src="https://image.tmdb.org/t/p/w185<%= p %>" alt=""><% } %>
+    </div>
+  </div>
+</section>
 <div class="<%= user ? 'accueil' : '' %>">
   <% if (user) { %>
     <aside class="accueil-fil">
