@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Playfair SosoBox";
+  src: url("/fonts/playfair-italic-900.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+}
+
 :root {
   --fond: #1f0f40;
   --carte: #2A1E4D;
@@ -425,8 +433,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .logo-geant {
   position: absolute; left: 50%; top: 45%;
   transform: translate(-50%, -50%);
-  font: 900 clamp(4rem, 17vw, 15rem)/1 system-ui, sans-serif;
-  letter-spacing: -.04em;
+  font: italic 900 clamp(4rem, 10vw, 16rem)/1 "Playfair SosoBox", Georgia, serif;
+  letter-spacing: -.02em;
   white-space: nowrap;
   color: rgba(236, 230, 255, .9);
   text-shadow: 0 10px 60px rgba(139, 124, 199, .5);
