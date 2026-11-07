@@ -121,15 +121,19 @@ app.get("/search", async (req, res) => {
       tmdb("/trending/movie/week?language=fr-FR"),
     ]);
     const GENRES = [28, 35, 18, 27, 878, 16];
-      genres = GENRES.map(id => g.genres.find(x => x.id === id)).filter(Boolean)
-      .map(x => ({
-        ...x,
-        affiches: t.results.filter(f => f.genre_ids.includes(x.id) && f.poster_path).slice(0, 3).map(f => f.poster_path),
-      }));
+    genres = await Promise.all(
+      GENRES.map(id => g.genres.find(x => x.id === id)).filter(Boolean).map(async x => {
+        const d = await tmdb("/discover/movie?language=fr-FR&sort_by=vote_count.desc&with_genres=" + x.id).catch(() => null); // les plus votés = les classiques
+        const affiches = d ? d.results.filter(f => f.poster_path).slice(0, 3).map(f => f.poster_path) : [];
+        return { ...x, affiches };
+      })
+    );
     tendances = t.results;
     genreChoisi = genres.find(x => x.id === Number(req.query.genre)) || null;
-    if (genreChoisi) {
-      genreFilms = (await tmdb("/discover/movie?language=fr-FR&sort_by=popularity.desc&with_genres=" + genreChoisi.id)).results;
+        if (genreChoisi) {
+      const url = "/discover/movie?language=fr-FR&sort_by=vote_count.desc&with_genres=" + genreChoisi.id + "&page=";
+      const pages = await Promise.all([1, 2].map(p => tmdb(url + p).catch(() => null)));
+      genreFilms = pages.flatMap(d => (d ? d.results : [])).slice(0, 28);
     }
   }
   res.render("search", { q, onglet, fav, films, gens, genres, tendances, genreChoisi, genreFilms });
