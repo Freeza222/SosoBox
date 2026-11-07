@@ -1,4 +1,5 @@
 async function tmdb(chemin) {
+  chemin += (chemin.includes("?") ? "&" : "?") + "include_adult=false";
   const r = await fetch("https://api.themoviedb.org/3" + chemin, {
     headers: { Authorization: `Bearer ${process.env.TMDB_TOKEN}` },
   });

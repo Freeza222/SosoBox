@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<div class="etroit">
+  <h1 class="etiquette">Affiche de <%= fav.title %></h1>
+  <% if (affiches.length === 0) { %><p>Aucune autre affiche trouvée pour ce film.</p><% } %>
+  <ul class="choix-affiches">
+    <% for (const a of affiches) { %>
+      <li>
+        <form method="post" action="/favoris/<%= fav.id %>/affiche">
+          <input type="hidden" name="poster" value="<%= a %>">
+          <button class="<%= a === fav.actuelle ? 'choisie' : '' %>" aria-label="Choisir cette affiche">
+            <img src="https://image.tmdb.org/t/p/w185<%= a %>" alt="" loading="lazy">
+          </button>
+        </form>
+      </li>
+    <% } %>
+  </ul>
+</div>
+
+<%- include('partials/footer') %>

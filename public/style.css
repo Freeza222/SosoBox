@@ -724,3 +724,28 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .cercles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem .75rem; }
   .cercles img { width: 84px; height: 84px; }
 }
+
+/* ===== Changer l'affiche d'un favori ===== */
+.changer {
+  position: absolute; top: 6px; left: 6px;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(14, 11, 29, .8);
+  color: var(--texte);
+}
+.changer:hover { background: var(--accent); }
+.changer svg { width: 14px; height: 14px; }
+
+.choix-affiches { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
+.choix-affiches form { margin: 0; }
+.choix-affiches button {
+  display: block; width: 100%; padding: 0;
+  background: none;
+  border: 3px solid transparent; border-radius: 10px;
+  overflow: hidden;
+  transition: transform .2s, border-color .2s;
+}
+.choix-affiches button:hover { background: none; border-color: var(--lien); transform: translateY(-4px); }
+.choix-affiches .choisie { border-color: var(--lien); box-shadow: 0 0 24px rgba(139, 124, 199, .5); }
+.choix-affiches img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }

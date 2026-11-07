@@ -11,6 +11,7 @@ app.set("trust proxy", 1);
 
 // Sessions rangées dans SQLite : elles survivent aux redémarrages
 db.exec("CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NOT NULL, expire INTEGER NOT NULL)");
+try { db.exec("ALTER TABLE favorites ADD COLUMN poster_path TEXT"); } catch {} // affiche choisie, NULL = celle par défaut
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now()); // ménage au démarrage
 
 class SqliteStore extends session.Store {
@@ -137,6 +138,7 @@ app.get("/films/:id", async (req, res) => {
   } catch {
     return res.status(404).send("Film introuvable");
   }
+  if (film.adult) return res.status(404).send("Film introuvable");
   const avis = db.prepare(`SELECT u.username, r.rating, r.body, r.watched_on
     FROM reviews r JOIN users u ON u.id = r.user_id
     WHERE r.film_id = ? ORDER BY r.id DESC`).all(film.id);
@@ -336,7 +338,7 @@ app.get("/u/:username", async (req, res) => {
   const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
   const abonnes = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?").get(profil.id).n;
   const abonnements = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?").get(profil.id).n;
-  const favoris = db.prepare(`SELECT f.id, f.title, f.poster_path FROM favorites fa
+  const favoris = db.prepare(`SELECT f.id, f.title, COALESCE(fa.poster_path, f.poster_path) AS poster_path FROM favorites fa
   JOIN films f ON f.id = fa.film_id WHERE fa.user_id = ? ORDER BY fa.id`).all(profil.id);
 
   let banniere = null;
@@ -424,6 +426,27 @@ app.post("/favoris/echanger", (req, res) => {
     changerId.run(b.id, -a.id); // b = tmp
   })();
   res.end();
+});
+
+app.get("/favoris/:id/affiche", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const id = Number(req.params.id);
+  const fav = db.prepare(`SELECT f.id, f.title, COALESCE(fa.poster_path, f.poster_path) AS actuelle
+    FROM favorites fa JOIN films f ON f.id = fa.film_id
+    WHERE fa.user_id = ? AND fa.film_id = ?`).get(req.session.userId, id);
+  if (!fav) return res.status(404).send("Ce film n'est pas dans ton top 4");
+  const data = await tmdb("/movie/" + id + "/images?include_image_language=fr,en,null").catch(() => null);
+  const affiches = data ? data.posters.slice(0, 40).map(p => p.file_path) : [];
+  res.render("affiche", { fav, affiches });
+});
+
+app.post("/favoris/:id/affiche", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const poster = req.body.poster || "";
+  if (!/^\/[A-Za-z0-9]+\.(jpg|png)$/.test(poster)) return res.status(400).send("Affiche invalide");
+  db.prepare("UPDATE favorites SET poster_path = ? WHERE user_id = ? AND film_id = ?")
+    .run(poster, req.session.userId, Number(req.params.id));
+  res.redirect("/u/" + encodeURIComponent(res.locals.user.username));
 });
 
 app.post("/films/:id/a-voir", async (req, res) => {

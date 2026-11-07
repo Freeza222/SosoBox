@@ -54,6 +54,7 @@
             <% if (f) { %>
               <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
               <% if (user && user.id === profil.id) { %>
+                <a class="changer" href="/favoris/<%= f.id %>/affiche" aria-label="Changer l'affiche de <%= f.title %>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></a>
                 <form method="post" action="/films/<%= f.id %>/favori">
                   <input type="hidden" name="retour" value="profil">
                   <button class="retirer" aria-label="Retirer <%= f.title %> des favoris">×</button>
@@ -120,7 +121,6 @@
   </form>
 
   <script>
-    // Photo de profil réduite avant l'envoi
     document.getElementById("champ-photo").addEventListener("change", async e => {
       const fichier = e.target.files[0];
       if (!fichier) return;
@@ -138,7 +138,6 @@
       location.reload();
     });
 
-    // Favoris glissables (souris et doigt)
     const cases = [...document.querySelectorAll(".favoris li[data-film]")];
     let source = null, cible = null, bouge = false, x0 = 0, y0 = 0;
     function finir() {
@@ -147,7 +146,7 @@
     }
     cases.forEach(li => {
       li.addEventListener("pointerdown", e => {
-        if (e.target.closest(".retirer")) return;
+        if (e.target.closest(".retirer, .changer")) return;
         source = li; cible = null; bouge = false;
         x0 = e.clientX; y0 = e.clientY;
         li.setPointerCapture(e.pointerId);
