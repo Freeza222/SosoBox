@@ -793,7 +793,11 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .admin-avis li { padding: .75rem 0; border-bottom: 1px solid rgba(201, 194, 227, .12); }
 .admin-avis p { margin: .3rem 0 0; color: var(--lien); }
 
-.admin form { margin: 0; }
-.admin-avis form { margin-top: .4rem; }
-.danger { padding: .25rem .8rem; font-size: .8rem; background: #8c2b3b; }
-.danger:hover { background: #c0394f; color: white; }
+/* ===== Accueil : le texte passe devant le logo géant sans se confondre ===== */
+.accueil h2,
+.accueil .avis-par,
+.accueil .fil a,
+.accueil .avis-critique {
+  text-shadow: 0 0 2px #0d0620, 0 2px 14px rgba(13, 6, 32, .95);
+}
+.accueil h2 { color: #ffffff; }
