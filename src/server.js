@@ -11,8 +11,9 @@ app.set("trust proxy", 1);
 
 // Sessions rangées dans SQLite : elles survivent aux redémarrages
 db.exec("CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NOT NULL, expire INTEGER NOT NULL)");
-try { db.exec("ALTER TABLE favorites ADD COLUMN poster_path TEXT"); } catch {} // affiche choisie, NULL = celle par défaut
-db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now()); // ménage au démarrage
+try { db.exec("ALTER TABLE favorites ADD COLUMN poster_path TEXT"); } catch {}
+try { db.exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"); } catch {}
+db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
 class SqliteStore extends session.Store {
   get(sid, cb) {
@@ -53,7 +54,7 @@ app.use(session({
 
 app.use((req, res, next) => {
   res.locals.user = req.session.userId
-    ? db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar FROM users WHERE id = ?").get(req.session.userId) || null
+    ? db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar, is_admin FROM users WHERE id = ?").get(req.session.userId) || null
     : null;
     res.locals.chemin = req.path;
   next();
@@ -488,5 +489,23 @@ app.get("/api/suggestions", async (req, res) => {
   res.json({ films, gens });
 });
 
+function estAdmin(req, res, next) {
+  if (!res.locals.user || !res.locals.user.is_admin) return res.status(404).send("Page introuvable");
+  next();
+}
+
+app.get("/admin", estAdmin, (req, res) => {
+  const chiffres = db.prepare(`SELECT
+    (SELECT COUNT(*) FROM users)   AS membres,
+    (SELECT COUNT(*) FROM reviews) AS notes,
+    (SELECT COUNT(*) FROM follows) AS abonnements`).get();
+  const membres = db.prepare(`SELECT u.id, u.username, u.email, u.is_admin,
+      (SELECT COUNT(*) FROM reviews r WHERE r.user_id = u.id) AS notes
+    FROM users u ORDER BY u.id DESC`).all();
+  const avis = db.prepare(`SELECT r.id, u.username, f.title, r.rating, r.body
+    FROM reviews r JOIN users u ON u.id = r.user_id JOIN films f ON f.id = r.film_id
+    ORDER BY r.id DESC LIMIT 30`).all();
+  res.render("admin", { chiffres, membres, avis });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Serveur lancé sur http://localhost:" + PORT));

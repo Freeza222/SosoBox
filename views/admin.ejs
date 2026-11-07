@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<div class="etroit admin">
+  <h1>Administration</h1>
+
+  <div class="admin-chiffres">
+    <div><b><%= chiffres.membres %></b>membres</div>
+    <div><b><%= chiffres.notes %></b>notes</div>
+    <div><b><%= chiffres.abonnements %></b>abonnements</div>
+  </div>
+
+  <h2 class="etiquette">Membres</h2>
+  <div class="admin-table">
+    <table>
+      <thead><tr><th>Pseudo</th><th>E-mail</th><th>Notes</th></tr></thead>
+      <tbody>
+        <% for (const m of membres) { %>
+          <tr>
+            <td><a href="/u/<%= encodeURIComponent(m.username) %>"><%= m.username %></a><% if (m.is_admin) { %> <small>admin</small><% } %></td>
+            <td><%= m.email %></td>
+            <td><%= m.notes %></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="etiquette">Derniers avis</h2>
+  <ul class="admin-avis">
+    <% for (const a of avis) { %>
+      <li>
+        <b><%= a.username %></b> sur <i><%= a.title %></i> · <%= "★".repeat(Math.floor(a.rating / 2)) + (a.rating % 2 ? "½" : "") %>
+        <% if (a.body) { %><p><%= a.body %></p><% } %>
+      </li>
+    <% } %>
+  </ul>
+</div>
+
+<%- include('partials/footer') %>

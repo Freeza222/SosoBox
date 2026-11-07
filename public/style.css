@@ -776,4 +776,19 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 /* ===== Rangées glissables à la souris ===== */
 .rangee { cursor: grab; }
 .rangee.tire { cursor: grabbing; user-select: none; }
-.rangee.tire img { transform: none; } /* pas d'effet de survol pendant qu'on tire */
+.rangee.tire img { transform: none; }
+
+/* ===== Administration ===== */
+.admin-chiffres { display: flex; gap: 2.5rem; margin: 1rem 0 2rem; }
+.admin-chiffres div { color: var(--lien); font-size: .85rem; }
+.admin-chiffres b { display: block; font-size: 2rem; color: #ECE6FF; }
+
+.admin-table { overflow-x: auto; margin-bottom: 2rem; } /* sur téléphone, le tableau défile au lieu de déborder */
+.admin table { width: 100%; border-collapse: collapse; }
+.admin th { text-align: left; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lien); }
+.admin th, .admin td { padding: .6rem .5rem; border-bottom: 1px solid rgba(201, 194, 227, .12); white-space: nowrap; }
+.admin td small { padding: .1rem .5rem; border-radius: 999px; background: var(--accent); color: #ECE6FF; }
+
+.admin-avis { list-style: none; padding: 0; }
+.admin-avis li { padding: .75rem 0; border-bottom: 1px solid rgba(201, 194, 227, .12); }
+.admin-avis p { margin: .3rem 0 0; color: var(--lien); }
