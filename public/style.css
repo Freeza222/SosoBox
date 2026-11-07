@@ -75,6 +75,7 @@ img { max-width: 100%; }
   font-size: 1.2rem; line-height: 1;
 }
 .retour:hover { background: var(--accent); color: white; }
+.dock { display: none; }
 
 /* ===== Boutons et formulaires ===== */
 button, .bouton {
@@ -483,8 +484,36 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 @media (max-width: 600px) {
   body { margin: 0 .6em; }
 
-  .barre .compte { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
-  .barre .retour { grid-row: 2; }
+    /* barre du haut réduite au logo (et au retour) */
+  .barre .barre-gauche, .barre .barre-droite, .barre .compte { display: none; }
+
+  /* dock en bas de l'écran */
+  body { padding-bottom: 6rem; }
+  .dock {
+    display: flex; gap: 4px;
+    position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 20;
+    padding: 6px;
+    border-radius: 26px;
+    background: rgba(20, 10, 45, .35);
+    border: 1px solid rgba(255, 255, 255, .14);
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .35), 0 10px 30px rgba(0, 0, 0, .5);
+  }
+  .dock a {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 8px 0;
+    border-radius: 20px;
+    font-size: .7rem; font-weight: 600;
+    color: var(--texte); text-decoration: none;
+  }
+  .dock a.actif {
+    background: linear-gradient(135deg, rgba(139, 124, 199, .55), rgba(90, 59, 140, .55));
+    color: #ECE6FF;
+  }
+  .dock svg { width: 22px; height: 22px; }
+  .dock-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
   .logo { font-size: 1.1rem; gap: .3rem; }
   .logo img { width: 24px; height: 24px; }
 
@@ -510,7 +539,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .verre h2 { font-size: 1rem; margin-bottom: .5rem; }
 
   .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
-  .barre { border-radius: 24px; }
 }
 
 /* ===== Grand écran ===== */
