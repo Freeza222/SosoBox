@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const { tmdb } = require("./tmdb");
 const session = require("express-session");
 const app = express();
-app.set("trust proxy", 1); // le proxy HTTPS de l'hébergeur est devant nous
+app.set("trust proxy", 1);
 
 
 app.set("view engine", "ejs");

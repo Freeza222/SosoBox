@@ -685,3 +685,21 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .profil-grille { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; }
   .profil-journal { border-left: 1px solid rgba(201, 194, 227, .18); padding-left: 3rem; }
 }
+
+/* ===== Affiches fantômes pendant le chargement ===== */
+.rangee img,
+.resultats img,
+.favoris img,
+.mur-affiches img {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: linear-gradient(100deg, var(--carte) 30%, #3d2e6b 50%, var(--carte) 70%) 0 0 / 300% 100%;
+  animation: reflet 1.4s ease-in-out infinite;
+}
+@keyframes reflet {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rangee img, .resultats img, .favoris img, .mur-affiches img { animation: none; }
+}
