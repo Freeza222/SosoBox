@@ -697,12 +697,5 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   aspect-ratio: 2 / 3;
   object-fit: cover;
   background: linear-gradient(100deg, var(--carte) 30%, #3d2e6b 50%, var(--carte) 70%) 0 0 / 300% 100%;
-  animation: reflet 1.4s ease-in-out infinite;
-}
-@keyframes reflet {
-  from { background-position: 100% 0; }
-  to   { background-position: 0 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rangee img, .resultats img, .favoris img, .mur-affiches img { animation: none; }
+  background: var(--carte);
 }
