@@ -507,5 +507,26 @@ app.get("/admin", estAdmin, (req, res) => {
     ORDER BY r.id DESC LIMIT 30`).all();
   res.render("admin", { chiffres, membres, avis });
 });
+
+app.post("/admin/membres/:id/supprimer", estAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const cible = db.prepare("SELECT id, is_admin FROM users WHERE id = ?").get(id);
+  if (!cible || cible.is_admin) return res.status(400).send("Impossible de supprimer ce compte");
+  db.transaction(() => {
+    db.prepare("DELETE FROM reviews   WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM favorites WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM watchlist WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM follows   WHERE follower_id = ? OR followed_id = ?").run(id, id);
+    db.prepare("DELETE FROM sessions  WHERE json_extract(data, '$.userId') = ?").run(id); // le déconnecte partout
+    db.prepare("DELETE FROM users     WHERE id = ?").run(id);
+  })();
+  res.redirect("/admin");
+});
+
+app.post("/admin/avis/:id/supprimer", estAdmin, (req, res) => {
+  db.prepare("DELETE FROM reviews WHERE id = ?").run(Number(req.params.id));
+  res.redirect("/admin");
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Serveur lancé sur http://localhost:" + PORT));

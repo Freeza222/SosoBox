@@ -12,13 +12,22 @@
   <h2 class="etiquette">Membres</h2>
   <div class="admin-table">
     <table>
-      <thead><tr><th>Pseudo</th><th>E-mail</th><th>Notes</th></tr></thead>
+    <thead><tr><th>Pseudo</th><th>E-mail</th><th>Notes</th><th></th></tr></thead>
       <tbody>
         <% for (const m of membres) { %>
           <tr>
             <td><a href="/u/<%= encodeURIComponent(m.username) %>"><%= m.username %></a><% if (m.is_admin) { %> <small>admin</small><% } %></td>
             <td><%= m.email %></td>
             <td><%= m.notes %></td>
+                        <td>
+              <% if (!m.is_admin) { %>
+                <form method="post" action="/admin/membres/<%= m.id %>/supprimer"
+                      data-nom="<%= m.username %>"
+                      onsubmit="return confirm('Supprimer ' + this.dataset.nom + ' et toutes ses notes ?')">
+                  <button class="danger">Supprimer</button>
+                </form>
+              <% } %>
+            </td>
           </tr>
         <% } %>
       </tbody>
@@ -28,6 +37,9 @@
   <h2 class="etiquette">Derniers avis</h2>
   <ul class="admin-avis">
     <% for (const a of avis) { %>
+        <form method="post" action="/admin/avis/<%= a.id %>/supprimer" onsubmit="return confirm('Retirer cet avis ?')">
+        <button class="danger">Retirer</button>
+        </form>
       <li>
         <b><%= a.username %></b> sur <i><%= a.title %></i> · <%= "★".repeat(Math.floor(a.rating / 2)) + (a.rating % 2 ? "½" : "") %>
         <% if (a.body) { %><p><%= a.body %></p><% } %>
