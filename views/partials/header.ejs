@@ -18,16 +18,19 @@
   <div class="couche moyenne" data-nombre="120"></div>
   <div class="couche grande" data-nombre="40"></div>
   <span class="filante"></span><span class="filante"></span><span class="filante"></span>
+    <% if (chemin === "/") { %>
+    <div class="logo-geant">SOSOBOX</div>
+  <% } %>
   </div>
     <header class="barre">
         <% if (chemin !== "/") { %>
             <button type="button" class="retour" aria-label="Retour" onclick="retour()">←</button>
         <% } %>
-  <div class="barre-gauche"><a class="pilule" href="/">Accueil</a></div>
+  <div class="barre-gauche"><a class="pilule <%= chemin === '/' ? 'actif' : '' %>" href="/">Accueil</a></div>
 
   <a class="logo" href="/"><img src="/logo-dark.svg" alt="" width="36" height="36"> SosoBox</a>
 
-  <div class="barre-droite"><a class="pilule" href="/search">Rechercher</a></div>
+  <div class="barre-droite"><a class="pilule <%= chemin.startsWith('/search') ? 'actif' : '' %>" href="/search">Rechercher</a></div>
 
   <div class="compte">
     <% if (user) { %>

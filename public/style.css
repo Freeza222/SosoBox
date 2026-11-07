@@ -24,16 +24,32 @@ img { max-width: 100%; }
 
 /* ===== Barre du haut ===== */
 .barre {
+  position: sticky; top: 12px; z-index: 10;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 1rem;
-  padding: .8rem 0;
-  margin-bottom: 1.5rem;
+  gap: .6rem;
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+  padding: .4rem .5rem;
+  border-radius: 999px;
+  background: rgba(20, 10, 45, .25);
+  border: 1px solid rgba(255, 255, 255, .12);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .35), 0 10px 30px rgba(0, 0, 0, .4);
 }
+.barre .pilule { background: transparent; transition: background .25s, transform .25s; }
+.barre .pilule:hover { background: rgba(255, 255, 255, .1); transform: translateY(-1px); }
+.barre .pilule.actif {
+  background: linear-gradient(135deg, rgba(139, 124, 199, .55), rgba(90, 59, 140, .55));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.barre .retour { background: rgba(255, 255, 255, .08); }
 .barre-gauche { grid-column: 1; grid-row: 1; justify-self: end; }
 .barre .logo { grid-column: 2; grid-row: 1; }
 .barre-droite { grid-column: 3; grid-row: 1; justify-self: start; }
+
 .compte {
   grid-column: 3; grid-row: 1; justify-self: end;
   display: flex; align-items: center; gap: .6rem;
@@ -310,15 +326,16 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   margin-bottom: 1.5rem;
   padding: 1rem 1.25rem .5rem;
   border-radius: 24px;
-  background: rgba(255, 255, 255, .06);
+  background: rgba(20, 10, 45, .18);
   border: 1px solid rgba(255, 255, 255, .14);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(5px) saturate(160%) brightness(1.1);
+  backdrop-filter: blur(5px) saturate(160%) brightness(1.1);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .25),
-    inset 0 -1px 0 rgba(255, 255, 255, .05),
-    0 10px 30px rgba(0, 0, 0, .35);
+    inset 0 1px 1px rgba(255, 255, 255, .45),
+    inset 0 -8px 16px rgba(0, 0, 0, .25),
+    0 14px 40px rgba(0, 0, 0, .45);
 }
+/* reflet en biais */
 .verre::before {
   content: "";
   position: absolute; inset: 0;
@@ -326,6 +343,20 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   background: linear-gradient(135deg, rgba(255, 255, 255, .18), transparent 40%);
   pointer-events: none;
 }
+/* liseré de lumière sur le contour */
+.verre::after {
+  content: "";
+  position: absolute; inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .7), transparent 30%, transparent 70%, rgba(255, 255, 255, .4));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* le titre et les affiches passent devant le reflet */
+.verre > * { position: relative; z-index: 1; }
 .verre h2 { margin: 0 0 .75rem; }
 
 
@@ -378,6 +409,17 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 @media (prefers-reduced-motion: reduce) {
   .ciel *, .ciel *::after { animation: none !important; }
 }
+
+.logo-geant {
+  position: absolute; left: 50%; top: 45%;
+  transform: translate(-50%, -50%);
+  font: 900 clamp(4rem, 17vw, 15rem)/1 system-ui, sans-serif;
+  letter-spacing: -.04em;
+  white-space: nowrap;
+  color: rgba(236, 230, 255, .9);
+  text-shadow: 0 10px 60px rgba(139, 124, 199, .5);
+}
+.espace-logo { height: 55vh; }
 
 /* ===== Connexion / inscription ===== */
 .mur {
@@ -457,7 +499,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .verre { padding: .6rem .6rem .2rem; border-radius: 16px; margin-bottom: 1rem; }
   .verre h2 { font-size: 1rem; margin-bottom: .5rem; }
 
-    .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
+  .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
+  .barre { border-radius: 24px; }
 }
 
 /* ===== Grand écran ===== */
@@ -469,10 +512,10 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
     align-items: start;
   }
   .accueil-rangees { grid-column: 1; grid-row: 1; }
-  .accueil-fil {
+    .accueil-fil {
     grid-column: 2; grid-row: 1;
-    position: sticky; top: 1rem;
-    max-height: calc(100vh - 2rem);
+    position: sticky; top: 5.5rem;
+    max-height: calc(100vh - 6.5rem);
     overflow-y: auto;
   }
 }
