@@ -41,11 +41,18 @@
   <h2><%= genreChoisi.name %></h2>
   <%- include('partials/grille', { films: genreFilms }) %>
 <% } else { %>
-  <div class="tuiles">
-    <% genres.forEach((genre, i) => { %>
-      <a class="tuile tuile-<%= i % 5 %>" href="/search?genre=<%= genre.id %><%= fav ? '&fav=1' : '' %>"><%= genre.name %></a>
-    <% }) %>
-  </div>
+  <nav class="genres" aria-label="Parcourir par genre">
+  <h2 class="etiquette">Parcourir par genre</h2>
+  <% genres.forEach((g, i) => { %>
+    <a class="ligne-genre ligne-genre-<%= i %><%= genreChoisi && genreChoisi.id === g.id ? ' actif' : '' %>" href="/search?genre=<%= g.id %>">
+      <b><%= g.name %></b>
+      <span class="pile" aria-hidden="true">
+        <% for (const p of g.affiches) { %><img src="https://image.tmdb.org/t/p/w92<%= p %>" alt="" loading="lazy"><% } %>
+      </span>
+      <svg class="fleche" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </a>
+  <% }) %>
+</nav>
 
   <h2>Tendances de la semaine</h2>
   <div class="rangee">

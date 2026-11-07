@@ -120,8 +120,12 @@ app.get("/search", async (req, res) => {
       tmdb("/genre/movie/list?language=fr-FR"),
       tmdb("/trending/movie/week?language=fr-FR"),
     ]);
-    const GENRES = [28, 35, 18, 27, 878];
-    genres = GENRES.map(id => g.genres.find(x => x.id === id)).filter(Boolean);
+    const GENRES = [28, 35, 18, 27, 878, 16];
+      genres = GENRES.map(id => g.genres.find(x => x.id === id)).filter(Boolean)
+      .map(x => ({
+        ...x,
+        affiches: t.results.filter(f => f.genre_ids.includes(x.id) && f.poster_path).slice(0, 3).map(f => f.poster_path),
+      }));
     tendances = t.results;
     genreChoisi = genres.find(x => x.id === Number(req.query.genre)) || null;
     if (genreChoisi) {

@@ -206,22 +206,6 @@ dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
 .sugg:hover { background: var(--bordure); }
 .sugg img { width: 32px; height: 48px; object-fit: cover; border-radius: 3px; }
 
-.tuiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0 2rem; }
-.tuile {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 80px; padding: .5rem;
-  border-radius: 12px;
-  font-weight: bold; text-align: center; text-decoration: none;
-  color: var(--texte);
-  transition: transform .2s;
-}
-.tuile:hover { transform: translateY(-3px); }
-.tuile-0 { background: var(--accent); }
-.tuile-1 { background: var(--lien); color: #0E0B1D; }
-.tuile-2 { background: var(--bordure); }
-.tuile-3 { background: var(--carte); border: 1px solid var(--accent); }
-.tuile-4 { background: var(--texte); color: #0E0B1D; }
-
 .recherche {
   position: relative;
   display: flex; align-items: center;
@@ -596,8 +580,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 
   .verre { padding: .6rem .6rem .2rem; border-radius: 16px; margin-bottom: 1rem; }
   .verre h2 { font-size: 1rem; margin-bottom: .5rem; }
-
-  .tuile { min-height: 60px; font-size: .8rem; padding: .3rem; }
 }
 
 /* ===== Grand écran ===== */
@@ -749,3 +731,42 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .choix-affiches button:hover { background: none; border-color: var(--lien); transform: translateY(-4px); }
 .choix-affiches .choisie { border-color: var(--lien); box-shadow: 0 0 24px rgba(139, 124, 199, .5); }
 .choix-affiches img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+
+/* ===== Recherche : rangées de genre ===== */
+.genres { width: 100%; margin: 1rem 0 2rem; }
+.ligne-genre {
+  display: flex; align-items: center; gap: .75rem;
+  min-height: 84px; padding: 0 1rem;
+  border-bottom: 1px solid rgba(201, 194, 227, .12);
+  text-decoration: none;
+}
+.ligne-genre b { flex: 1; font-size: 1.25rem; color: #ECE6FF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.ligne-genre-0 { background: linear-gradient(90deg, rgba(179, 32, 42, .35), transparent 70%); }   /* Action */
+.ligne-genre-1 { background: linear-gradient(90deg, rgba(224, 169, 109, .3), transparent 70%); }  /* Comédie */
+.ligne-genre-2 { background: linear-gradient(90deg, rgba(43, 63, 92, .5), transparent 70%); }     /* Drame */
+.ligne-genre-3 { background: linear-gradient(90deg, rgba(76, 90, 58, .4), transparent 70%); }     /* Horreur */
+.ligne-genre-4 { background: linear-gradient(90deg, rgba(29, 47, 69, .6), transparent 70%); }     /* SF */
+.ligne-genre-5 { background: linear-gradient(90deg, rgba(214, 72, 127, .3), transparent 70%); }  /* Animation */
+.ligne-genre.actif b { color: var(--lien); }
+
+.pile { display: flex; flex: none; }
+.pile img { width: 48px; height: 72px; object-fit: cover; border-radius: 6px; box-shadow: 0 6px 16px rgba(0, 0, 0, .5); transition: transform .2s; }
+.pile img + img { margin-left: -12px; }
+.pile img:nth-child(1) { transform: rotate(-6deg); }
+.pile img:nth-child(2) { position: relative; z-index: 1; }
+.pile img:nth-child(3) { transform: rotate(6deg); }
+.ligne-genre:hover .pile img:nth-child(1) { transform: rotate(-10deg) translateX(-4px); }
+.ligne-genre:hover .pile img:nth-child(3) { transform: rotate(10deg) translateX(4px); }
+
+.fleche { flex: none; color: var(--lien); transition: transform .2s; }
+.ligne-genre:hover .fleche { transform: translateX(3px); }
+
+@media (min-width: 601px) {
+  .genres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; }
+  .genres .etiquette { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .ligne-genre { padding: 0 .75rem; gap: .5rem; }
+  .ligne-genre b { font-size: 1.1rem; }
+}
