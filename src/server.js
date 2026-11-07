@@ -314,7 +314,7 @@ app.get("/u/:username", async (req, res) => {
     banniere = f && f.backdrop_path;
   }
 
-  res.render("profile", { profil, avis, suit, abonnes, abonnements, favoris, total, banniere });
+  res.render("profile", { profil, journal, suit, abonnes, abonnements, favoris, total, banniere });
 });
 
 app.post("/films/:id/review/delete", (req, res) => {

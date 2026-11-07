@@ -16,11 +16,6 @@
   </div>
 </div>
 
-<p style="display: flex; flex-wrap: wrap; gap: .5rem">
-  <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">Watchlist</a>
-  <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/stats">Statistiques</a>
-</p>
-
 <% if (user && user.id === profil.id) { %>
   <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem">
     <form method="post" action="/avatar" enctype="multipart/form-data">
@@ -50,32 +45,39 @@
 <% } %>
 
 <div class="profil-grille">
-  <section class="verre">
-    <h2>Top 4</h2>
-    <ul class="favoris">
-      <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
-        <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
-          <% if (f) { %>
-            <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
-            <span class="rang" aria-hidden="true"><%= i + 1 %></span>
-            <% if (user && user.id === profil.id) { %>
-              <form method="post" action="/films/<%= f.id %>/favori">
-                <input type="hidden" name="retour" value="profil">
-                <button class="retirer" aria-label="Retirer <%= f.title %> des favoris">×</button>
-              </form>
+    <div class="profil-gauche">
+    <section class="profil-liens">
+      <h2>Top 4</h2>
+      <ul class="favoris">
+        <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
+          <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
+            <% if (f) { %>
+              <a href="/films/<%= f.id %>"><img src="https://image.tmdb.org/t/p/w342<%= f.poster_path %>" alt="<%= f.title %>"></a>
+              <% if (user && user.id === profil.id) { %>
+                <form method="post" action="/films/<%= f.id %>/favori">
+                  <input type="hidden" name="retour" value="profil">
+                  <button class="retirer" aria-label="Retirer <%= f.title %> des favoris">×</button>
+                </form>
+              <% } %>
+            <% } else if (user && user.id === profil.id && i === favoris.length) { %>
+              <a class="case-vide" href="/search?fav=1">+</a>
+            <% } else { %>
+              <span class="case-vide"></span>
             <% } %>
-          <% } else if (user && user.id === profil.id && i === favoris.length) { %>
-            <a class="case-vide" href="/search?fav=1">+</a>
-          <% } else { %>
-            <span class="case-vide"></span>
-          <% } %>
-        </li>
-      <% } %>
-    </ul>
-  </section>
+          </li>
+        <% } %>
+      </ul>
+    </section>
 
-  <section class="verre">
-    <h2>Journal</h2>
+    <nav class="profil-liens" aria-label="Pages du profil">
+      <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir"><span>Watchlist</span><span>></span></a>
+      <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/films"><span>Tout mes films</span><span><%= total %> ></span></a>
+      <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/stats"><span>Statistiques</span><span>></span></a>
+    </nav>
+  </div>
+
+  <section class="profil-liens">
+    <h2 class="etiquette">Journal</h2>
     <% if (journal.length === 0) { %>
       <p>Rien pour l'instant. Remplis la date « Vu le » quand tu notes un film pour remplir le journal.</p>
     <% } %>
@@ -97,7 +99,6 @@
         </li>
       <% } %>
     </ol>
-    <p style="margin-bottom: 0"><a href="/u/<%= encodeURIComponent(profil.username) %>/films">Tous les films vus</a></p>
   </section>
 </div>
 
