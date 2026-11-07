@@ -46,8 +46,8 @@
 
 <div class="profil-grille">
     <div class="profil-gauche">
-    <section class="profil-liens">
-      <h2>Top 4</h2>
+    <section>
+      <h2 class="etiquette">Top 4</h2>
       <ul class="favoris">
         <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
           <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
@@ -70,13 +70,25 @@
     </section>
 
     <nav class="profil-liens" aria-label="Pages du profil">
-      <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/a-voir"><span>Watchlist</span><span>></span></a>
-      <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/films"><span>Tout mes films</span><span><%= total %> ></span></a>
-      <a class="pilule" href="/u/<%= encodeURIComponent(profil.username) %>/stats"><span>Statistiques</span><span>></span></a>
+      <a href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">
+        <span class="lien-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></span>
+        <span class="lien-texte">Watchlist<small>Les films à voir</small></span>
+        <span class="lien-fin">›</span>
+      </a>
+      <a href="/u/<%= encodeURIComponent(profil.username) %>/films">
+        <span class="lien-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span>
+        <span class="lien-texte">Tous mes films<small><%= total %> films vus</small></span>
+        <span class="lien-fin">›</span>
+      </a>
+      <a href="/u/<%= encodeURIComponent(profil.username) %>/stats">
+        <span class="lien-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
+        <span class="lien-texte">Statistiques<small>Tes chiffres</small></span>
+        <span class="lien-fin">›</span>
+      </a>
     </nav>
   </div>
 
-  <section class="profil-liens">
+  <section class="profil-journal">
     <h2 class="etiquette">Journal</h2>
     <% if (journal.length === 0) { %>
       <p>Rien pour l'instant. Remplis la date « Vu le » quand tu notes un film pour remplir le journal.</p>
