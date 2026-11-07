@@ -245,6 +245,7 @@ dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
 /* ===== Bannière (profil, fiche film) ===== */
 .banniere {
   position: relative;
+  width: 100%;
   aspect-ratio: 3 / 1;
   max-height: 280px;
   background: var(--accent) center 25% / cover;
