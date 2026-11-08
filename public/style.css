@@ -828,3 +828,15 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   .bande img { width: 84px; }
   .hero-bandes { gap: 1.2rem; padding: 1rem 0 2rem; }
 }
+
+
+/* ===== Accueil : rangées sans bulles, titre à filet ===== */
+.bloc-rangee { margin-bottom: 2rem; }
+.bloc-rangee h2 {
+  margin: 0 0 .75rem;
+  padding-bottom: .4rem;
+  font-size: .85rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(201, 194, 227, .25);
+}
