@@ -411,7 +411,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 /* ===== Ciel étoilé ===== */
 .ciel {
   position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 120%, #3a1d6e 0%, #1f0f40 45%, #0d0620 100%);
+  background: #0d0620 url(/fond-ciel.jpg) center bottom / cover no-repeat;
 }
 .nebuleuse span { position: absolute; will-change: transform; animation: derive 40s ease-in-out infinite alternate; }
 .nebuleuse span:nth-child(1) { width: 60vmax; height: 40vmax; top: -10%; left: -15%; background: radial-gradient(closest-side, #5A3B8C, transparent); opacity: .6; }
@@ -868,4 +868,9 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   border-radius: 999px;
   background: #7c3aed; color: #fff;
   font-size: .65rem; font-weight: 700; line-height: 16px; text-align: center;
+}
+
+/* Fond de ciel : version portrait sur téléphone (colline au-dessus du dock) */
+@media (max-width: 600px) {
+  .ciel { background-image: url(/fond-ciel-mobile.jpg); }
 }
