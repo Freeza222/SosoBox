@@ -844,3 +844,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   text-transform: uppercase;
   border-bottom: 1px solid rgba(201, 194, 227, .25);
 }
+
+/* ===== Notifications ===== */
+.notifs h2 { margin: 1.5rem 0 .75rem; font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; }
+.fil li.nouveau { border-left: 3px solid var(--lien); }

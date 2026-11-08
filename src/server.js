@@ -13,6 +13,8 @@ app.set("trust proxy", 1);
 db.exec("CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NOT NULL, expire INTEGER NOT NULL)");
 try { db.exec("ALTER TABLE favorites ADD COLUMN poster_path TEXT"); } catch {}
 try { db.exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"); } catch {}
+try { db.exec("ALTER TABLE users ADD COLUMN notif_vu_at TEXT"); db.exec("UPDATE users SET notif_vu_at = datetime('now')"); } catch {}
+try { db.exec("ALTER TABLE reviews ADD COLUMN created_at TEXT"); } catch {}
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
 class SqliteStore extends session.Store {
@@ -57,6 +59,12 @@ app.use((req, res, next) => {
     ? db.prepare("SELECT id, username, avatar IS NOT NULL AS has_avatar, is_admin FROM users WHERE id = ?").get(req.session.userId) || null
     : null;
     res.locals.chemin = req.path;
+  res.locals.nbNotifs = res.locals.user ? db.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM follows f WHERE f.followed_id = @me AND f.created_at > IFNULL(u.notif_vu_at, ''))
+      + (SELECT COUNT(*) FROM reviews r JOIN follows fo ON fo.followed_id = r.user_id AND fo.follower_id = @me
+         WHERE r.created_at > fo.created_at AND r.created_at > IFNULL(u.notif_vu_at, '')) AS n
+    FROM users u WHERE u.id = @me`).get({ me: res.locals.user.id }).n : 0;
   next();
 });
 
@@ -141,6 +149,27 @@ app.get("/search", async (req, res) => {
     }
   }
   res.render("search", { q, onglet, fav, films, gens, genres, tendances, genreChoisi, genreFilms });
+});
+
+app.get("/notifications", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const me = req.session.userId;
+  const vu = db.prepare("SELECT IFNULL(notif_vu_at, '') AS v FROM users WHERE id = ?").get(me).v;
+  const abonnes = db.prepare(`
+    SELECT u.username, f.created_at > ? AS nouveau
+    FROM follows f JOIN users u ON u.id = f.follower_id
+    WHERE f.followed_id = ? ORDER BY f.created_at DESC LIMIT 20`).all(vu, me);
+  const avis = db.prepare(`
+    SELECT u.username, r.film_id, r.rating, f.title, r.created_at > ? AS nouveau
+    FROM reviews r
+    JOIN follows fo ON fo.followed_id = r.user_id AND fo.follower_id = ?
+    JOIN users u ON u.id = r.user_id
+    JOIN films f ON f.id = r.film_id
+    WHERE r.created_at > fo.created_at
+    ORDER BY r.created_at DESC LIMIT 20`).all(vu, me);
+  db.prepare("UPDATE users SET notif_vu_at = datetime('now') WHERE id = ?").run(me);
+  res.locals.nbNotifs = 0;
+  res.render("notifications", { abonnes, avis });
 });
 
 app.get("/films/:id", async (req, res) => {
@@ -247,7 +276,7 @@ app.post("/films/:id/review", async (req, res) => {
     return res.status(404).send("Film introuvable");
   }
   copierFilm(film);
-  db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on) VALUES (?, ?, ?, ?, ?)
+  db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on`)
     .run(req.session.userId, id, rating, req.body.body || "", req.body.watched_on || null);
       db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
