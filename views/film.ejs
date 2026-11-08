@@ -1,7 +1,8 @@
 <%- include('partials/header') %>
 
 <% const real = film.credits.crew.find(p => p.job === "Director"); %>
-<section class="hero-film" <% if (film.backdrop_path) { %>style="background-image: url('https://image.tmdb.org/t/p/w1280<%= film.backdrop_path %>')"<% } %>>
+<section class="hero-film">
+  <div class="film-banniere" <% if (film.backdrop_path) { %>style="background-image: url('https://image.tmdb.org/t/p/w1280<%= film.backdrop_path %>')"<% } %>></div>
   <div class="hero-contenu">
     <% if (film.poster_path) { %>
       <img class="film-affiche" src="https://image.tmdb.org/t/p/w342<%= film.poster_path %>" alt="">
