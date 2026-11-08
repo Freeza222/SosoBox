@@ -33,6 +33,10 @@
 
   <div class="compte">
     <% if (user) { %>
+      <a class="cloche <%= chemin === '/notifications' ? 'actif' : '' %>" href="/notifications" title="Notifications" aria-label="Notifications<%= nbNotifs ? ' (' + nbNotifs + ' nouvelles)' : '' %>">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <% if (nbNotifs > 0) { %><span class="pastille"><%= nbNotifs > 9 ? "9+" : nbNotifs %></span><% } %>
+      </a>
       <a href="/u/<%= encodeURIComponent(user.username) %>"><img class="avatar-nav" src="/u/<%= encodeURIComponent(user.username) %>/avatar" alt="Mon profil"></a>
       <a href="/u/<%= encodeURIComponent(user.username) %>"><%= user.username %></a>
     <% } else { %>

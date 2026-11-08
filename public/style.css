@@ -524,7 +524,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   body { margin: 0 .6em; }
 
     /* barre du haut réduite au logo (et au retour) */
-  .barre .barre-gauche, .barre .barre-droite, .barre .compte { display: none; }
+  .barre .barre-gauche, .barre .barre-droite { display: none; }
+  .barre .compte a:not(.cloche) { display: none; }
 
   /* dock en bas de l'écran */
   body { padding-bottom: 6rem; }
@@ -851,3 +852,20 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .ligne-suivi { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
 .ligne-suivi form { margin: 0; }
 .suivi-ok { font-size: .8rem; color: var(--lien); }
+
+
+/* ===== Cloche de notifications ===== */
+.cloche {
+  position: relative;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255, 255, 255, .08);
+  display: grid; place-items: center;
+}
+.cloche:hover, .cloche.actif { background: var(--accent); color: #fff; }
+.pastille {
+  position: absolute; top: -3px; right: -3px;
+  min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box;
+  border-radius: 999px;
+  background: #7c3aed; color: #fff;
+  font-size: .65rem; font-weight: 700; line-height: 16px; text-align: center;
+}
