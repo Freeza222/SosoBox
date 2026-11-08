@@ -53,7 +53,6 @@ Quelques détails dont je suis content :
 
 - les sessions sont rangées dans SQLite, donc une mise à jour du site ne déconnecte personne ;
 - les mots de passe sont chiffrés avec bcrypt, et la connexion se bloque après 5 essais ratés ;
-- les films pour adultes sont filtrés partout ;
 - le ciel étoilé du fond est fait en CSS, sans image.
 
 ## Le lancer chez soi
