@@ -863,6 +863,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
   background: #7c3aed; color: #fff;
   font-size: .65rem; font-weight: 700; line-height: 16px; text-align: center;
 }
+.cloche.plein {color: #e9d5ff; }
+.cloche.plein svg {fill: currentColor; }
 
 /* Fond de ciel : version portrait sur téléphone (colline au-dessus du dock) */
 @media (max-width: 600px) {
