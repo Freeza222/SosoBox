@@ -156,9 +156,10 @@ app.get("/notifications", (req, res) => {
   const me = req.session.userId;
   const vu = db.prepare("SELECT IFNULL(notif_vu_at, '') AS v FROM users WHERE id = ?").get(me).v;
   const abonnes = db.prepare(`
-    SELECT u.username, f.created_at > ? AS nouveau
-    FROM follows f JOIN users u ON u.id = f.follower_id
-    WHERE f.followed_id = ? ORDER BY f.created_at DESC LIMIT 20`).all(vu, me);
+  SELECT u.username, f.created_at > ? AS nouveau,
+    EXISTS (SELECT 1 FROM follows x WHERE x.follower_id = ? AND x.followed_id = f.follower_id) AS je_suis
+  FROM follows f JOIN users u ON u.id = f.follower_id
+  WHERE f.followed_id = ? ORDER BY f.created_at DESC LIMIT 20`).all(vu, me, me);
   const avis = db.prepare(`
     SELECT u.username, r.film_id, r.rating, f.title, r.created_at > ? AS nouveau
     FROM reviews r
@@ -407,7 +408,7 @@ app.post("/u/:username/follow", (req, res) => {
     db.prepare("INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)").run(req.session.userId, cible.id);
   }
   const retour = req.body.retour || "";
-  const retourOk = /^\/u\/[^/]+\/(abonnes|abonnements)$/.test(retour); // liste blanche
+    const retourOk = /^(\/u\/[^/]+\/(abonnes|abonnements)|\/notifications)$/.test(retour); // liste blanche
   res.redirect(retourOk ? retour : "/u/" + encodeURIComponent(req.params.username));
 });
 

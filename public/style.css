@@ -848,3 +848,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 /* ===== Notifications ===== */
 .notifs h2 { margin: 1.5rem 0 .75rem; font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; }
 .fil li.nouveau { border-left: 3px solid var(--lien); }
+.ligne-suivi { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
+.ligne-suivi form { margin: 0; }
+.suivi-ok { font-size: .8rem; color: var(--lien); }

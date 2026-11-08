@@ -7,8 +7,16 @@
   <% if (abonnes.length === 0) { %><p>Personne ne s'est encore abonné à toi.</p><% } %>
   <ul class="fil">
     <% for (const a of abonnes) { %>
-      <li class="<%= a.nouveau ? 'nouveau' : '' %>">
-        <a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a> s'est abonné à toi
+        <li class="<%= a.nouveau ? 'nouveau' : '' %> ligne-suivi">
+          <span><a href="/u/<%= encodeURIComponent(a.username) %>"><%= a.username %></a> s'est abonné à toi</span>
+            <% if (a.je_suis) { %>
+              <span class="suivi-ok">Tu le suis</span>
+            <% } else { %>
+              <form method="post" action="/u/<%= encodeURIComponent(a.username) %>/follow">
+              <input type="hidden" name="retour" value="/notifications">
+              <button>Suivre en retour</button>
+          </form>
+        <% } %>
       </li>
     <% } %>
   </ul>
