@@ -344,6 +344,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .histo span { flex: 1; border-radius: 3px; background: rgba(255, 255, 255, .2); }
 .histo span.haut { background: var(--lien); }
 .histo-legende { display: flex; justify-content: space-between; font-size: .7rem; color: var(--lien); }
+.note-lab { font-size: .7rem; color: var(--lien); margin-bottom: .2rem; }
+.note-tmdb { margin-top: .6rem; padding-top: .5rem; border-top: 1px solid rgba(201, 194, 227, .18); font-size: .8rem; color: #A99CDB; }
 
 .film-bas { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
 .film-bas .verre { margin: 0; padding-bottom: 1rem; }

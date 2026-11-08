@@ -36,13 +36,16 @@
     </div>
 
     <div class="film-note verre">
-      <div><b><%= moy ? (moy / 2).toFixed(1).replace(".", ",") : "–" %></b> / 5 · <%= avis.length %> avis</div>
-      <div class="histo" role="img" aria-label="Répartition des notes, de 0,5 à 5">
-        <% for (let i = 1; i <= 10; i++) { %>
-          <span class="<%= i >= 7 ? 'haut' : '' %>" style="height: <%= Math.max(4, Math.round(repartition[i] / maxRep * 100)) %>%"></span>
-        <% } %>
+      <div class="note-lab">SosoBox</div>
+        <div><b><%= moy ? (moy / 2).toFixed(1).replace(".", ",") : "–" %></b> / 5 · <%= avis.length %> avis</div>
+          <div class="histo" role="img" aria-label="Répartition des notes, de 0,5 à 5">
+            <% for (let i = 1; i <= 10; i++) { %>
+            <span class="<%= i >= 7 ? 'haut' : '' %>" style="height: <%= Math.max(4, Math.round(repartition[i] / maxRep * 100)) %>%"></span>
+            <% } %>
       </div>
       <div class="histo-legende"><span>½</span><span>5</span></div>
+      <div class="note-tmdb">TMDB : <%= film.vote_count ? (film.vote_average / 2).toFixed(1).replace(".", ",") + " / 5 · " + film.vote_count.toLocaleString("fr-FR") + " votes" : "–" %></div>
+    </div>
     </div>
   </div>
 </section>
