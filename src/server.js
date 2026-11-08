@@ -532,4 +532,4 @@ app.post("/admin/avis/:id/supprimer", estAdmin, (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Serveur lancé sur http://localhost:" + PORT));
+app.listen(PORT, "127.0.0.1", () => console.log("Serveur lancé sur http://localhost:" + PORT));
