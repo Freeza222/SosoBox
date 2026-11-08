@@ -33,14 +33,14 @@
       <% } %>
       <ul class="fil">
         <% for (const a of fil) { %>
-                    <li class="avis">
-            <a class="avis-affiche" href="/films/<%= a.film_id %>">
-              <% if (a.poster_path) { %>
-                <img src="https://image.tmdb.org/t/p/w185<%= a.poster_path %>" alt="">
-              <% } %>
-            </a>
-            <div class="avis-texte">
-              <a href="/films/<%= a.film_id %>"><%= a.title %></a>
+            <li class="avis">
+              <a class="avis-affiche" href="/films/<%= a.film_id %>">
+                <% if (a.poster_path) { %>
+                  <img src="https://image.tmdb.org/t/p/w185<%= a.poster_path %>" alt="">
+                <% } %>
+              </a>
+              <div class="avis-texte">
+                <a href="/films/<%= a.film_id %>"><%= a.title %></a>
               <div class="etoiles" role="img" aria-label="<%= a.rating / 2 %> sur 5">
                 <%= "★".repeat(Math.floor(a.rating / 2)) + (a.rating % 2 ? "½" : "") %>
               </div>
@@ -72,7 +72,6 @@
 </div>
 
 <script>
-  // met les bandes en pause quand elles sortent de l'écran
   const obsBandes = new IntersectionObserver(es => es.forEach(e => {
     e.target.style.animationPlayState = e.isIntersecting ? "running" : "paused";
   }));

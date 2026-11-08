@@ -85,7 +85,7 @@ app.get("/", async (req, res) => {
     JOIN users u ON u.id = r.user_id
     JOIN films f ON f.id = r.film_id
     WHERE fo.follower_id = ?
-    ORDER BY r.id DESC LIMIT 20
+    ORDER BY r.id DESC LIMIT 5
   `).all(req.session.userId) : [];
 
   const RANGEES = [

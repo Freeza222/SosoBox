@@ -425,18 +425,12 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .couche {
   position: absolute; top: 0; left: 0; border-radius: 50%;
   box-shadow: var(--etoiles);
-  animation: monte linear infinite, scintille ease-in-out infinite alternate;
-  will-change: transform, opacity;
+  animation: scintille ease-in-out infinite alternate;
+  will-change: opacity;
 }
-.couche::after {
-  content: ""; position: absolute; top: 2000px; left: 0;
-  width: inherit; height: inherit; border-radius: 50%;
-  box-shadow: var(--etoiles);
-}
-.petite  { width: 1px; height: 1px; animation-duration: 200s, 3s; }
-.moyenne { width: 2px; height: 2px; animation-duration: 140s, 4.5s; animation-delay: 0s, -1s; }
-.grande  { width: 3px; height: 3px; animation-duration: 90s, 6s; animation-delay: 0s, -3s; }
-@keyframes monte { to { transform: translateY(-2000px); } }
+.petite  { width: 1px; height: 1px; animation-duration: 3s; }
+.moyenne { width: 2px; height: 2px; animation-duration: 4.5s; animation-delay: -1s; }
+.grande  { width: 3px; height: 3px; animation-duration: 6s; animation-delay: -3s; }
 @keyframes scintille { from { opacity: .45; } to { opacity: 1; } }
 
 .filante {
