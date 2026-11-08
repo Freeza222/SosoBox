@@ -32,6 +32,7 @@ C'est un projet perso, sans but commercial, que j'ai construit pour apprendre le
 
 - Suivre ses amis et voir leurs avis sur l'accueil
 - Voir qui on suit et qui nous suit, et suivre quelqu'un en un clic
+- Etre norifié quand un ami nous suit ou écrit un avis sur un film
 
 Le tout marche aussi bien sur téléphone que sur ordinateur, et on peut rester connecté 30 jours.
 
