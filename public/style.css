@@ -319,6 +319,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 
 .hero-film { margin-bottom: 1.5rem; }
 .film-banniere {
+  width: 100%;
   aspect-ratio: 21 / 9;
   max-height: 60vh;
   border-radius: 28px;
