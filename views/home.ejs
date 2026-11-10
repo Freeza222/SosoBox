@@ -12,9 +12,10 @@
       <img src="/logo-dark.svg" alt="" class="logo-icone">
       <span class="logo-geant">SosoBox</span>
     </h1>
-    <form class="recherche" action="/search" role="search">
+    <form class="recherche" action="/search" role="search" autocomplete="off">
       <input name="q" placeholder="Un film, un ami…" aria-label="Rechercher">
       <button>Chercher</button>
+      <div id="suggestions"></div>
     </form>
   </div>
 
@@ -78,5 +79,6 @@
   document.querySelectorAll(".bande").forEach(b => obsBandes.observe(b));
 </script>
 
+<script src="/suggestions.js" defer></script>
 <script src="/glisser.js"></script>
 <%- include('partials/footer') %>
