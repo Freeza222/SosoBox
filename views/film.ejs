@@ -38,12 +38,22 @@
     <div class="film-note verre">
       <div class="note-lab">SosoBox</div>
         <div><b><%= moy ? (moy / 2).toFixed(1).replace(".", ",") : "–" %></b> / 5 · <%= avis.length %> avis</div>
-          <div class="histo" role="img" aria-label="Répartition des notes, de 0,5 à 5">
-            <% for (let i = 1; i <= 10; i++) { %>
-            <span class="<%= i >= 7 ? 'haut' : '' %>" style="height: <%= Math.max(4, Math.round(repartition[i] / maxRep * 100)) %>%"></span>
-            <% } %>
+                <%
+        const cols = [];
+        for (let k = 1; k <= 5; k++) {
+          const entiers = repartition[2 * k];     // k étoiles pile
+          const demis = repartition[2 * k - 1];   // k - 0,5 étoile
+          cols.push({ poids: entiers + demis / 2, nb: entiers + demis });
+        }
+        const maxNb = Math.max(1, ...cols.map(c => c.nb));
+      %>
+      <div class="histo" role="img" aria-label="Répartition des notes, de 1 à 5 étoiles">
+        <% cols.forEach((c, i) => { %>
+          <span class="<%= i >= 3 ? 'haut' : '' %>" style="height: <%= Math.max(4, Math.round(c.poids / maxNb * 100)) %>%"></span>
+        <% }) %>
       </div>
-      <div class="histo-legende"><span>½</span><span>5</span></div>
+      <div class="histo-legende"><span>1</span><span>5</span></div>
+      <div class="histo-legende"><span>1</span><span>5</span></div>
       <div class="note-tmdb">TMDB : <%= film.vote_count ? (film.vote_average / 2).toFixed(1).replace(".", ",") + " / 5 · " + film.vote_count.toLocaleString("fr-FR") + " votes" : "–" %></div>
     </div>
     </div>

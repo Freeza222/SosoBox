@@ -123,7 +123,13 @@ app.get("/search", async (req, res) => {
   const q = req.query.q || "";
   const fav = req.query.fav === "1" && !!req.session.userId;
   const onglet = req.query.onglet === "users" && !fav ? "users" : "films";
-  const films = q && onglet === "films" ? (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results : [];
+    const MIN_VOTES = 20; // en dessous : making-of, fiches vides, projets inconnus
+  let films = [];
+  if (q && onglet === "films") {
+    const brut = (await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q))).results.filter(f => f.poster_path);
+    const connus = brut.filter(f => f.vote_count >= MIN_VOTES);
+    films = connus.length ? connus : brut; // si rien de connu, on garde tout : un film très rare reste trouvable
+  }
   const gens = q && onglet === "users" ? db.prepare("SELECT username FROM users WHERE username LIKE ? LIMIT 20").all("%" + q + "%") : [];
   const deja = fav ? db.prepare("SELECT film_id FROM favorites WHERE user_id = ?").all(req.session.userId).map(r => r.film_id) : [];
     let genres = [], tendances = [], genreChoisi = null, genreFilms = [];
@@ -509,14 +515,32 @@ app.post("/films/:id/a-voir", async (req, res) => {
   res.redirect("/films/" + filmId);
 });
 
+let catalogue = [];
+(async () => {
+  for (let debut = 1; debut <= 50; debut += 10) {
+    const lot = await Promise.all(Array.from({ length: 10 }, (_, i) =>
+      tmdb("/discover/movie?language=fr-FR&sort_by=vote_count.desc&page=" + (debut + i)).catch(() => null)));
+    for (const d of lot) if (d) catalogue.push(...d.results.filter(f => f.poster_path));
+  }
+  console.log("Catalogue de suggestions :", catalogue.length, "films");
+})();
+
 app.get("/api/suggestions", async (req, res) => {
   const q = (req.query.q || "").trim().slice(0, 50);
   if (!q) return res.json({ films: [], gens: [] });
   const gens = db.prepare("SELECT username FROM users WHERE username LIKE ? ORDER BY length(username) LIMIT 3")
     .all("%" + q + "%");
-  const data = await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => ({ results: [] }));
-  const films = data.results
-    .sort((a, b) => b.popularity - a.popularity)
+  if (q.length < 2) return res.json({ films: [], gens });
+  const data = q.length < 3
+    ? { results: [] } // sous 3 lettres, TMDB cherche des mots entiers ("du", "d'un"...)
+    : await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => ({ results: [] }));
+  const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const qn = norm(q);
+  const commence = f => norm(f.title).startsWith(qn) || norm(f.original_title).startsWith(qn);
+  const candidats = [...new Map([...catalogue.filter(commence), ...data.results].map(f => [f.id, f])).values()];
+  const films = candidats
+    .filter(f => f.poster_path && f.vote_count >= 20)
+    .sort((a, b) => (commence(b) - commence(a)) || b.vote_count - a.vote_count)
     .slice(0, 3)
     .map(f => ({ id: f.id, title: f.title, year: (f.release_date || "").slice(0, 4), poster: f.poster_path }));
   res.json({ films, gens });
