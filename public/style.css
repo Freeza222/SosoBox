@@ -292,8 +292,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .profil-grille { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1.25rem; align-items: start; }
 .profil-grille .verre { margin: 0; padding-bottom: 1.25rem; }
 
-.favoris li:first-child img { border-color: var(--lien); box-shadow: 0 0 24px rgba(139, 124, 199, .5); }
-
 .journal { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
 .journal-mois { margin-top: .6rem; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: #A99CDB; }
 .journal-ligne { display: flex; align-items: center; gap: .75rem; }
@@ -880,7 +878,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .acteurs-liste { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .acteurs-liste li { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .acteurs-liste img { width: 112px; max-width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; border: 3px solid transparent; box-shadow: 0 12px 28px rgba(0, 0, 0, .5); }
-.acteurs-liste li:first-child img { border-color: var(--lien); }
 .acteurs-liste b { color: #ECE6FF; }
 .acteurs-liste small { margin-top: -4px; color: #A99CDB; }
 
