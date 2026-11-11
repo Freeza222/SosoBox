@@ -173,12 +173,14 @@
         if (e.target.closest(".retirer, .changer")) return;
         source = li; cible = null; bouge = false;
         x0 = e.clientX; y0 = e.clientY;
-        li.setPointerCapture(e.pointerId);
       });
       li.addEventListener("pointermove", e => {
         if (source !== li) return;
-        if (!bouge && Math.hypot(e.clientX - x0, e.clientY - y0) < 8) return;
-        bouge = true;
+        if (!bouge) {
+          if (Math.hypot(e.clientX - x0, e.clientY - y0) < 8) return;
+          bouge = true;
+          li.setPointerCapture(e.pointerId);
+        }
         li.classList.add("glisse");
         const dessous = document.elementFromPoint(e.clientX, e.clientY);
         cible = dessous && dessous.closest(".favoris li[data-film]");
