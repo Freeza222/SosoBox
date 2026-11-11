@@ -884,8 +884,6 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .acteurs-liste b { color: #ECE6FF; }
 .acteurs-liste small { margin-top: -4px; color: #A99CDB; }
 
-favoris { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-
 /* ===== Top 4 : boutons seulement en mode « Modifier » (sans JS) ===== */
 .top4 .etiquette { display: flex; justify-content: space-between; align-items: baseline; }
 .editer { margin: 0; font-size: .75rem; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--lien); cursor: pointer; }
@@ -907,3 +905,35 @@ favoris { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .top4 .favoris { gap: 6px; margin-inline: -1rem; }
   .top4 .favoris img { border-width: 1px; border-radius: 8px; }
 }
+
+/* ===== Suggestions d'acteurs : liste déroulante de petits ronds ===== */
+.recherche .sugg-acteurs {
+  position: absolute; left: 0; right: 0; top: calc(100% + .5rem); z-index: 10;
+  display: flex; flex-wrap: wrap; gap: .25rem; padding: .5rem;
+  background: var(--carte); border: 1px solid var(--bordure); border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .5);
+}
+.recherche .sugg-acteurs:empty { display: none; }
+
+.recherche .sugg-acteur {
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  width: 92px; padding: .5rem .3rem;
+  border-radius: 14px; background: none; color: var(--texte);
+  font-size: .8rem; line-height: 1.2; text-align: center;
+}
+.recherche .sugg-acteur:hover { background: rgba(139, 124, 199, .18); color: #ECE6FF; }
+.recherche .sugg-acteur img { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; box-shadow: 0 8px 18px rgba(0, 0, 0, .45); transition: transform .2s; }
+.recherche .sugg-acteur:hover img { transform: scale(1.06); }
+
+/* ===== Page : choisir ses acteurs ===== */
+.page-acteurs { display: flex; flex-direction: column; gap: 1.2rem; }
+.page-acteurs h1 { margin: 0; color: #ECE6FF; }
+.page-acteurs .recherche { margin: 1rem 0 0; width: min(560px, 100%); }
+.page-acteurs .vide, .deja { color: #A99CDB; font-size: .9rem; }
+.petit-btn { padding: .3rem .9rem; font-size: .85rem; }
+.page-acteurs form { margin: 0; }
+
+.choix-acteurs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1.5rem 1rem; }
+.choix-acteurs li { display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center; }
+.choix-acteurs img { width: 96px; aspect-ratio: 1; object-fit: cover; border-radius: 50%; box-shadow: 0 10px 24px rgba(0, 0, 0, .45); }
+.choix-acteurs b { color: #ECE6FF; font-size: .9rem; }

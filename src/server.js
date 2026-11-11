@@ -508,7 +508,7 @@ app.get("/acteurs", async (req, res) => {
   const mes = db.prepare("SELECT person_id, nom, photo FROM acteurs_favoris WHERE user_id = ? ORDER BY id").all(req.session.userId);
   const data = q ? await tmdb("/search/person?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => null) : null;
   // seulement les acteurs (pas les réalisateurs, techniciens…), 12 au plus
-  const resultats = data ? data.results.filter(p => p.known_for_department === "Acting").slice(0, 12) : [];
+  const resultats = data ? data.results.filter(p => p.known_for_department === "Acting" && p.profile_path).slice(0, 12) : [];
   const choisis = new Set(mes.map(a => a.person_id));
   res.render("acteurs", { q, mes, resultats, choisis });
 });
@@ -587,6 +587,14 @@ app.get("/api/suggestions", async (req, res) => {
     .slice(0, 3)
     .map(f => ({ id: f.id, title: f.title, year: (f.release_date || "").slice(0, 4), poster: f.poster_path }));
   res.json({ films, gens });
+});
+
+app.get("/api/acteurs", async (req, res) => {
+  const q = (req.query.q || "").trim().slice(0, 50);
+  if (!q) return res.json([]);
+  const data = await tmdb("/search/person?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => null);
+  const acteurs = data ? data.results.filter(p => p.known_for_department === "Acting" && p.profile_path).slice(0, 6) : [];
+  res.json(acteurs.map(p => ({ id: p.id, nom: p.name, photo: p.profile_path })));
 });
 
 function estAdmin(req, res, next) {

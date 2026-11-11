@@ -19,6 +19,7 @@
   </ul>
 
   <form class="recherche" action="/acteurs" role="search" autocomplete="off">
+    <div id="sugg-acteurs" class="sugg-acteurs" aria-live="polite"></div>
     <input name="q" value="<%= q %>" placeholder="Un acteur, une actrice…" aria-label="Chercher un acteur">
     <button>Chercher</button>
   </form>
@@ -41,5 +42,39 @@
     <% } %>
   </ul>
 </div>
+
+<% if (mes.length < 3) { %>
+<script>
+  const champ = document.querySelector('.page-acteurs input[name="q"]');
+  const boite = document.getElementById("sugg-acteurs");
+  const deja = new Set(<%- JSON.stringify([...choisis]) %>); // ids déjà choisis : ne pas les reproposer
+  let derniere = 0;
+
+  // un petit rond cliquable : il envoie le formulaire de recherche en POST vers /acteurs/<id>
+  // (pas de <form> imbriqué : un formulaire dans un formulaire est interdit en HTML)
+  function rond(a) {
+    const bouton = document.createElement("button");
+    bouton.className = "sugg-acteur";
+    bouton.formAction = "/acteurs/" + a.id;
+    bouton.formMethod = "post";
+    const img = document.createElement("img");
+    img.src = a.photo ? "https://image.tmdb.org/t/p/w185" + a.photo : "/avatar-defaut.svg";
+    img.alt = "";
+    const nom = document.createElement("span");
+    nom.textContent = a.nom; // du texte, jamais du HTML
+    bouton.append(img, nom);
+    return bouton;
+  }
+
+  champ.addEventListener("input", async () => {
+    const n = ++derniere;
+    const q = champ.value.trim();
+    if (q.length < 2) { boite.replaceChildren(); return; }
+    const acteurs = await (await fetch("/api/acteurs?q=" + encodeURIComponent(q))).json();
+    if (n !== derniere) return; // une frappe plus récente a déjà relancé la recherche
+    boite.replaceChildren(...acteurs.filter(a => !deja.has(a.id)).map(rond));
+  });
+</script>
+<% } %>
 
 <%- include('partials/footer') %>
