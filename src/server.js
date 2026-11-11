@@ -13,6 +13,14 @@ app.set("trust proxy", 1);
 db.exec("CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NOT NULL, expire INTEGER NOT NULL)");
 try { db.exec("ALTER TABLE favorites ADD COLUMN poster_path TEXT"); } catch {}
 try { db.exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"); } catch {}
+db.exec(`CREATE TABLE IF NOT EXISTS acteurs_favoris (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  person_id INTEGER NOT NULL,
+  nom TEXT NOT NULL,
+  photo TEXT,
+  UNIQUE (user_id, person_id)
+)`);
 try { db.exec("ALTER TABLE users ADD COLUMN notif_vu_at TEXT"); db.exec("UPDATE users SET notif_vu_at = datetime('now')"); } catch {}
 try { db.exec("ALTER TABLE reviews ADD COLUMN created_at TEXT"); } catch {}
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
@@ -388,6 +396,12 @@ app.get("/u/:username", async (req, res) => {
   const abonnements = db.prepare("SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?").get(profil.id).n;
   const favoris = db.prepare(`SELECT f.id, f.title, COALESCE(fa.poster_path, f.poster_path) AS poster_path FROM favorites fa
   JOIN films f ON f.id = fa.film_id WHERE fa.user_id = ? ORDER BY fa.id`).all(profil.id);
+  const acteurs = db.prepare("SELECT person_id, nom, photo FROM acteurs_favoris WHERE user_id = ? ORDER BY id").all(profil.id);
+  const vus = new Set(db.prepare("SELECT film_id FROM reviews WHERE user_id = ?").all(profil.id).map(r => r.film_id));
+  await Promise.all(acteurs.map(async a => {
+    const credits = await tmdb("/person/" + a.person_id + "/movie_credits?language=fr-FR").catch(() => null);
+    a.films = credits ? credits.cast.filter(f => vus.has(f.id)).length : 0;
+  }));
 
   let banniere = null;
   if (favoris.length > 0) {
@@ -395,7 +409,7 @@ app.get("/u/:username", async (req, res) => {
     banniere = f && f.backdrop_path;
   }
 
-  res.render("profile", { profil, journal, suit, abonnes, abonnements, favoris, total, banniere });
+  res.render("profile", { profil, journal, suit, abonnes, abonnements, favoris, total, banniere, acteurs });
 });
 
 app.post("/films/:id/review/delete", (req, res) => {
@@ -574,7 +588,8 @@ app.post("/admin/membres/:id/supprimer", estAdmin, (req, res) => {
     db.prepare("DELETE FROM favorites WHERE user_id = ?").run(id);
     db.prepare("DELETE FROM watchlist WHERE user_id = ?").run(id);
     db.prepare("DELETE FROM follows   WHERE follower_id = ? OR followed_id = ?").run(id, id);
-    db.prepare("DELETE FROM sessions  WHERE json_extract(data, '$.userId') = ?").run(id); // le déconnecte partout
+    db.prepare("DELETE FROM sessions  WHERE json_extract(data, '$.userId') = ?").run(id);
+    db.prepare("DELETE FROM acteurs_favoris WHERE user_id = ?").run(id);
     db.prepare("DELETE FROM users     WHERE id = ?").run(id);
   })();
   res.redirect("/admin");

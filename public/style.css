@@ -872,3 +872,14 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 @media (max-width: 600px) {
   .ciel { background-image: url(/fond-ciel-mobile.jpg); }
 }
+
+/* ===== Profil : acteurs préférés ===== */
+.acteurs .etiquette { display: flex; justify-content: space-between; align-items: baseline; }
+.acteurs .etiquette a { font-size: .75rem; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--lien); text-decoration: none; }
+.acteurs .vide { color: #A99CDB; }
+.acteurs-liste { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.acteurs-liste li { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.acteurs-liste img { width: 112px; max-width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; border: 3px solid transparent; box-shadow: 0 12px 28px rgba(0, 0, 0, .5); }
+.acteurs-liste li:first-child img { border-color: var(--lien); }
+.acteurs-liste b { color: #ECE6FF; }
+.acteurs-liste small { margin-top: -4px; color: #A99CDB; }

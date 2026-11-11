@@ -68,6 +68,24 @@
           </li>
         <% } %>
       </ul>
+        <% const moi = user && user.id === profil.id; %>
+    <% if (acteurs.length > 0 || moi) { %>
+      <section class="acteurs">
+        <h2 class="etiquette">Acteurs préférés <% if (moi) { %><a href="/acteurs">Modifier</a><% } %></h2>
+        <% if (acteurs.length === 0) { %>
+          <p class="vide">Choisis tes 3 acteurs préférés.</p>
+        <% } %>
+        <ul class="acteurs-liste">
+          <% for (const a of acteurs) { %>
+            <li>
+              <img src="<%= a.photo ? 'https://image.tmdb.org/t/p/w185' + a.photo : '/avatar-defaut.svg' %>" alt="">
+              <b><%= a.nom %></b>
+              <small><%= a.films %> de <%= moi ? "tes" : "ses" %> films</small>
+            </li>
+          <% } %>
+        </ul>
+      </section>
+    <% } %>
     </section>
 
     <nav class="profil-liens" aria-label="Pages du profil">
