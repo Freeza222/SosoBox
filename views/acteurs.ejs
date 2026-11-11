@@ -77,4 +77,19 @@
 </script>
 <% } %>
 
+<script>
+  // Sur cette page, chercher ou choisir un acteur REMPLACE la page dans l'historique
+  document.addEventListener("submit", async e => {
+    const f = e.target, b = e.submitter;
+    const url = b?.getAttribute("formaction") || f.action;
+    if (!new URL(url, location).pathname.startsWith("/acteurs")) return; // les autres formulaires (barre du haut…) restent normaux
+    const methode = (b?.getAttribute("formmethod") || f.method).toLowerCase();
+    const donnees = new URLSearchParams(new FormData(f, b));
+    e.preventDefault();
+    if (methode === "get") return location.replace(url.split("?")[0] + "?" + donnees);
+    const r = await fetch(url, { method: "POST", body: donnees }); // le serveur répond par une redirection…
+    location.replace(r.url);                                        // …on va à la page finale sans empiler
+  });
+</script>
+
 <%- include('partials/footer') %>

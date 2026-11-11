@@ -70,8 +70,10 @@
 <script>
   const pile = JSON.parse(sessionStorage.getItem("pile") || "[]");
   const ici = location.pathname + location.search;
-  if (pile[pile.length - 2] === ici) pile.pop();          // retour natif du téléphone
-  else if (pile[pile.length - 1] !== ici) pile.push(ici); // nouvelle page (pas un simple rechargement)
+    const dessus = pile[pile.length - 1] || "";
+  if (pile[pile.length - 2] === ici) pile.pop();                                   // retour natif du téléphone
+  else if (dessus.split("?")[0] === location.pathname) pile[pile.length - 1] = ici; // même page, autre recherche (ou rechargement) : on remplace
+  else pile.push(ici);                                                             // vraie nouvelle page
   if (pile.length > 50) pile.shift();
   sessionStorage.setItem("pile", JSON.stringify(pile));
 
