@@ -883,3 +883,27 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .acteurs-liste li:first-child img { border-color: var(--lien); }
 .acteurs-liste b { color: #ECE6FF; }
 .acteurs-liste small { margin-top: -4px; color: #A99CDB; }
+
+favoris { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+/* ===== Top 4 : boutons seulement en mode « Modifier » (sans JS) ===== */
+.top4 .etiquette { display: flex; justify-content: space-between; align-items: baseline; }
+.editer { margin: 0; font-size: .75rem; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--lien); cursor: pointer; }
+.editer:hover { color: #ECE6FF; }
+.editer::after { content: "Modifier"; }
+#editer-top4:checked + .editer::after { content: "Terminé"; }
+#editer-top4:focus-visible + .editer { outline: 2px solid var(--lien); outline-offset: 3px; border-radius: 4px; }
+
+.top4 .retirer, .top4 .changer {
+  opacity: 0; visibility: hidden; transform: scale(.6);
+  transition: opacity .2s, transform .2s, visibility .2s;
+}
+.top4:has(#editer-top4:checked) .retirer,
+.top4:has(#editer-top4:checked) .changer { opacity: 1; visibility: visible; transform: none; }
+.top4:has(#editer-top4:checked) .favoris img { outline: 2px dashed rgba(201, 194, 227, .45); outline-offset: 3px; }
+
+/* sur téléphone : toujours 4 sur une ligne, mais jusqu'aux bords de l'écran */
+@media (max-width: 600px) {
+  .top4 .favoris { gap: 6px; margin-inline: -1rem; }
+  .top4 .favoris img { border-width: 1px; border-radius: 8px; }
+}

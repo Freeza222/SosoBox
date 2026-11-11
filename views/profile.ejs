@@ -46,8 +46,13 @@
 
 <div class="profil-grille">
     <div class="profil-gauche">
-    <section>
-      <h2 class="etiquette">Top 4</h2>
+    <section class="top4">
+      <h2 class="etiquette">Top 4
+        <% if (user && user.id === profil.id) { %>
+          <input type="checkbox" id="editer-top4" class="sr-only">
+          <label for="editer-top4" class="editer"></label>
+        <% } %>
+      </h2>
       <ul class="favoris">
         <% for (let i = 0; i < 4; i++) { const f = favoris[i]; %>
           <li <% if (f && user && user.id === profil.id) { %>data-film="<%= f.id %>"<% } %>>
@@ -68,7 +73,9 @@
           </li>
         <% } %>
       </ul>
-        <% const moi = user && user.id === profil.id; %>
+    </section>
+
+    <% const moi = user && user.id === profil.id; %>
     <% if (acteurs.length > 0 || moi) { %>
       <section class="acteurs">
         <h2 class="etiquette">Acteurs préférés <% if (moi) { %><a href="/acteurs">Modifier</a><% } %></h2>
@@ -80,13 +87,12 @@
             <li>
               <img src="<%= a.photo ? 'https://image.tmdb.org/t/p/w185' + a.photo : '/avatar-defaut.svg' %>" alt="">
               <b><%= a.nom %></b>
-              <small><%= a.films %> de <%= moi ? "tes" : "ses" %> films</small>
+              <small><%= a.films %> films</small>
             </li>
           <% } %>
         </ul>
       </section>
     <% } %>
-    </section>
 
     <nav class="profil-liens" aria-label="Pages du profil">
       <a href="/u/<%= encodeURIComponent(profil.username) %>/a-voir">

@@ -502,6 +502,35 @@ app.get("/favoris/:id/affiche", async (req, res) => {
   res.render("affiche", { fav, affiches });
 });
 
+app.get("/acteurs", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const q = (req.query.q || "").trim().slice(0, 50);
+  const mes = db.prepare("SELECT person_id, nom, photo FROM acteurs_favoris WHERE user_id = ? ORDER BY id").all(req.session.userId);
+  const data = q ? await tmdb("/search/person?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => null) : null;
+  // seulement les acteurs (pas les réalisateurs, techniciens…), 12 au plus
+  const resultats = data ? data.results.filter(p => p.known_for_department === "Acting").slice(0, 12) : [];
+  const choisis = new Set(mes.map(a => a.person_id));
+  res.render("acteurs", { q, mes, resultats, choisis });
+});
+
+app.post("/acteurs/:id", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).send("Acteur invalide");
+  const retire = db.prepare("DELETE FROM acteurs_favoris WHERE user_id = ? AND person_id = ?").run(req.session.userId, id);
+  if (retire.changes === 0) {
+    const n = db.prepare("SELECT COUNT(*) AS n FROM acteurs_favoris WHERE user_id = ?").get(req.session.userId).n;
+    if (n >= 3) return res.status(400).send("3 acteurs maximum : retires-en un d'abord.");
+    // nom et photo demandés à TMDB par le serveur, jamais pris dans le formulaire
+    const p = await tmdb("/person/" + id + "?language=fr-FR").catch(() => null);
+    if (!p || p.adult) return res.status(404).send("Acteur introuvable");
+    db.prepare("INSERT INTO acteurs_favoris (user_id, person_id, nom, photo) VALUES (?, ?, ?, ?)")
+      .run(req.session.userId, id, p.name, p.profile_path);
+  }
+  const q = (req.body.q || "").slice(0, 50);
+  res.redirect("/acteurs" + (q ? "?q=" + encodeURIComponent(q) : ""));
+});
+
 app.post("/favoris/:id/affiche", (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   const poster = req.body.poster || "";

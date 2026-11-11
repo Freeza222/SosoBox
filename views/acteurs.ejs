@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<div class="etroit page-acteurs">
+  <h1>Mes acteurs préférés</h1>
+
+  <h2 class="etiquette">Mon choix · <%= mes.length %>/3</h2>
+  <% if (mes.length === 0) { %><p class="vide">Aucun pour l'instant : cherche un acteur ci-dessous.</p><% } %>
+  <ul class="acteurs-liste">
+    <% for (const a of mes) { %>
+      <li>
+        <img src="<%= a.photo ? 'https://image.tmdb.org/t/p/w185' + a.photo : '/avatar-defaut.svg' %>" alt="">
+        <b><%= a.nom %></b>
+        <form method="post" action="/acteurs/<%= a.person_id %>">
+          <input type="hidden" name="q" value="<%= q %>">
+          <button class="secondaire petit-btn">Retirer</button>
+        </form>
+      </li>
+    <% } %>
+  </ul>
+
+  <form class="recherche" action="/acteurs" role="search" autocomplete="off">
+    <input name="q" value="<%= q %>" placeholder="Un acteur, une actrice…" aria-label="Chercher un acteur">
+    <button>Chercher</button>
+  </form>
+
+  <% if (q && resultats.length === 0) { %><p class="vide">Personne trouvé pour « <%= q %> ».</p><% } %>
+  <ul class="choix-acteurs">
+    <% for (const p of resultats) { %>
+      <li>
+        <img src="<%= p.profile_path ? 'https://image.tmdb.org/t/p/w185' + p.profile_path : '/avatar-defaut.svg' %>" alt="" loading="lazy">
+        <b><%= p.name %></b>
+        <% if (choisis.has(p.id)) { %>
+          <span class="deja">Déjà choisi</span>
+        <% } else if (mes.length < 3) { %>
+          <form method="post" action="/acteurs/<%= p.id %>">
+            <input type="hidden" name="q" value="<%= q %>">
+            <button class="petit-btn">Ajouter</button>
+          </form>
+        <% } %>
+      </li>
+    <% } %>
+  </ul>
+</div>
+
+<%- include('partials/footer') %>
