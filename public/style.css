@@ -596,6 +596,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
     max-height: calc(100vh - 6.5rem);
     overflow-y: auto;
   }
+  .accueil.sans-fil { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ===== Profil sans bulles ===== */

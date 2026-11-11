@@ -25,13 +25,10 @@
     </div>
   </div>
 </section>
-<div class="<%= user ? 'accueil' : '' %>">
-  <% if (user) { %>
+<div class="<%= user ? 'accueil' : '' %> <%= user && fil.length === 0 ? 'sans-fil' : '' %>">
+  <% if (user && fil.length > 0) { %>
     <aside class="accueil-fil">
       <h2>Avis de tes abonnements</h2>
-      <% if (fil.length === 0) { %>
-        <p>Rien pour l'instant : suis des gens depuis leur profil.</p>
-      <% } %>
       <ul class="fil">
         <% for (const a of fil) { %>
             <li class="avis">
