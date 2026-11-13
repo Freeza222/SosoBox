@@ -162,7 +162,7 @@ app.get("/search", async (req, res) => {
       genreFilms = pages.flatMap(d => (d ? d.results : [])).slice(0, 35);
     }
   }
-  res.render("search", { q, onglet, fav, films, gens, genres, tendances, genreChoisi, genreFilms });
+  res.render("search", { q, onglet, fav, deja, films, gens, genres, tendances, genreChoisi, genreFilms });
 });
 
 app.get("/notifications", (req, res) => {
