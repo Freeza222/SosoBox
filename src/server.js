@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 const { tmdb } = require("./tmdb");
 const session = require("express-session");
 const app = express();
+const aujourdhui = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
+app.locals.aujourdhui = aujourdhui;
 app.set("trust proxy", 1);
 
 // Sessions rangées dans SQLite : elles survivent aux redémarrages
@@ -284,6 +286,10 @@ app.post("/films/:id/review", async (req, res) => {
   if (!Number.isInteger(id) || !Number.isInteger(rating) || rating < 1 || rating > 10) {
     return res.status(400).send("Note invalide");
   }
+  const vu = req.body.watched_on || null;
+  if (vu && (!/^\d{4}-\d{2}-\d{2}$/.test(vu) || vu < "1900-01-01" || vu > aujourdhui())) {
+    return res.status(400).send("Date invalide : elle ne peut pas être dans le futur.");
+  }
   let film;
   try {
     film = await tmdb("/movie/" + id + "?language=fr-FR");
@@ -293,7 +299,7 @@ app.post("/films/:id/review", async (req, res) => {
   copierFilm(film);
   db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on`)
-    .run(req.session.userId, id, rating, req.body.body || "", req.body.watched_on || null);
+      .run(req.session.userId, id, rating, req.body.body || "", vu);
       db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
   res.redirect("/films/" + id);
 });

@@ -73,7 +73,7 @@
           </label>
         <% } %>
       </div>
-      <label>Vu le <input name="watched_on" type="date" value="<%= monAvis ? monAvis.watched_on || "" : "" %>"></label>
+      <label>Vu le <input name="watched_on" type="date" min="1900-01-01" max="<%= aujourdhui() %>" value="<%= monAvis ? monAvis.watched_on || "" : "" %>"></label>
       <label>Critique <textarea name="body" rows="4"><%= monAvis ? monAvis.body || "" : "" %></textarea></label>
       <div class="actions">
         <button type="button" class="secondaire" onclick="this.closest('dialog').close()">Annuler</button>
