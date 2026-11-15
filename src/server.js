@@ -415,7 +415,16 @@ app.get("/u/:username", async (req, res) => {
     banniere = f && f.backdrop_path;
   }
 
-  res.render("profile", { profil, journal, suit, abonnes, abonnements, favoris, total, banniere, acteurs });
+  let compat = null;
+  if (req.session.userId && req.session.userId !== profil.id) {
+    const c = db.prepare(`
+      SELECT COUNT(*) AS n, AVG(ABS(a.rating - b.rating)) AS ecart
+      FROM reviews a JOIN reviews b ON b.film_id = a.film_id
+      WHERE a.user_id = ? AND b.user_id = ?
+    `).get(req.session.userId, profil.id);
+    if (c.n >= 3) compat = { score: Math.round(100 * (1 - c.ecart / 9)), n: c.n };
+  }
+  res.render("profile", { profil, journal, suit, abonnes, abonnements, favoris, total, banniere, acteurs, compat });
 });
 
 app.post("/films/:id/review/delete", (req, res) => {

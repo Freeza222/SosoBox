@@ -273,7 +273,7 @@ dialog textarea, dialog input:not([type="radio"]) { width: 100%; }
 .profil-nom h2 { margin: 0; }
 .profil-nom p { margin: .2rem 0 0; color: var(--lien); }
 .chiffres { display: flex; gap: 1.5rem; }
-.chiffres a { text-align: center; color: var(--lien); text-decoration: none; font-size: .85rem; }
+.chiffres a, .chiffres span { text-align: center; color: var(--lien); text-decoration: none; font-size: .85rem; }
 .chiffres b { display: block; font-size: 1.4rem; color: var(--texte); }
 
 .favoris { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin: 0; }

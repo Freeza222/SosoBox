@@ -13,6 +13,9 @@
     <a href="/u/<%= encodeURIComponent(profil.username) %>/films"><b><%= total %></b>films</a>
     <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnes"><b><%= abonnes %></b>abonnés</a>
     <a href="/u/<%= encodeURIComponent(profil.username) %>/abonnements"><b><%= abonnements %></b>abonnements</a>
+    <% if (compat) { %>
+      <span title="Calculé sur <%= compat.n %> films notés par vous deux"><b><%= compat.score %> %</b>compatibles</span>
+    <% } %>
   </div>
 </div>
 
