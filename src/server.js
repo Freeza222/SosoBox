@@ -192,7 +192,7 @@ app.get("/notifications", (req, res) => {
 app.get("/films/:id", async (req, res) => {
   let film;
   try {
-    film = await tmdb("/movie/" + encodeURIComponent(req.params.id) + "?language=fr-FR&append_to_response=credits");
+    film = await tmdb("/movie/" + encodeURIComponent(req.params.id) + "?language=fr-FR&append_to_response=credits,watch/providers");
   } catch {
     return res.status(404).send("Film introuvable");
   }

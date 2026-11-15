@@ -16,6 +16,21 @@
       <h1><%= film.title %></h1>
       <p><%= (film.release_date || "").slice(0, 4) %><% if (real) { %> · réalisé par <%= real.name %><% } %></p>
 
+            <% const fr = (film["watch/providers"]?.results || {}).FR; %>
+      <% if (fr && fr.flatrate) { %>
+        <div class="ou-voir">
+          <span>Disponible sur</span>
+          <% for (const p of fr.flatrate) { %>
+            <a href="<%= fr.link %>" target="_blank" rel="noopener" title="<%= p.provider_name %>">
+              <img src="https://image.tmdb.org/t/p/w92<%= p.logo_path %>" alt="<%= p.provider_name %>">
+            </a>
+          <% } %>
+          <small>Source : JustWatch</small>
+        </div>
+      <% } else { %>
+        <p class="ou-voir"><span>Pas en streaming en France pour l'instant.</span></p>
+      <% } %>
+
       <% if (user) { %>
         <div class="barre-film">
           <button type="button" onclick="document.getElementById('avis').showModal()"><%= monAvis ? "Modifier mon avis" : "Noter ce film" %></button>

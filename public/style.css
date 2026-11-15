@@ -945,3 +945,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .choix-acteurs li { display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center; }
 .choix-acteurs img { width: 96px; aspect-ratio: 1; object-fit: cover; border-radius: 50%; box-shadow: 0 10px 24px rgba(0, 0, 0, .45); }
 .choix-acteurs b { color: #ECE6FF; font-size: .9rem; }
+
+/* ===== Où le voir en France ===== */
+.ou-voir { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .75rem 0; color: var(--lien); font-size: .9rem; }
+.ou-voir img { width: 34px; height: 34px; border-radius: 8px; display: block; }
+.ou-voir small { font-size: .7rem; opacity: .7; }
