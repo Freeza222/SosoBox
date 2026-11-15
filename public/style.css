@@ -106,6 +106,8 @@ button:hover, .bouton:hover { background: var(--lien); color: var(--fond); }
 .petit:hover { background: var(--accent); color: white; }
 
 input, textarea {
+  font: inherit;
+  font-size: max(16px, 1rem);
   background: var(--carte);
   color: var(--texte);
   border: 1px solid var(--bordure);
