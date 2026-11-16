@@ -1038,3 +1038,7 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 @media (prefers-reduced-motion: reduce) {
   .jour *, .jour *::before, .jour *::after { animation: none !important; }
 }
+
+/* ===== Accueil : carte du film du jour ===== */
+.carte-jour { display: inline-flex; flex-direction: column; gap: 2px; margin-top: 1rem; padding: .7rem 1.2rem; border-radius: 16px; background: rgba(42, 30, 77, .75); border: 1px solid var(--lien); color: #fff; text-decoration: none; backdrop-filter: blur(6px); transition: transform .2s, background .2s; }
+.carte-jour:hover { transform: translateY(-2px); background: var(--accent); }

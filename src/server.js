@@ -130,8 +130,12 @@ app.get("/", async (req, res) => {
   `).all();
   if (plusVus.length > 0) rangees.splice(1, 0, { titre: "Les plus vus sur SosoBox", films: plusVus });
 
-  res.render("home", { fil, rangees: rangees.filter(r => r.films.length > 0), bandeHaut, bandeBas });
-});
+  const jourEtat = req.session.userId
+    ? db.prepare("SELECT COUNT(*) AS essais, MAX(temp) = 100 AS trouve FROM jour_essais WHERE user_id = ? AND jour = ?")
+        .get(req.session.userId, aujourdhui())
+    : null;
+    res.render("home", { fil, rangees: rangees.filter(r => r.films.length > 0), bandeHaut, bandeBas, jourEtat });
+  });
 
 app.get("/search", async (req, res) => {
   const q = req.query.q || "";

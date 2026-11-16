@@ -17,6 +17,14 @@
       <button>Chercher</button>
       <div id="suggestions"></div>
     </form>
+      <a class="carte-jour" href="/jour">
+      <span class="jour-label">Le film du jour</span>
+      <b>
+        <% if (jourEtat && jourEtat.trouve) { %>Trouvé en <%= jourEtat.essais %> essai<%= jourEtat.essais > 1 ? "s" : "" %> · voir le classement
+        <% } else if (jourEtat && jourEtat.essais) { %><%= jourEtat.essais %> essai<%= jourEtat.essais > 1 ? "s" : "" %> · continue !
+        <% } else { %>Devine le film mystère →<% } %>
+      </b>
+    </a>
   </div>
 
   <div class="bande-cadre" aria-hidden="true">
