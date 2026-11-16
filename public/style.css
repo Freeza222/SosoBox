@@ -1042,3 +1042,10 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 /* ===== Accueil : carte du film du jour ===== */
 .carte-jour { display: inline-flex; flex-direction: column; gap: 2px; margin-top: 1rem; padding: .7rem 1.2rem; border-radius: 16px; background: rgba(42, 30, 77, .75); border: 1px solid var(--lien); color: #fff; text-decoration: none; backdrop-filter: blur(6px); transition: transform .2s, background .2s; }
 .carte-jour:hover { transform: translateY(-2px); background: var(--accent); }
+
+/* ===== Recadrage de la photo de profil ===== */
+.recadrer { width: min(92vw, 360px); }
+.recadre-zone { position: relative; width: 100%; aspect-ratio: 1; margin: 0 auto 1rem; overflow: hidden; border-radius: 50%; background: #000; box-shadow: 0 0 0 3px var(--lien); touch-action: none; cursor: grab; }
+.recadre-zone:active { cursor: grabbing; }
+.recadre-zone img { position: absolute; top: 0; left: 0; max-width: none; transform-origin: 0 0; pointer-events: none; user-select: none; }
+.recadrer input[type="range"] { width: 100%; accent-color: var(--lien); }

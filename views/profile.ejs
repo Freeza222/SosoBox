@@ -45,6 +45,17 @@
       </div>
     </form>
   </dialog>
+    <dialog id="recadrer" class="recadrer">
+    <h3>Recadrer ma photo</h3>
+    <div class="recadre-zone" id="recadre-zone">
+      <img id="recadre-img" alt="Aperçu de ta photo" draggable="false">
+    </div>
+    <label>Zoom <input type="range" id="recadre-zoom" min="1" max="4" step="0.01" value="1"></label>
+    <div class="actions">
+      <button type="button" class="secondaire" id="recadre-annuler">Annuler</button>
+      <button type="button" id="recadre-ok">Enregistrer</button>
+    </div>
+  </dialog>
 <% } else if (user) { %>
   <form method="post" action="/u/<%= encodeURIComponent(profil.username) %>/follow" style="margin-bottom: 1.5rem">
     <button><%= suit ? "Ne plus suivre" : "Suivre" %></button>
@@ -152,15 +163,70 @@
   </form>
 
   <script>
+    const fenetre = document.getElementById("recadrer");
+    const zone = document.getElementById("recadre-zone");
+    const apercu = document.getElementById("recadre-img");
+    const zoom = document.getElementById("recadre-zoom");
+    const boutonOk = document.getElementById("recadre-ok");
+    let photo = null;           // l'image choisie (bien orientée)
+    let x = 0, y = 0;           // position du coin haut-gauche de la photo dans la zone, en px
+    let s = 1, base = 1;        // échelle actuelle, et échelle « zoom 1 » (la photo remplit juste le cercle)
+
+    // la photo doit toujours couvrir tout le cercle : on bloque x et y, puis on affiche
+    function placer() {
+      const Z = zone.clientWidth;
+      x = Math.min(0, Math.max(Z - photo.width * s, x));
+      y = Math.min(0, Math.max(Z - photo.height * s, y));
+      apercu.style.width = photo.width * s + "px";
+      apercu.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
     document.getElementById("champ-photo").addEventListener("change", async e => {
       const fichier = e.target.files[0];
+      e.target.value = "";                      // pour pouvoir rechoisir la même photo ensuite
       if (!fichier) return;
-      const image = await createImageBitmap(fichier, { imageOrientation: "from-image" });
-      const echelle = Math.min(1, 512 / Math.max(image.width, image.height));
+      photo = await createImageBitmap(fichier, { imageOrientation: "from-image" });
+      apercu.src = URL.createObjectURL(fichier);
+      boutonOk.disabled = false;
+      fenetre.showModal();                      // la zone doit être affichée pour connaître sa taille
+      const Z = zone.clientWidth;
+      base = Z / Math.min(photo.width, photo.height);
+      s = base;
+      zoom.value = 1;
+      x = (Z - photo.width * s) / 2;            // centrée au départ
+      y = (Z - photo.height * s) / 2;
+      placer();
+    });
+
+    // glisser la photo (souris ou doigt)
+    let px = 0, py = 0;
+    zone.addEventListener("pointerdown", e => { zone.setPointerCapture(e.pointerId); px = e.clientX; py = e.clientY; });
+    zone.addEventListener("pointermove", e => {
+      if (!zone.hasPointerCapture(e.pointerId)) return;
+      x += e.clientX - px; y += e.clientY - py;
+      px = e.clientX; py = e.clientY;
+      placer();
+    });
+
+    // zoomer autour du centre du cercle
+    zoom.addEventListener("input", () => {
+      const c = zone.clientWidth / 2;
+      const nouveau = base * zoom.value;
+      x = c - (c - x) * nouveau / s;
+      y = c - (c - y) * nouveau / s;
+      s = nouveau;
+      placer();
+    });
+
+    document.getElementById("recadre-annuler").addEventListener("click", () => fenetre.close());
+
+    // découper ce qui est dans le cercle, en 512 x 512, et l'envoyer
+    boutonOk.addEventListener("click", async () => {
+      boutonOk.disabled = true;
+      const Z = zone.clientWidth;
       const canvas = document.createElement("canvas");
-      canvas.width = Math.round(image.width * echelle);
-      canvas.height = Math.round(image.height * echelle);
-      canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+      canvas.width = canvas.height = 512;
+      canvas.getContext("2d").drawImage(photo, -x / s, -y / s, Z / s, Z / s, 0, 0, 512, 512);
       const jpeg = await new Promise(ok => canvas.toBlob(ok, "image/jpeg", 0.85));
       const donnees = new FormData();
       donnees.append("avatar", jpeg, "photo.jpg");
