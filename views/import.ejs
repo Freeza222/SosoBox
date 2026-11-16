@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+
+<div class="etroit">
+  <h1>Importer depuis Letterboxd</h1>
+  <ol>
+    <li>Sur Letterboxd : <b>Settings → Data → Export your data</b>.</li>
+    <li>Ouvre le ZIP reçu : prends <b>ratings.csv</b> (tes notes) et, si tu veux remplir ton journal, <b>diary.csv</b> (tes dates de visionnage).</li>
+    <li>Envoie-les ici. Les films déjà notés sur SosoBox gardent leur note ; s'ils n'avaient pas de date, elle est ajoutée.</li>
+  </ol>
+
+    <details class="aide-tel">
+    <summary>Tu as seulement l'appli Letterboxd sur téléphone ?</summary>
+    <p>L'export n'est pas dans l'appli : il se fait sur le <b>site</b>, depuis le navigateur du téléphone.</p>
+    <ol>
+      <li>Ouvre <b>Safari</b> (iPhone) ou <b>Chrome</b> (Android) et va sur <b>letterboxd.com/settings/data</b>. Connecte-toi avec ton compte habituel.</li>
+      <li>Si le lien t'envoie dans l'appli, ouvre-le en <b>navigation privée</b>, ou demande la <b>version ordinateur</b> du site dans le menu du navigateur.</li>
+      <li>Appuie sur <b>Export Your Data</b> : un fichier <b>.zip</b> se télécharge.</li>
+      <li>Dézippe-le :
+        <ul>
+          <li><b>iPhone</b> : app <b>Fichiers</b> → Téléchargements → touche le .zip, un dossier apparaît à côté.</li>
+          <li><b>Android</b> : app <b>Fichiers</b> → Téléchargements → touche le .zip → <b>Extraire</b>.</li>
+        </ul>
+      </li>
+      <li>Reviens ici, appuie sur « Choisir un fichier » et va chercher <b>ratings.csv</b> (et <b>diary.csv</b>) dans ce dossier.</li>
+    </ol>
+  </details>
+
+  <form method="post" action="/import" enctype="multipart/form-data"
+        onsubmit="const b = this.querySelector('button'); b.disabled = true; b.textContent = 'Import en cours… (jusqu’à 1 minute)';">
+    <label>Fichier ratings.csv <input type="file" name="fichier" accept=".csv,text/csv" required></label>
+    <label>Fichier diary.csv <small>(facultatif)</small> <input type="file" name="journal" accept=".csv,text/csv"></label>
+    <button>Importer</button>
+  </form>
+
+  <% if (erreur) { %><p class="vide"><%= erreur %></p><% } %>
+
+  <% if (bilan) { %>
+    <h2 class="etiquette">Import terminé</h2>
+    <p><b><%= bilan.ajoutes %></b> films ajoutés · <b><%= bilan.deja %></b> déjà notés sur SosoBox · <b><%= bilan.introuvables.length %></b> introuvables</p>
+    <p><b><%= bilan.dates %></b> films ont reçu une date et apparaissent dans ton journal.</p>
+    <% if (bilan.introuvables.length > 0) { %>
+      <p>Ceux-là, ajoute-les à la main avec la recherche :</p>
+      <ul>
+        <% for (const l of bilan.introuvables) { %>
+          <li><a href="/search?q=<%= encodeURIComponent(l.titre) %>"><%= l.titre %></a> (<%= l.annee %>) · <%= (l.note / 2).toString().replace(".", ",") %> ★</li>
+        <% } %>
+      </ul>
+    <% } %>
+    <p><a class="bouton" href="/u/<%= encodeURIComponent(user.username) %>">Voir mon profil</a></p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

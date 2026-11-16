@@ -89,7 +89,9 @@ img { max-width: 100%; }
 
 /* ===== Boutons et formulaires ===== */
 button, .bouton {
-  display: inline-block;
+  display: inline-flex; align-items: center; gap: .4rem;
+  font: inherit; font-size: .9rem; line-height: 1.2;
+  text-decoration: none; /* un lien-bouton n'est pas souligné */
   margin: 0;
   background: var(--accent);
   color: white;
@@ -950,3 +952,10 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .ou-voir { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .75rem 0; color: var(--lien); font-size: .9rem; }
 .ou-voir img { width: 34px; height: 34px; border-radius: 8px; display: block; }
 .ou-voir small { font-size: .7rem; opacity: .7; }
+
+/* ===== Import : aide téléphone ===== */
+.aide-tel { margin: 0 0 1.25rem; padding: .75rem 1rem; border: 1px solid var(--bordure); border-radius: 12px; background: var(--carte); }
+.aide-tel summary { cursor: pointer; font-weight: 600; color: var(--lien); }
+.aide-tel[open] summary { margin-bottom: .5rem; }
+.aide-tel ol, .aide-tel ul { padding-left: 1.2rem; }
+.aide-tel li { margin-bottom: .35rem; }

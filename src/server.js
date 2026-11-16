@@ -5,6 +5,9 @@ const multer = require("multer");
 const upload = multer({ limits: { fileSize: 1024 * 1024 } }).single("avatar");
 const bcrypt = require("bcrypt");
 const { tmdb } = require("./tmdb");
+const { lireCsv } = require("./csv");
+const uploadCsv = multer({ limits: { fileSize: 5 * 1024 * 1024 } })
+.fields([{ name: "fichier", maxCount: 1 }, { name: "journal", maxCount: 1 }]);
 const session = require("express-session");
 const app = express();
 const aujourdhui = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
@@ -95,7 +98,7 @@ app.get("/", async (req, res) => {
     JOIN users u ON u.id = r.user_id
     JOIN films f ON f.id = r.film_id
     WHERE fo.follower_id = ?
-    ORDER BY r.id DESC LIMIT 5
+    ORDER BY r.created_at DESC, r.id DESC LIMIT 5
   `).all(req.session.userId) : [];
 
   const RANGEES = [
@@ -384,6 +387,69 @@ app.post("/avatar", (req, res) => {
     }
     db.prepare("UPDATE users SET avatar = ?, avatar_type = ? WHERE id = ?").run(f.buffer, f.mimetype, req.session.userId);
     res.redirect("/u/" + encodeURIComponent(res.locals.user.username));
+  });
+});
+
+app.get("/import", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  res.render("import", { bilan: null, erreur: null });
+});
+
+app.post("/import", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  uploadCsv(req, res, async (err) => {
+    const fichier = req.files?.fichier?.[0];
+    if (err || !fichier) return res.render("import", { bilan: null, erreur: "Fichier manquant ou trop gros (5 Mo maximum)." });
+
+    // diary.csv (facultatif) : "Titre|Année" → date de visionnage la plus récente
+    const vus = new Map();
+    const journal = req.files?.journal?.[0];
+    if (journal) {
+      for (const d of lireCsv(journal.buffer.toString("utf8"))) {
+        const date = d["Watched Date"], cle = d.Name + "|" + d.Year;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date) && date <= aujourdhui() && !(vus.get(cle) >= date)) vus.set(cle, date);
+      }
+    }
+
+    const lignes = lireCsv(fichier.buffer.toString("utf8"))
+      .filter(l => l.Name && Number(l.Rating) > 0)                 // seulement les films notés
+      .slice(0, 3000)                                               // garde-fou
+      .map(l => ({
+        titre: l.Name,
+        annee: /^\d{4}$/.test(l.Year) ? l.Year : "",
+        note: Math.round(Number(l.Rating) * 2),                     // 0,5..5 étoiles → 1..10
+        date: /^\d{4}-\d{2}-\d{2}$/.test(l.Date) ? l.Date : aujourdhui(),
+        vu: vus.get(l.Name + "|" + l.Year) || null,                 // date de visionnage (diary.csv)
+      }));
+    if (lignes.length === 0) return res.render("import", { bilan: null, erreur: "Aucun film noté trouvé : envoie bien le fichier ratings.csv." });
+
+    const me = req.session.userId;
+    // DO NOTHING : si tu as déjà noté ce film sur SosoBox, on garde ta note SosoBox
+    const ajouter = db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, created_at)
+      VALUES (?, ?, ?, '', ?, ?) ON CONFLICT (user_id, film_id) DO NOTHING`);
+    // avis déjà là : on ajoute seulement la date s'il n'en avait pas
+    const ajouterDate = db.prepare(`UPDATE reviews SET watched_on = ?
+      WHERE user_id = ? AND film_id = ? AND (watched_on IS NULL OR watched_on = '')`);
+    const retirerAVoir = db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?");
+    const bilan = { ajoutes: 0, deja: 0, dates: 0, introuvables: [] };
+
+    for (let i = 0; i < lignes.length; i += 10) { // 10 recherches TMDB à la fois
+      await Promise.all(lignes.slice(i, i + 10).map(async l => {
+        const r = await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(l.titre) + (l.annee ? "&year=" + l.annee : "")).catch(() => null);
+        const film = r && r.results[0];
+        if (!film) return bilan.introuvables.push(l);
+        copierFilm(film);
+        if (ajouter.run(me, film.id, l.note, l.vu, l.date).changes) {
+          bilan.ajoutes++;
+          if (l.vu) bilan.dates++;
+        } else {
+          bilan.deja++;
+          if (l.vu && ajouterDate.run(l.vu, me, film.id).changes) bilan.dates++;
+        }
+        retirerAVoir.run(me, film.id);
+      }));
+    }
+    res.render("import", { bilan, erreur: null });
   });
 });
 
