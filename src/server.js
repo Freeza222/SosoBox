@@ -12,6 +12,7 @@ const session = require("express-session");
 const app = express();
 const aujourdhui = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
 app.locals.aujourdhui = aujourdhui;
+const { annee, comparer } = require("./jour");
 app.set("trust proxy", 1);
 
 // Sessions rangées dans SQLite : elles survivent aux redémarrages
@@ -28,6 +29,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS acteurs_favoris (
 )`);
 try { db.exec("ALTER TABLE users ADD COLUMN notif_vu_at TEXT"); db.exec("UPDATE users SET notif_vu_at = datetime('now')"); } catch {}
 try { db.exec("ALTER TABLE reviews ADD COLUMN created_at TEXT"); } catch {}
+try { db.exec("ALTER TABLE jour_essais ADD COLUMN cases TEXT"); } catch {} // les 4 cases de la grille, en JSON
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
 class SqliteStore extends session.Store {
@@ -676,6 +678,55 @@ let catalogue = [];
   console.log("Catalogue de suggestions :", catalogue.length, "films");
 })();
 
+const cibles = new Map();
+async function filmDuJour() {
+  const jour = aujourdhui();
+  if (cibles.has(jour)) return cibles.get(jour);
+  let ligne = db.prepare("SELECT film_id FROM jour_films WHERE jour = ?").get(jour);
+  if (!ligne) {
+    const pris = new Set(db.prepare("SELECT film_id FROM jour_films").all().map(r => r.film_id));
+    const libres = catalogue.slice(0, 300).filter(f => !pris.has(f.id)); // les 300 plus votés = les plus connus
+    if (libres.length === 0) return null;                                 // catalogue pas encore chargé
+    const choix = libres[Math.floor(Math.random() * libres.length)];
+    db.prepare("INSERT OR IGNORE INTO jour_films (jour, film_id) VALUES (?, ?)").run(jour, choix.id);
+    ligne = db.prepare("SELECT film_id FROM jour_films WHERE jour = ?").get(jour);
+    if (!ligne) return null;
+  }
+  const film = await tmdb("/movie/" + ligne.film_id + "?language=fr-FR&append_to_response=credits");
+  cibles.clear();
+  cibles.set(jour, film);
+  return film;
+}
+
+app.get("/jour", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const cible = await filmDuJour().catch(() => null);
+  if (!cible) return res.render("jour", { pret: false });
+  const jour = aujourdhui();
+  const essais = db.prepare("SELECT id, titre, temp, cases FROM jour_essais WHERE user_id = ? AND jour = ? ORDER BY id DESC")
+    .all(req.session.userId, jour)                              // le plus récent en haut, comme Onepiecedle
+    .map(e => ({ ...e, cases: JSON.parse(e.cases || "[]") }));
+  const trouve = essais.some(e => e.temp === 100);
+  const numero = db.prepare("SELECT COUNT(*) AS n FROM jour_films WHERE jour <= ?").get(jour).n;
+  // le film n'est envoyé à la page QUE si tu l'as trouvé
+  res.render("jour", { pret: true, essais, trouve, numero, cible: trouve ? cible : null });
+});
+
+app.post("/jour/essai", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const id = Number(req.body.film_id);
+  const cible = await filmDuJour().catch(() => null);
+  if (!cible || !Number.isInteger(id)) return res.redirect("/jour");
+  const me = req.session.userId, jour = aujourdhui();
+  if (db.prepare("SELECT 1 FROM jour_essais WHERE user_id = ? AND jour = ? AND temp = 100").get(me, jour)) return res.redirect("/jour");
+  const essai = await tmdb("/movie/" + id + "?language=fr-FR&append_to_response=credits").catch(() => null);
+  if (!essai) return res.redirect("/jour");
+  const { temp, cases } = comparer(cible, essai);
+  db.prepare("INSERT OR IGNORE INTO jour_essais (user_id, jour, film_id, titre, temp, cases) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(me, jour, essai.id, essai.title + " (" + (annee(essai) || "?") + ")", temp, JSON.stringify(cases));
+  res.redirect("/jour");
+});
+
 app.get("/api/suggestions", async (req, res) => {
   const q = (req.query.q || "").trim().slice(0, 50);
   if (!q) return res.json({ films: [], gens: [] });
@@ -734,6 +785,7 @@ app.post("/admin/membres/:id/supprimer", estAdmin, (req, res) => {
     db.prepare("DELETE FROM follows   WHERE follower_id = ? OR followed_id = ?").run(id, id);
     db.prepare("DELETE FROM sessions  WHERE json_extract(data, '$.userId') = ?").run(id);
     db.prepare("DELETE FROM acteurs_favoris WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM jour_essais WHERE user_id = ?").run(id);
     db.prepare("DELETE FROM users     WHERE id = ?").run(id);
   })();
   res.redirect("/admin");

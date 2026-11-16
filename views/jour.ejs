@@ -1,0 +1,81 @@
+<%- include('partials/header') %>
+<%
+  const couleur = t => t >= 60 ? "#FF6B3D" : t >= 35 ? "#FFB347" : t >= 15 ? "#C9C2E3" : "#6FA8FF";
+  const lu = { oui: "pareil", mi: "en partie", non: "différent" }; // pour les lecteurs d'écran
+%>
+
+<div class="jour">
+  <% if (!pret) { %>
+    <h1>Le film du jour</h1>
+    <p class="vide">Le film du jour se prépare… recharge dans quelques secondes.</p>
+  <% } else { %>
+    <div class="jour-titre">
+      <h1>Le film du jour</h1>
+      <span class="jour-label">n° <%= numero %> · <%= essais.length %> essai<%= essais.length > 1 ? "s" : "" %></span>
+    </div>
+
+    <% if (trouve) { %>
+      <a class="jour-trouve" href="/films/<%= cible.id %>">
+        <span class="jour-label">Trouvé en <%= essais.length %> essai<%= essais.length > 1 ? "s" : "" %></span>
+        <b><%= cible.title %></b> · voir la fiche
+      </a>
+    <% } else { %>
+      <form class="jour-form" method="post" action="/jour/essai" autocomplete="off">
+        <label class="sr-only" for="jour-champ">Propose un film</label>
+        <input id="jour-champ" name="titre" placeholder="Propose un film…" required>
+        <!-- les suggestions sont des <button name="film_id" value="…"> : Entrée choisit la 1re -->
+        <div class="jour-sugg" id="jour-sugg"></div>
+      </form>
+    <% } %>
+
+    <div class="jour-legende" aria-hidden="true">
+      <span><i class="case-oui"></i>Pareil</span>
+      <span><i class="case-mi"></i>En partie</span>
+      <span><i class="case-non"></i>Rien en commun</span>
+      <span>↑ ↓ le film mystère est plus récent / plus ancien</span>
+    </div>
+
+    <ul class="essais">
+      <% essais.forEach((e, n) => { %>
+        <li class="<%= n === 0 ? 'nouveau' : '' %>">
+          <div class="ligne"><b><%= e.titre %></b><b class="temp" style="color: <%= couleur(e.temp) %>"><%= e.temp %> °C</b></div>
+          <div class="cases">
+            <% e.cases.forEach((c, i) => { %>
+              <div class="case case-<%= c.etat %>" style="--i: <%= i %>">
+                <small><%= c.lab %></small><b><%= c.val %></b><span class="sr-only"><%= lu[c.etat] %></span>
+              </div>
+            <% }) %>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</div>
+
+<% if (pret && !trouve) { %>
+<script>
+  const champ = document.getElementById("jour-champ");
+  const boite = document.getElementById("jour-sugg");
+  let derniere = 0;
+
+  champ.addEventListener("input", async () => {
+    const n = ++derniere;
+    const q = champ.value.trim();
+    if (q.length < 2) { boite.replaceChildren(); return; }
+    const { films } = await (await fetch("/api/suggestions?q=" + encodeURIComponent(q))).json();
+    if (n !== derniere) return;
+    boite.replaceChildren(...films.map(f => {
+      const b = document.createElement("button");
+      b.name = "film_id";
+      b.value = f.id;                 // c'est CE champ que le serveur reçoit
+      const img = document.createElement("img");
+      img.src = "https://image.tmdb.org/t/p/w92" + f.poster;
+      img.alt = "";
+      b.append(img, f.title + (f.year ? " (" + f.year + ")" : "")); // du texte, jamais du HTML
+      return b;
+    }));
+  });
+</script>
+<% } %>
+
+<%- include('partials/footer') %>

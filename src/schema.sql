@@ -47,3 +47,19 @@ CREATE TABLE IF NOT EXISTS watchlist (
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, film_id)
 );
+
+CREATE TABLE IF NOT EXISTS jour_films (
+  jour TEXT PRIMARY KEY,
+  film_id INTEGER NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS jour_essais (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  jour TEXT NOT NULL,
+  film_id INTEGER NOT NULL,
+  titre TEXT NOT NULL,
+  temp INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, jour, film_id)
+);

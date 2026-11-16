@@ -959,3 +959,51 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .aide-tel[open] summary { margin-bottom: .5rem; }
 .aide-tel ol, .aide-tel ul { padding-left: 1.2rem; }
 .aide-tel li { margin-bottom: .35rem; }
+
+/* ===== Film du jour (grille) ===== */
+.jour { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+.jour h1 { margin: 0; font-family: "Playfair SosoBox", serif; font-style: italic; font-weight: 900; color: #fff; }
+.jour-titre { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.jour-label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lien); }
+
+/* la saisie */
+.jour-form { position: relative; }
+.jour-form input { width: 100%; min-height: 52px; border-radius: 999px; padding: 0 1.2rem; }
+.jour-sugg { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; background: var(--carte); border: 1px solid var(--bordure); }
+.jour-sugg:empty { display: none; }
+.jour-sugg button { display: flex; align-items: center; gap: .6rem; border-radius: 0; background: transparent; color: var(--texte); padding: .5rem .8rem; text-align: left; }
+.jour-sugg button:hover, .jour-sugg button:focus-visible { background: rgba(139, 124, 199, .2); color: #fff; }
+.jour-sugg img { width: 28px; height: 42px; object-fit: cover; border-radius: 4px; }
+
+/* la légende */
+.jour-legende { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .8rem; color: var(--lien); }
+.jour-legende span { display: inline-flex; align-items: center; gap: .4rem; }
+.jour-legende i { width: 14px; height: 14px; border-radius: 4px; }
+
+/* les essais et leurs 4 cases */
+.essais { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+.essais li { padding: .7rem; border-radius: 14px; background: var(--carte); border: 1px solid var(--bordure); }
+.essais .ligne { display: flex; justify-content: space-between; gap: .6rem; margin-bottom: .45rem; }
+.essais .temp { flex: none; font-weight: 800; }
+.cases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.case { min-height: 58px; padding: 6px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; font-size: .82rem; line-height: 1.15; overflow-wrap: anywhere; }
+.case small { font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+.case-oui { background: #FFC94D; color: #1f0f40; }
+.case-mi { background: #7A55C0; color: #fff; }
+.case-non { background: var(--fond); color: var(--lien); border: 1px solid var(--bordure); }
+
+/* l'animation du dernier essai : la ligne glisse, les cases se retournent une par une, puis la température */
+.essais li.nouveau { border-color: var(--lien); animation: jour-entrer .45s cubic-bezier(.2, .8, .2, 1) both; }
+.essais li.nouveau .case { animation: jour-retourner .6s calc(.3s + var(--i) * .35s) cubic-bezier(.2, .8, .2, 1) both; }
+.essais li.nouveau .temp { animation: jour-pop .45s 1.8s cubic-bezier(.3, 1.6, .5, 1) both; }
+
+.jour-trouve { display: block; padding: 1rem 1.2rem; border-radius: 16px; background: var(--carte); border: 1px solid #FFC94D; color: #fff; text-decoration: none; animation: jour-entrer .6s both; }
+
+@keyframes jour-entrer { from { opacity: 0; transform: translateY(-12px) scale(.97); } }
+@keyframes jour-retourner { from { opacity: 0; transform: perspective(500px) rotateX(-90deg); } }
+@keyframes jour-pop { from { opacity: 0; transform: scale(.4); } }
+
+/* respecte les gens qui ont demandé moins d'animations dans leur système */
+@media (prefers-reduced-motion: reduce) {
+  .jour *, .jour *::before, .jour *::after { animation: none !important; }
+}
