@@ -401,8 +401,6 @@ app.post("/import", (req, res) => {
   uploadCsv(req, res, async (err) => {
     const fichier = req.files?.fichier?.[0];
     if (err || !fichier) return res.render("import", { bilan: null, erreur: "Fichier manquant ou trop gros (5 Mo maximum)." });
-
-    // diary.csv (facultatif) : "Titre|Année" → date de visionnage la plus récente
     const vus = new Map();
     const journal = req.files?.journal?.[0];
     if (journal) {
@@ -413,28 +411,27 @@ app.post("/import", (req, res) => {
     }
 
     const lignes = lireCsv(fichier.buffer.toString("utf8"))
-      .filter(l => l.Name && Number(l.Rating) > 0)                 // seulement les films notés
-      .slice(0, 3000)                                               // garde-fou
+      .filter(l => l.Name && Number(l.Rating) > 0)
+      .slice(0, 3000)
       .map(l => ({
         titre: l.Name,
         annee: /^\d{4}$/.test(l.Year) ? l.Year : "",
-        note: Math.round(Number(l.Rating) * 2),                     // 0,5..5 étoiles → 1..10
+        note: Math.round(Number(l.Rating) * 2),
         date: /^\d{4}-\d{2}-\d{2}$/.test(l.Date) ? l.Date : aujourdhui(),
-        vu: vus.get(l.Name + "|" + l.Year) || null,                 // date de visionnage (diary.csv)
+        vu: vus.get(l.Name + "|" + l.Year)
+          || (/^\d{4}-\d{2}-\d{2}$/.test(l["Watched Date"]) && l["Watched Date"] <= aujourdhui() ? l["Watched Date"] : null),                
       }));
     if (lignes.length === 0) return res.render("import", { bilan: null, erreur: "Aucun film noté trouvé : envoie bien le fichier ratings.csv." });
 
     const me = req.session.userId;
-    // DO NOTHING : si tu as déjà noté ce film sur SosoBox, on garde ta note SosoBox
     const ajouter = db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, created_at)
       VALUES (?, ?, ?, '', ?, ?) ON CONFLICT (user_id, film_id) DO NOTHING`);
-    // avis déjà là : on ajoute seulement la date s'il n'en avait pas
     const ajouterDate = db.prepare(`UPDATE reviews SET watched_on = ?
       WHERE user_id = ? AND film_id = ? AND (watched_on IS NULL OR watched_on = '')`);
     const retirerAVoir = db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?");
     const bilan = { ajoutes: 0, deja: 0, dates: 0, introuvables: [] };
 
-    for (let i = 0; i < lignes.length; i += 10) { // 10 recherches TMDB à la fois
+    for (let i = 0; i < lignes.length; i += 10) {
       await Promise.all(lignes.slice(i, i + 10).map(async l => {
         const r = await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(l.titre) + (l.annee ? "&year=" + l.annee : "")).catch(() => null);
         const film = r && r.results[0];
@@ -702,6 +699,8 @@ app.get("/jour", async (req, res) => {
   const cible = await filmDuJour().catch(() => null);
   if (!cible) return res.render("jour", { pret: false });
   const me = req.session.userId, jour = aujourdhui();
+  const anime = req.session.anime || ""; // lu une fois…
+  delete req.session.anime;
   const essais = db.prepare("SELECT id, titre, temp, cases FROM jour_essais WHERE user_id = ? AND jour = ? ORDER BY id DESC")
     .all(me, jour)
     .map(e => ({ ...e, cases: JSON.parse(e.cases || "[]") }));
@@ -724,7 +723,7 @@ app.get("/jour", async (req, res) => {
     ORDER BY essais, indices, e.created_at
   `).all(jour) : [];
 
-  res.render("jour", { pret: true, essais, trouve, numero, indices, nbIndices: ouverts.size, classement, cible: trouve ? cible : null });
+  res.render("jour", { pret: true, essais, trouve, numero, indices, nbIndices: ouverts.size, classement, anime, cible: trouve ? cible : null });
 });
 
 app.post("/jour/indice/:n", (req, res) => {
@@ -734,6 +733,7 @@ app.post("/jour/indice/:n", (req, res) => {
   const etat = db.prepare("SELECT COUNT(*) AS nb, MAX(temp) AS max FROM jour_essais WHERE user_id = ? AND jour = ?").get(me, jour);
   if (ind && etat.nb >= ind.seuil && etat.max !== 100) {
     db.prepare("INSERT OR IGNORE INTO jour_indices (user_id, jour, indice) VALUES (?, ?, ?)").run(me, jour, n);
+    req.session.anime = "indice-" + n;
   }
   res.redirect("/jour");
 });
@@ -750,6 +750,7 @@ app.post("/jour/essai", async (req, res) => {
   const { temp, cases } = comparer(cible, essai);
   db.prepare("INSERT OR IGNORE INTO jour_essais (user_id, jour, film_id, titre, temp, cases) VALUES (?, ?, ?, ?, ?, ?)")
     .run(me, jour, essai.id, essai.title + " (" + (annee(essai) || "?") + ")", temp, JSON.stringify(cases));
+  req.session.anime = "essai";
   res.redirect("/jour");
 });
 

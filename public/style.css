@@ -1007,7 +1007,8 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .indice small { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; }
 .indice.dispo { width: 100%; border: 1px solid var(--lien); background: rgba(139, 124, 199, .15); color: #fff; border-radius: 12px; }
 .indice.dispo:hover { background: var(--accent); }
-.indice.ouvert { border: 1px solid var(--bordure); border-style: solid; background: var(--carte); color: #fff; animation: jour-retourner .6s cubic-bezier(.2, .8, .2, 1) both; }
+.indice.ouvert { border: 1px solid var(--bordure); border-style: solid; background: var(--carte); color: #fff; }
+.indice.nouveau { animation: jour-retourner .6s cubic-bezier(.2, .8, .2, 1) both; } /* seulement celui qu'on vient d'ouvrir */
 .indice.image { grid-column: 1 / -1; align-items: center; }
 .indice.image img { width: 120px; border-radius: 8px; filter: blur(14px); }  /* ponytail: flou en CSS, contournable avec F12 ; une image floutée côté serveur si un jour ça compte */
 
