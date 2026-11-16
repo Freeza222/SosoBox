@@ -1,11 +1,10 @@
-// Film du jour : comparaison d'un essai avec le film mystère
+
 const annee = f => Number((f.release_date || "").slice(0, 4)) || 0;
 
-// → { temp: 0..100, cases: les 4 cases de la grille (Année, Genres, Réal., Casting) }
 function comparer(cible, essai) {
   const trouve = cible.id === essai.id;
   const reals = f => f.credits.crew.filter(p => p.job === "Director");
-  const acteurs = f => f.credits.cast.slice(0, 10); // les 10 premiers rôles
+  const acteurs = f => f.credits.cast.slice(0, 10);
   const idsReal = new Set(reals(cible).map(p => p.id));
   const idsActeurs = new Set(acteurs(cible).map(p => p.id));
   const idsGenres = new Set(cible.genres.map(g => g.id));
@@ -13,7 +12,7 @@ function comparer(cible, essai) {
   const memeReal = reals(essai).some(p => idsReal.has(p.id));
   const acteursCommuns = acteurs(essai).filter(p => idsActeurs.has(p.id));
   const genresCommuns = essai.genres.filter(g => idsGenres.has(g.id));
-  const ecart = annee(cible) - annee(essai); // > 0 : le film mystère est plus récent
+  const ecart = annee(cible) - annee(essai);
   const saga = cible.belongs_to_collection;
   const memeSaga = !!saga && saga.id === essai.belongs_to_collection?.id;
 
@@ -25,7 +24,7 @@ function comparer(cible, essai) {
     + (memeSaga ? 8 : 0));
 
   const etat = (oui, mi) => (trouve || oui ? "oui" : mi ? "mi" : "non");
-  const nom = p => p ? p.name.split(" ").pop() : "—"; // juste le nom de famille, ça tient dans la case
+  const nom = p => p ? p.name.split(" ").pop() : "—";
   const memesGenres = genresCommuns.length === essai.genres.length && essai.genres.length === cible.genres.length;
   const cases = [
     { lab: "Année", val: annee(essai) + (ecart > 0 ? " ↑" : ecart < 0 ? " ↓" : ""), etat: etat(ecart === 0, Math.abs(ecart) <= 5) },
@@ -37,9 +36,16 @@ function comparer(cible, essai) {
   return { temp, cases };
 }
 
-module.exports = { annee, comparer };
+const INDICES = [
+  { seuil: 3, nom: "Décennie", valeur: f => "Années " + Math.floor(annee(f) / 10) * 10 },
+  { seuil: 5, nom: "Genres", valeur: f => f.genres.map(g => g.name).join(", ") || "—" },
+  { seuil: 7, nom: "Un acteur", valeur: f => f.credits.cast[0]?.name || "—" },
+  { seuil: 9, nom: "Réalisateur", valeur: f => f.credits.crew.find(p => p.job === "Director")?.name || "—" },
+  { seuil: 12, nom: "Affiche floutée", image: true, valeur: f => f.poster_path },
+];
 
-// Auto-test : node src/jour.js
+module.exports = { annee, comparer, INDICES };
+
 if (require.main === module) {
   const assert = require("assert");
   const film = (id, an, genres, real, cast, saga) => ({
@@ -65,5 +71,9 @@ if (require.main === module) {
 
   const suite = comparer(film(4, 2001, [12], 30, [1], 99), film(5, 2002, [12], 31, [2], 99)); // même saga
   assert.strictEqual(suite.temp, 6 + 14 + 8);
+
+    assert.strictEqual(INDICES[0].valeur(interstellar), "Années 2010");
+  assert.strictEqual(INDICES[3].valeur(inception), "Réal 10");
+
   console.log("jour.js : OK");
 }

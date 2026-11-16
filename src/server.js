@@ -12,10 +12,9 @@ const session = require("express-session");
 const app = express();
 const aujourdhui = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
 app.locals.aujourdhui = aujourdhui;
-const { annee, comparer } = require("./jour");
+const { annee, comparer, INDICES } = require("./jour");
 app.set("trust proxy", 1);
 
-// Sessions rangées dans SQLite : elles survivent aux redémarrages
 db.exec("CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NOT NULL, expire INTEGER NOT NULL)");
 try { db.exec("ALTER TABLE favorites ADD COLUMN poster_path TEXT"); } catch {}
 try { db.exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"); } catch {}
@@ -29,7 +28,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS acteurs_favoris (
 )`);
 try { db.exec("ALTER TABLE users ADD COLUMN notif_vu_at TEXT"); db.exec("UPDATE users SET notif_vu_at = datetime('now')"); } catch {}
 try { db.exec("ALTER TABLE reviews ADD COLUMN created_at TEXT"); } catch {}
-try { db.exec("ALTER TABLE jour_essais ADD COLUMN cases TEXT"); } catch {} // les 4 cases de la grille, en JSON
+try { db.exec("ALTER TABLE jour_essais ADD COLUMN cases TEXT"); } catch {}
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
 class SqliteStore extends session.Store {
@@ -702,14 +701,41 @@ app.get("/jour", async (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   const cible = await filmDuJour().catch(() => null);
   if (!cible) return res.render("jour", { pret: false });
-  const jour = aujourdhui();
+  const me = req.session.userId, jour = aujourdhui();
   const essais = db.prepare("SELECT id, titre, temp, cases FROM jour_essais WHERE user_id = ? AND jour = ? ORDER BY id DESC")
-    .all(req.session.userId, jour)                              // le plus récent en haut, comme Onepiecedle
+    .all(me, jour)
     .map(e => ({ ...e, cases: JSON.parse(e.cases || "[]") }));
   const trouve = essais.some(e => e.temp === 100);
   const numero = db.prepare("SELECT COUNT(*) AS n FROM jour_films WHERE jour <= ?").get(jour).n;
-  // le film n'est envoyé à la page QUE si tu l'as trouvé
-  res.render("jour", { pret: true, essais, trouve, numero, cible: trouve ? cible : null });
+
+  const ouverts = new Set(db.prepare("SELECT indice FROM jour_indices WHERE user_id = ? AND jour = ?").all(me, jour).map(r => r.indice));
+  const indices = INDICES.map((ind, i) => ({
+    n: i, nom: ind.nom, image: !!ind.image,
+    reste: Math.max(0, ind.seuil - essais.length),
+    valeur: ouverts.has(i) ? ind.valeur(cible) : null,
+  }));
+
+  const classement = trouve ? db.prepare(`
+    SELECT u.username,
+      (SELECT COUNT(*) FROM jour_essais x WHERE x.user_id = e.user_id AND x.jour = e.jour) AS essais,
+      (SELECT COUNT(*) FROM jour_indices i WHERE i.user_id = e.user_id AND i.jour = e.jour) AS indices
+    FROM jour_essais e JOIN users u ON u.id = e.user_id
+    WHERE e.jour = ? AND e.temp = 100
+    ORDER BY essais, indices, e.created_at
+  `).all(jour) : [];
+
+  res.render("jour", { pret: true, essais, trouve, numero, indices, nbIndices: ouverts.size, classement, cible: trouve ? cible : null });
+});
+
+app.post("/jour/indice/:n", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  const n = Number(req.params.n), me = req.session.userId, jour = aujourdhui();
+  const ind = INDICES[n];
+  const etat = db.prepare("SELECT COUNT(*) AS nb, MAX(temp) AS max FROM jour_essais WHERE user_id = ? AND jour = ?").get(me, jour);
+  if (ind && etat.nb >= ind.seuil && etat.max !== 100) {
+    db.prepare("INSERT OR IGNORE INTO jour_indices (user_id, jour, indice) VALUES (?, ?, ?)").run(me, jour, n);
+  }
+  res.redirect("/jour");
 });
 
 app.post("/jour/essai", async (req, res) => {

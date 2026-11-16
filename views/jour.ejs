@@ -14,11 +14,39 @@
       <span class="jour-label">n° <%= numero %> · <%= essais.length %> essai<%= essais.length > 1 ? "s" : "" %></span>
     </div>
 
-    <% if (trouve) { %>
-      <a class="jour-trouve" href="/films/<%= cible.id %>">
-        <span class="jour-label">Trouvé en <%= essais.length %> essai<%= essais.length > 1 ? "s" : "" %></span>
-        <b><%= cible.title %></b> · voir la fiche
-      </a>
+        <% if (trouve) { %>
+      <% const real = cible.credits.crew.find(p => p.job === "Director"); %>
+      <section class="victoire">
+        <% if (cible.poster_path) { %><img src="https://image.tmdb.org/t/p/w185<%= cible.poster_path %>" alt=""><% } %>
+        <div>
+          <span class="jour-label victoire-label">Trouvé · 100 °C</span>
+          <h2><%= cible.title %></h2>
+          <p><%= (cible.release_date || "").slice(0, 4) %><% if (real) { %> · <%= real.name %><% } %></p>
+          <p><b><%= essais.length %> essai<%= essais.length > 1 ? "s" : "" %></b> · <%= nbIndices %> indice<%= nbIndices > 1 ? "s" : "" %></p>
+          <a class="bouton secondaire" href="/films/<%= cible.id %>">Voir la fiche</a>
+        </div>
+      </section>
+
+      <!-- tes essais dans l'ordre, du premier au dernier, en couleurs -->
+      <div class="carres" role="img" aria-label="Tes essais, du premier au dernier : <%= essais.slice().reverse().map(e => e.temp + ' degrés').join(', ') %>">
+        <% essais.slice().reverse().forEach((e, i) => { %>
+          <span style="--i: <%= i %>; background: <%= e.temp === 100 ? '#FFC94D' : couleur(e.temp) %>"></span>
+        <% }) %>
+      </div>
+
+      <section>
+        <h2 class="etiquette">Classement du jour</h2>
+        <ol class="classement">
+          <% classement.forEach((c, i) => { %>
+            <li class="<%= c.username === user.username ? 'moi' : '' %>">
+              <span class="rang"><%= i + 1 %></span>
+              <img class="avatar-nav" src="/u/<%= encodeURIComponent(c.username) %>/avatar" alt="">
+              <a href="/u/<%= encodeURIComponent(c.username) %>"><%= c.username %></a>
+              <span class="score"><%= c.essais %> essai<%= c.essais > 1 ? "s" : "" %> · <%= c.indices %> indice<%= c.indices > 1 ? "s" : "" %></span>
+            </li>
+          <% }) %>
+        </ol>
+      </section>
     <% } else { %>
       <form class="jour-form" method="post" action="/jour/essai" autocomplete="off">
         <label class="sr-only" for="jour-champ">Propose un film</label>
@@ -26,6 +54,30 @@
         <!-- les suggestions sont des <button name="film_id" value="…"> : Entrée choisit la 1re -->
         <div class="jour-sugg" id="jour-sugg"></div>
       </form>
+
+      <section class="indices">
+        <h2 class="etiquette">Indices</h2>
+        <div class="indices-grille">
+          <% for (const ind of indices) { %>
+            <% if (ind.valeur) { %>
+              <div class="indice ouvert<%= ind.image ? ' image' : '' %>">
+                <small><%= ind.nom %></small>
+                <% if (ind.image) { %>
+                  <img src="https://image.tmdb.org/t/p/w185<%= ind.valeur %>" alt="Affiche floutée du film mystère">
+                <% } else { %>
+                  <b><%= ind.valeur %></b>
+                <% } %>
+              </div>
+            <% } else if (ind.reste === 0) { %>
+              <form method="post" action="/jour/indice/<%= ind.n %>">
+                <button class="indice dispo"><small>Débloquer</small><b><%= ind.nom %></b></button>
+              </form>
+            <% } else { %>
+              <div class="indice"><small><%= ind.nom %></small><span>dans <%= ind.reste %> essai<%= ind.reste > 1 ? "s" : "" %></span></div>
+            <% } %>
+          <% } %>
+        </div>
+      </section>
     <% } %>
 
     <div class="jour-legende" aria-hidden="true">

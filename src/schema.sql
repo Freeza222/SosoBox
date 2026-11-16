@@ -63,3 +63,10 @@ CREATE TABLE IF NOT EXISTS jour_essais (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, jour, film_id)
 );
+
+CREATE TABLE IF NOT EXISTS jour_indices (
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  jour TEXT NOT NULL,
+  indice INTEGER NOT NULL,
+  PRIMARY KEY (user_id, jour, indice)
+);
