@@ -685,7 +685,7 @@ async function filmDuJour() {
   let ligne = db.prepare("SELECT film_id FROM jour_films WHERE jour = ?").get(jour);
   if (!ligne) {
     const pris = new Set(db.prepare("SELECT film_id FROM jour_films").all().map(r => r.film_id));
-    const libres = catalogue.slice(0, 300).filter(f => !pris.has(f.id)); // les 300 plus votés = les plus connus
+    const libres = catalogue.slice(0, 150).filter(f => !pris.has(f.id));
     if (libres.length === 0) return null;                                 // catalogue pas encore chargé
     const choix = libres[Math.floor(Math.random() * libres.length)];
     db.prepare("INSERT OR IGNORE INTO jour_films (jour, film_id) VALUES (?, ?)").run(jour, choix.id);
