@@ -29,6 +29,9 @@ db.exec(`CREATE TABLE IF NOT EXISTS acteurs_favoris (
 try { db.exec("ALTER TABLE users ADD COLUMN notif_vu_at TEXT"); db.exec("UPDATE users SET notif_vu_at = datetime('now')"); } catch {}
 try { db.exec("ALTER TABLE reviews ADD COLUMN created_at TEXT"); } catch {}
 try { db.exec("ALTER TABLE jour_essais ADD COLUMN cases TEXT"); } catch {}
+try { db.exec("ALTER TABLE users ADD COLUMN banniere_x REAL NOT NULL DEFAULT 50"); } catch {}
+try { db.exec("ALTER TABLE users ADD COLUMN banniere_y REAL NOT NULL DEFAULT 25"); } catch {}
+try { db.exec("ALTER TABLE users ADD COLUMN banniere_zoom REAL NOT NULL DEFAULT 100"); } catch {}
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
 class SqliteStore extends session.Store {
@@ -395,6 +398,15 @@ app.post("/avatar", (req, res) => {
   });
 });
 
+app.post("/banniere/cadrage", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  // ces nombres finissent dans un style="…" : on n'accepte QUE des nombres, bornés
+  const borne = (v, min, max, defaut) => { const n = Number(v); return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : defaut; };
+  db.prepare("UPDATE users SET banniere_x = ?, banniere_y = ?, banniere_zoom = ? WHERE id = ?")
+    .run(borne(req.body.x, 0, 100, 50), borne(req.body.y, 0, 100, 25), borne(req.body.zoom, 100, 250, 100), req.session.userId);
+  res.redirect("/u/" + encodeURIComponent(res.locals.user.username));
+});
+
 app.get("/import", (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   res.render("import", { bilan: null, erreur: null });
@@ -421,7 +433,7 @@ app.post("/import", (req, res) => {
         titre: l.Name,
         annee: /^\d{4}$/.test(l.Year) ? l.Year : "",
         note: Math.round(Number(l.Rating) * 2),
-        date: /^\d{4}-\d{2}-\d{2}$/.test(l.Date) ? l.Date : aujourdhui(),
+        date: /^\d{4}-\d{2}-\d{2}$/.test(l.Date) && l.Date <= aujourdhui() ? l.Date : aujourdhui(),
         vu: vus.get(l.Name + "|" + l.Year)
           || (/^\d{4}-\d{2}-\d{2}$/.test(l["Watched Date"]) && l["Watched Date"] <= aujourdhui() ? l["Watched Date"] : null),                
       }));
@@ -456,7 +468,7 @@ app.post("/import", (req, res) => {
 });
 
 app.get("/u/:username", async (req, res) => {
-  const profil = db.prepare("SELECT id, username, bio, avatar IS NOT NULL AS has_avatar FROM users WHERE username = ?").get(req.params.username);
+  const profil = db.prepare("SELECT id, username, bio, avatar IS NOT NULL AS has_avatar, banniere_x, banniere_y, banniere_zoom FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
   const journal = db.prepare(`
     SELECT f.id, f.title, f.poster_path, r.rating, r.watched_on

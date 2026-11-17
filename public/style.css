@@ -1049,3 +1049,12 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .recadre-zone:active { cursor: grabbing; }
 .recadre-zone img { position: absolute; top: 0; left: 0; max-width: none; transform-origin: 0 0; pointer-events: none; user-select: none; }
 .recadrer input[type="range"] { width: 100%; accent-color: var(--lien); }
+
+/* ===== Recadrer la bannière ===== */
+.banniere.cadrage-actif { cursor: grab; touch-action: none; outline: 2px dashed var(--lien); outline-offset: 4px; }
+.banniere.cadrage-actif:active { cursor: grabbing; }
+.cadrage:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin-bottom: 1.5rem; padding: .75rem 1rem; border-radius: 12px; background: var(--carte); border: 1px solid var(--bordure); }
+.cadrage label { display: flex; align-items: center; gap: .5rem; margin: 0; }
+.cadrage input[type="range"] { accent-color: var(--lien); }
+.cadrage .actions { margin: 0 0 0 auto; }
+.cadrage-aide { font-size: .85rem; color: var(--lien); }
