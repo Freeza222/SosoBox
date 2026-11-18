@@ -32,6 +32,7 @@ try { db.exec("ALTER TABLE jour_essais ADD COLUMN cases TEXT"); } catch {}
 try { db.exec("ALTER TABLE users ADD COLUMN banniere_x REAL NOT NULL DEFAULT 50"); } catch {}
 try { db.exec("ALTER TABLE users ADD COLUMN banniere_y REAL NOT NULL DEFAULT 25"); } catch {}
 try { db.exec("ALTER TABLE users ADD COLUMN banniere_zoom REAL NOT NULL DEFAULT 100"); } catch {}
+try { db.exec("ALTER TABLE reviews ADD COLUMN revu INTEGER NOT NULL DEFAULT 0"); } catch {}
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
 class SqliteStore extends session.Store {
@@ -215,7 +216,7 @@ app.get("/films/:id", async (req, res) => {
   const favori = !!db.prepare("SELECT 1 FROM favorites WHERE user_id = ? AND film_id = ?").get(req.session.userId, film.id);
   const aVoir = !!(req.session.userId && db.prepare("SELECT 1 FROM watchlist WHERE user_id = ? AND film_id = ?")
   .get(req.session.userId, Number(req.params.id)));
-  const monAvis = db.prepare("SELECT rating, body, watched_on FROM reviews WHERE user_id = ? AND film_id = ?")
+  const monAvis = db.prepare("SELECT rating, body, watched_on, revu FROM reviews WHERE user_id = ? AND film_id = ?")
   .get(req.session.userId, film.id);
   const nbFavoris = db.prepare("SELECT COUNT(*) AS n FROM favorites WHERE user_id = ?").get(req.session.userId).n;
     const repartition = Array(11).fill(0); // cases 1 à 10 = demi-étoiles
@@ -308,9 +309,10 @@ app.post("/films/:id/review", async (req, res) => {
     return res.status(404).send("Film introuvable");
   }
   copierFilm(film);
-  db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))
-    ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on`)
-      .run(req.session.userId, id, rating, req.body.body || "", vu);
+  const revu = req.body.revu ? 1 : 0; // case cochée = "revu" envoyé ; décochée = rien d'envoyé
+  db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, revu, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on, revu = excluded.revu`)
+      .run(req.session.userId, id, rating, req.body.body || "", vu, revu);
       db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
   res.redirect("/films/" + id);
 });
@@ -471,7 +473,7 @@ app.get("/u/:username", async (req, res) => {
   const profil = db.prepare("SELECT id, username, bio, avatar IS NOT NULL AS has_avatar, banniere_x, banniere_y, banniere_zoom FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
   const journal = db.prepare(`
-    SELECT f.id, f.title, f.poster_path, r.rating, r.watched_on
+    SELECT f.id, f.title, f.poster_path, r.rating, r.watched_on, r.revu
     FROM reviews r JOIN films f ON f.id = r.film_id
     WHERE r.user_id = ? AND r.watched_on IS NOT NULL AND r.watched_on != ''
     ORDER BY r.watched_on DESC, r.id DESC LIMIT 12
