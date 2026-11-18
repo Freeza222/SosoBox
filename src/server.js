@@ -35,6 +35,22 @@ try { db.exec("ALTER TABLE users ADD COLUMN banniere_zoom REAL NOT NULL DEFAULT 
 try { db.exec("ALTER TABLE reviews ADD COLUMN revu INTEGER NOT NULL DEFAULT 0"); } catch {}
 db.prepare("DELETE FROM sessions WHERE expire < ?").run(Date.now());
 
+// Journal : un visionnage = une ligne (un film revu plusieurs fois = plusieurs lignes)
+if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'visionnages'").get()) {
+  db.exec(`CREATE TABLE visionnages (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    film_id INTEGER NOT NULL,
+    rating INTEGER NOT NULL,
+    watched_on TEXT NOT NULL,
+    revu INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (user_id, film_id, watched_on)
+  )`);
+  // la toute première fois : on recopie les dates déjà présentes dans les avis
+  db.exec(`INSERT OR IGNORE INTO visionnages (user_id, film_id, rating, watched_on)
+    SELECT user_id, film_id, rating, watched_on FROM reviews WHERE watched_on IS NOT NULL AND watched_on != ''`);
+}
+
 class SqliteStore extends session.Store {
   get(sid, cb) {
     try {
@@ -313,6 +329,19 @@ app.post("/films/:id/review", async (req, res) => {
   db.prepare(`INSERT INTO reviews (user_id, film_id, rating, body, watched_on, revu, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT (user_id, film_id) DO UPDATE SET rating = excluded.rating, body = excluded.body, watched_on = excluded.watched_on, revu = excluded.revu`)
       .run(req.session.userId, id, rating, req.body.body || "", vu, revu);
+        if (vu) {
+    const me = req.session.userId;
+    if (revu) {
+      // revisionnage : une NOUVELLE ligne dans le journal (même jour = on met juste la note à jour)
+      db.prepare(`INSERT INTO visionnages (user_id, film_id, rating, watched_on, revu) VALUES (?, ?, ?, ?, 1)
+        ON CONFLICT (user_id, film_id, watched_on) DO UPDATE SET rating = excluded.rating, revu = 1`).run(me, id, rating, vu);
+    } else {
+      // simple correction : on modifie le dernier visionnage de ce film (ou on le crée)
+      const dernier = db.prepare("SELECT id FROM visionnages WHERE user_id = ? AND film_id = ? ORDER BY watched_on DESC LIMIT 1").get(me, id);
+      if (dernier) db.prepare("UPDATE OR IGNORE visionnages SET rating = ?, watched_on = ? WHERE id = ?").run(rating, vu, dernier.id);
+      else db.prepare("INSERT OR IGNORE INTO visionnages (user_id, film_id, rating, watched_on) VALUES (?, ?, ?, ?)").run(me, id, rating, vu);
+    }
+  }
       db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
   res.redirect("/films/" + id);
 });
@@ -380,8 +409,8 @@ app.get("/u/:username/stats", (req, res) => {
 
   const parAnnee = db.prepare(`
     SELECT substr(watched_on, 1, 4) AS annee, COUNT(*) AS n
-    FROM reviews
-    WHERE user_id = ? AND watched_on IS NOT NULL AND watched_on != ''
+    FROM visionnages
+    WHERE user_id = ?
     GROUP BY annee ORDER BY annee DESC
   `).all(profil.id);
 
@@ -447,6 +476,7 @@ app.post("/import", (req, res) => {
     const ajouterDate = db.prepare(`UPDATE reviews SET watched_on = ?
       WHERE user_id = ? AND film_id = ? AND (watched_on IS NULL OR watched_on = '')`);
     const retirerAVoir = db.prepare("DELETE FROM watchlist WHERE user_id = ? AND film_id = ?");
+    const ajouterVision = db.prepare("INSERT OR IGNORE INTO visionnages (user_id, film_id, rating, watched_on) VALUES (?, ?, ?, ?)");
     const bilan = { ajoutes: 0, deja: 0, dates: 0, introuvables: [] };
 
     for (let i = 0; i < lignes.length; i += 10) {
@@ -462,6 +492,7 @@ app.post("/import", (req, res) => {
           bilan.deja++;
           if (l.vu && ajouterDate.run(l.vu, me, film.id).changes) bilan.dates++;
         }
+        if (l.vu) ajouterVision.run(me, film.id, l.note, l.vu);
         retirerAVoir.run(me, film.id);
       }));
     }
@@ -473,10 +504,10 @@ app.get("/u/:username", async (req, res) => {
   const profil = db.prepare("SELECT id, username, bio, avatar IS NOT NULL AS has_avatar, banniere_x, banniere_y, banniere_zoom FROM users WHERE username = ?").get(req.params.username);
   if (!profil) return res.status(404).send("Utilisateur introuvable");
   const journal = db.prepare(`
-    SELECT f.id, f.title, f.poster_path, r.rating, r.watched_on, r.revu
-    FROM reviews r JOIN films f ON f.id = r.film_id
-    WHERE r.user_id = ? AND r.watched_on IS NOT NULL AND r.watched_on != ''
-    ORDER BY r.watched_on DESC, r.id DESC LIMIT 12
+    SELECT f.id, f.title, f.poster_path, v.rating, v.watched_on, v.revu
+    FROM visionnages v JOIN films f ON f.id = v.film_id
+    WHERE v.user_id = ?
+    ORDER BY v.watched_on DESC, v.id DESC LIMIT 12
   `).all(profil.id);
   const total = db.prepare("SELECT COUNT(*) AS n FROM reviews WHERE user_id = ?").get(profil.id).n;
   const suit = !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?").get(req.session.userId, profil.id);
@@ -513,6 +544,7 @@ app.post("/films/:id/review/delete", (req, res) => {
   if (!req.session.userId) return res.redirect("/login");
   const id = Number(req.params.id);
   db.prepare("DELETE FROM reviews WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
+  db.prepare("DELETE FROM visionnages WHERE user_id = ? AND film_id = ?").run(req.session.userId, id);
   res.redirect("/films/" + id);
 });
 
@@ -831,6 +863,7 @@ app.post("/admin/membres/:id/supprimer", estAdmin, (req, res) => {
     db.prepare("DELETE FROM sessions  WHERE json_extract(data, '$.userId') = ?").run(id);
     db.prepare("DELETE FROM acteurs_favoris WHERE user_id = ?").run(id);
     db.prepare("DELETE FROM jour_essais WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM visionnages WHERE user_id = ?").run(id);
     db.prepare("DELETE FROM users     WHERE id = ?").run(id);
   })();
   res.redirect("/admin");
