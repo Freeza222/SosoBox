@@ -1103,6 +1103,27 @@ dialog .revu input { position: absolute; opacity: 0; width: 1px; height: 1px; } 
 
 /* liens vers les artistes depuis la fiche film */
 a.acteur { color: var(--texte); text-decoration: none; }
-a.acteur:hover img { outline: 2px solid var(--lien); outline-offset: 2px; }
+.rangee a.acteur { flex: 0 0 90px; }
+.rangee a.acteur img { aspect-ratio: 1; border: 0; border-radius: 50%; }
+.rangee a.acteur:hover img { transform: none; outline: 2px solid var(--lien); outline-offset: 2px; }
 .lien-artiste { color: #ECE6FF; font-weight: 600; text-decoration: none; }
 .lien-artiste:hover { text-decoration: underline; }
+
+/* ===== Recherche : onglets avec icônes + liste des artistes ===== */
+.onglets a { display: inline-flex; align-items: center; gap: .4rem; }
+.onglets svg { width: 16px; height: 16px; flex: none; }
+.onglets a.actif .etoile { color: #FFC94D; }
+
+.artistes { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: .6rem; }
+.artistes a { display: flex; align-items: center; gap: .8rem; padding: .6rem .8rem; border-radius: 14px; background: var(--carte); border: 1px solid var(--bordure); color: var(--texte); text-decoration: none; transition: border-color .2s; }
+.artistes a:hover { border-color: var(--lien); }
+.artistes img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: none; }
+.artiste-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.artiste-texte b { color: #fff; }
+.artiste-texte .metier { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #FFC94D; }
+.artiste-texte .connu { font-size: .8rem; color: #A99CDB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 600px) {
+  .artistes { grid-template-columns: minmax(0, 1fr); }
+  .onglets a { padding: .5rem .7rem; } /* les 3 onglets tiennent sur une ligne */
+}

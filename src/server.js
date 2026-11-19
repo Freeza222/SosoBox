@@ -160,7 +160,7 @@ app.get("/", async (req, res) => {
 app.get("/search", async (req, res) => {
   const q = req.query.q || "";
   const fav = req.query.fav === "1" && !!req.session.userId;
-  const onglet = req.query.onglet === "users" && !fav ? "users" : "films";
+  const onglet = !fav && ["users", "artistes"].includes(req.query.onglet) ? req.query.onglet : "films";
     const MIN_VOTES = 20; // en dessous : making-of, fiches vides, projets inconnus
   let films = [];
   if (q && onglet === "films") {
@@ -169,6 +169,24 @@ app.get("/search", async (req, res) => {
     films = connus.length ? connus : brut; // si rien de connu, on garde tout : un film très rare reste trouvable
   }
   const gens = q && onglet === "users" ? db.prepare("SELECT username FROM users WHERE username LIKE ? LIMIT 20").all("%" + q + "%") : [];
+  let artistes = [];
+  if (q && onglet === "artistes") {
+    const METIERS = { Acting: ["Acteur", "Actrice"], Directing: ["Réalisateur", "Réalisatrice"], Writing: ["Scénariste", "Scénariste"] };
+    const data = await tmdb("/search/person?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => null);
+    const candidats = (data ? data.results : []).filter(p => p.profile_path && !p.adult && METIERS[p.known_for_department]);
+    // les acteurs passent la vérification de filmographie ; les autres, seulement la liste noire
+    const oks = await Promise.all(candidats.map(p => p.known_for_department === "Acting" ? vraiActeur(p) : !BANNIS.has(p.id)));
+    artistes = candidats.filter((_, i) => oks[i])
+      .sort((a, b) => b.popularity - a.popularity)
+      .slice(0, 20)
+      .map(p => ({
+        id: p.id,
+        nom: p.name,
+        photo: p.profile_path,
+        metier: METIERS[p.known_for_department][p.gender === 1 ? 1 : 0],
+        connu: (p.known_for || []).map(f => f.title || f.name).filter(Boolean).slice(0, 3).join(", "),
+      }));
+  }
   const deja = fav ? db.prepare("SELECT film_id FROM favorites WHERE user_id = ?").all(req.session.userId).map(r => r.film_id) : [];
     let genres = [], tendances = [], genreChoisi = null, genreFilms = [];
   if (!q) {
@@ -192,7 +210,7 @@ app.get("/search", async (req, res) => {
       genreFilms = pages.flatMap(d => (d ? d.results : [])).slice(0, 35);
     }
   }
-  res.render("search", { q, onglet, fav, deja, films, gens, genres, tendances, genreChoisi, genreFilms });
+  res.render("search", { q, onglet, fav, deja, films, gens, artistes, genres, tendances, genreChoisi, genreFilms });
 });
 
 app.get("/notifications", (req, res) => {
