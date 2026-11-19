@@ -346,6 +346,9 @@ a.case-vide:hover { border-color: var(--lien); background: var(--carte); }
 .film-affiche { width: 170px; border-radius: 14px; border: 3px solid rgba(255, 255, 255, .25); box-shadow: 0 20px 50px rgba(0, 0, 0, .6); }
 .hero-film h1 { margin: .4rem 0 .2rem; font-size: clamp(2rem, 4.5vw, 3.4rem); line-height: 1.05; color: #ECE6FF; }
 .film-infos p { margin: 0; color: #A99CDB; }
+.film-infos { flex: 1 1 300px; min-width: 0; }
+.hero-film h1 { overflow-wrap: break-word; } /* un mot très long passe aussi à la ligne */
+.film-note.verre { flex: none; } 
 .genres { display: flex; flex-wrap: wrap; gap: .4rem; }
 .genre { padding: .2rem .75rem; border-radius: 999px; background: rgba(255, 255, 255, .12); font-size: .85rem; }
 .film-affiche { width: 170px; margin-top: -6.5rem; border-radius: 14px; border: 3px solid rgba(255, 255, 255, .25); box-shadow: 0 20px 50px rgba(0, 0, 0, .6); }
