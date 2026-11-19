@@ -631,12 +631,35 @@ app.get("/favoris/:id/affiche", async (req, res) => {
   res.render("affiche", { fav, affiches });
 });
 
+const PAS_FICTION = [99, 10763, 10764, 10767];
+const vraiRole = f => !(f.genre_ids || []).some(g => PAS_FICTION.includes(g))
+  && !/^(self|himself|herself|themselves|lui-même|elle-même)\b/i.test(f.character || "");
+const BANNIS = new Set([]);
+const acteurOk = p => p.known_for_department === "Acting" && p.profile_path && !p.adult
+  && !BANNIS.has(p.id) && (p.known_for || []).some(vraiRole);
+
+// vérification complète sur la filmographie : au moins 3 vrais rôles de fiction
+const verdicts = new Map(); // id → true / false (ponytail: cache sans fin, ça reste petit)
+async function vraiActeur(p) {
+  if (BANNIS.has(p.id)) return false;
+  if (verdicts.has(p.id)) return verdicts.get(p.id);
+  const c = await tmdb("/person/" + p.id + "/combined_credits?language=en-US").catch(() => null);
+  if (!c) return true; // TMDB muet : on ne bloque pas (et on ne garde pas en cache)
+  const nom = (p.name || "").toLowerCase();
+  const roles = c.cast.filter(f => vraiRole(f)
+    && !/archiv/i.test(f.character || "")                       // images d'archives
+    && !(nom && (f.character || "").toLowerCase().includes(nom)) // joue son propre rôle
+  ).length;
+  verdicts.set(p.id, roles >= 3);
+  return roles >= 3;
+}
+
 let populaires = [];
 async function chargerPopulaires() {
   const pages = await Promise.all(Array.from({ length: 20 }, (_, i) =>
     tmdb("/person/popular?language=fr-FR&page=" + (i + 1)).catch(() => null)));
   populaires = pages.flatMap(d => (d ? d.results : []))
-    .filter(p => p.known_for_department === "Acting" && p.profile_path)
+    .filter(acteurOk)
     .sort((a, b) => b.popularity - a.popularity);
 }
 chargerPopulaires();
@@ -652,12 +675,14 @@ function ressemble(q, nom) {
 async function chercherActeurs(q, combien) {
   const data = await tmdb("/search/person?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => null);
   const exacts = data
-    ? data.results.filter(p => p.known_for_department === "Acting" && p.profile_path)
+      ? data.results.filter(acteurOk)
         .sort((a, b) => b.popularity - a.popularity)
     : [];
   const deja = new Set(exacts.map(p => p.id));
   const proches = q.length >= 3 ? populaires.filter(p => !deja.has(p.id) && ressemble(q, p.name)) : [];
-  return [...exacts, ...proches].slice(0, combien);
+  const candidats = [...exacts, ...proches].slice(0, combien * 2);       // un peu plus, certains seront écartés
+  const oks = await Promise.all(candidats.map(vraiActeur));              // vérifiés en parallèle
+  return candidats.filter((_, i) => oks[i]).slice(0, combien);
 }
 
 app.get("/acteurs", async (req, res) => {
@@ -679,7 +704,7 @@ app.post("/acteurs/:id", async (req, res) => {
     if (n >= 3) return res.status(400).send("3 acteurs maximum : retires-en un d'abord.");
     // nom et photo demandés à TMDB par le serveur, jamais pris dans le formulaire
     const p = await tmdb("/person/" + id + "?language=fr-FR").catch(() => null);
-    if (!p || p.adult) return res.status(404).send("Acteur introuvable");
+    if (!p || p.adult || !(await vraiActeur(p))) return res.status(404).send("Acteur introuvable");
     db.prepare("INSERT INTO acteurs_favoris (user_id, person_id, nom, photo) VALUES (?, ?, ?, ?)")
       .run(req.session.userId, id, p.name, p.profile_path);
   }
