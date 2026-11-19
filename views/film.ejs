@@ -14,7 +14,7 @@
         <% if (film.runtime) { %><span class="genre"><%= Math.floor(film.runtime / 60) %> h <%= String(film.runtime % 60).padStart(2, "0") %></span><% } %>
       </div>
       <h1><%= film.title %></h1>
-      <p><%= (film.release_date || "").slice(0, 4) %><% if (real) { %> · réalisé par <%= real.name %><% } %></p>
+            <p><%= (film.release_date || "").slice(0, 4) %><% if (real) { %> · réalisé par <a class="lien-artiste" href="/personnes/<%= real.id %>"><%= real.name %></a><% } %></p>
 
             <% const fr = (film["watch/providers"]?.results || {}).FR; %>
       <% if (fr && fr.flatrate) { %>
@@ -114,14 +114,14 @@
       <h2>Casting</h2>
       <div class="rangee">
         <% for (const a of film.credits.cast.slice(0, 15)) { %>
-          <div class="acteur">
+          <a class="acteur" href="/personnes/<%= a.id %>">
             <% if (a.profile_path) { %>
               <img src="https://image.tmdb.org/t/p/w185<%= a.profile_path %>" alt="" loading="lazy">
             <% } else { %>
               <span class="acteur-vide"></span>
             <% } %>
             <%= a.name %>
-          </div>
+            </a>
         <% } %>
       </div>
     <% } %>

@@ -829,6 +829,38 @@ app.post("/jour/essai", async (req, res) => {
   res.redirect("/jour");
 });
 
+// ===== Page d'un artiste (acteur, réalisateur) =====
+app.get("/personnes/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).send("Personne introuvable");
+  const p = await tmdb("/person/" + id + "?language=fr-FR&append_to_response=movie_credits").catch(() => null);
+  if (!p || p.adult) return res.status(404).send("Personne introuvable");
+
+  // sans doublons, avec affiche, du plus récent au plus ancien (sans date = à la fin)
+  const trier = films => [...new Map(films.filter(f => f.poster_path && !f.adult).map(f => [f.id, f])).values()]
+    .sort((a, b) => (b.release_date || "").localeCompare(a.release_date || ""));
+  const realise = trier(p.movie_credits.crew.filter(f => f.job === "Director"));
+  const joue = trier(p.movie_credits.cast);
+
+  // onglet : celui demandé, sinon son métier principal ; jamais un onglet vide
+  let role = ["real", "acteur"].includes(req.query.role) ? req.query.role
+    : (p.known_for_department === "Directing" ? "real" : "acteur");
+  if (role === "real" && realise.length === 0) role = "acteur";
+  if (role === "acteur" && joue.length === 0 && realise.length > 0) role = "real";
+  const liste = role === "real" ? realise : joue;
+
+  // mes notes : film_id → note (1..10)
+  const mesNotes = new Map(req.session.userId
+    ? db.prepare("SELECT film_id, rating FROM reviews WHERE user_id = ?").all(req.session.userId).map(r => [r.film_id, r.rating])
+    : []);
+  const vus = liste.filter(f => mesNotes.has(f.id));
+  const moyenne = vus.length ? vus.reduce((s, f) => s + mesNotes.get(f.id), 0) / vus.length / 2 : null;
+  const pasVus = req.query.pasvus === "1";
+  const films = pasVus ? liste.filter(f => !mesNotes.has(f.id)) : liste;
+
+  res.render("personne", { p, role, realise, joue, films, total: liste.length, nbVus: vus.length, moyenne, mesNotes, pasVus });
+});
+
 app.get("/api/suggestions", async (req, res) => {
   const q = (req.query.q || "").trim().slice(0, 50);
   if (!q) return res.json({ films: [], gens: [] });

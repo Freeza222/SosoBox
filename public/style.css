@@ -1079,3 +1079,30 @@ dialog .revu input { position: absolute; opacity: 0; width: 1px; height: 1px; } 
 @media (prefers-reduced-motion: reduce) { .revu svg { transition: none; } }
 
 .journal-revu { flex: none; width: 16px; height: 16px; color: #FFC94D; }
+
+/* ===== Page d'un artiste ===== */
+.personne-entete { display: flex; flex-direction: column; align-items: center; gap: .5rem; margin-bottom: 1.5rem; text-align: center; }
+.personne-photo { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 4px var(--fond), 0 0 0 6px var(--lien), 0 16px 40px rgba(0, 0, 0, .5); }
+.personne-entete h1 { margin: .5rem 0 0; font-family: "Playfair SosoBox", serif; font-style: italic; font-weight: 900; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; color: #fff; }
+.personne-info { margin: 0; color: #A99CDB; }
+.personne-entete .chiffres { margin-top: .5rem; }
+.chiffres b.dore { color: #FFC94D; }
+.personne .bascule { display: flex; width: max-content; margin: 0 auto 1rem; }
+.filtre-vus { margin-bottom: 1.5rem; text-align: center; }
+.filtre-vus label { display: inline-flex; align-items: center; gap: .5rem; margin: 0; cursor: pointer; }
+.filtre-vus input { width: 18px; height: 18px; accent-color: var(--lien); }
+
+.filmo { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
+.filmo a { position: relative; display: block; }
+.filmo img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; background: var(--carte); border: 2px solid var(--bordure); transition: transform .2s, border-color .2s; }
+.filmo a:hover img { transform: translateY(-4px); border-color: var(--lien); }
+.filmo.avec-notes li:not(.vu) img { opacity: .7; } /* pas encore vus : légèrement éteints */
+.ma-note { position: absolute; top: 6px; right: 6px; padding: 1px 7px; border-radius: 999px; background: #FFC94D; color: #1f0f40; font-size: .75rem; font-weight: 800; }
+.filmo small { display: block; margin-top: .3rem; font-size: .75rem; color: var(--lien); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 600px) { .filmo { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; } }
+
+/* liens vers les artistes depuis la fiche film */
+a.acteur { color: var(--texte); text-decoration: none; }
+a.acteur:hover img { outline: 2px solid var(--lien); outline-offset: 2px; }
+.lien-artiste { color: #ECE6FF; font-weight: 600; text-decoration: none; }
+.lien-artiste:hover { text-decoration: underline; }

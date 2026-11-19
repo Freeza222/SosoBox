@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+<% const virgule = n => String(n).replace(".", ","); %>
+
+<div class="etroit personne">
+  <header class="personne-entete">
+    <img class="personne-photo" src="<%= p.profile_path ? 'https://image.tmdb.org/t/p/w342' + p.profile_path : '/avatar-defaut.svg' %>" alt="">
+    <h1><%= p.name %></h1>
+    <p class="personne-info">
+      <%= p.known_for_department === "Directing" ? "Réalisateur" : "Acteur" %><% if (p.birthday) { %> · né<%= p.gender === 1 ? "e" : "" %> en <%= p.birthday.slice(0, 4) %><% } %><% if (p.place_of_birth) { %> · <%= p.place_of_birth %><% } %>
+    </p>
+    <div class="chiffres">
+      <span><b><%= total %></b>films</span>
+      <% if (user) { %>
+        <span><b class="dore"><%= nbVus %></b>vus par toi</span>
+        <% if (moyenne !== null) { %><span><b><%= virgule(moyenne.toFixed(1)) %></b>ta moyenne</span><% } %>
+      <% } %>
+    </div>
+  </header>
+
+  <% if (realise.length && joue.length) { %>
+    <nav class="bascule" aria-label="Rôle">
+      <a href="?role=real" class="<%= role === 'real' ? 'actif' : '' %>">Réalisateur · <%= realise.length %></a>
+      <a href="?role=acteur" class="<%= role === 'acteur' ? 'actif' : '' %>">Acteur · <%= joue.length %></a>
+    </nav>
+  <% } %>
+
+  <% if (user) { %>
+    <form class="filtre-vus">
+      <input type="hidden" name="role" value="<%= role %>">
+      <label><input type="checkbox" name="pasvus" value="1" <%= pasVus ? "checked" : "" %> onchange="this.form.submit()"> Seulement ceux que je n'ai pas vus</label>
+    </form>
+  <% } %>
+
+  <ul class="filmo<%= user ? ' avec-notes' : '' %>">
+    <% for (const f of films) { const n = mesNotes.get(f.id); %>
+      <li class="<%= n ? 'vu' : '' %>">
+        <a href="/films/<%= f.id %>">
+          <img src="https://image.tmdb.org/t/p/w185<%= f.poster_path %>" alt="<%= f.title %>" loading="lazy">
+          <% if (n) { %><span class="ma-note">★ <%= virgule(n / 2) %></span><% } %>
+        </a>
+        <small><%= (f.release_date || "").slice(0, 4) || "—" %><% if (role === "acteur" && f.character) { %> · <%= f.character %><% } %></small>
+      </li>
+    <% } %>
+  </ul>
+  <% if (films.length === 0) { %><p class="vide">Tu les as tous vus !</p><% } %>
+</div>
+
+<%- include('partials/footer') %>
