@@ -1127,3 +1127,9 @@ a.acteur { color: var(--texte); text-decoration: none; }
   .artistes { grid-template-columns: minmax(0, 1fr); }
   .onglets a { padding: .5rem .7rem; } /* les 3 onglets tiennent sur une ligne */
 }
+
+/* ===== Suggestions : bloc « Artiste » ===== */
+.sugg-titre { padding: .5em .8em .2em; border-top: 1px solid var(--bordure); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lien); }
+.sugg small { color: #FFC94D; font-size: .75rem; font-weight: 700; }
+.sugg-tous { display: block; padding: .5em .8em; border-top: 1px solid var(--bordure); font-size: .85rem; color: var(--lien); text-decoration: none; }
+.sugg-tous:hover { background: var(--bordure); }

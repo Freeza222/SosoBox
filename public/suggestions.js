@@ -20,8 +20,24 @@ champ.addEventListener("input", async () => {
   const n = ++derniere;
   const q = champ.value.trim();
   if (!q) { boite.replaceChildren(); return; }
-  const { films, gens } = await (await fetch("/api/suggestions?q=" + encodeURIComponent(q))).json();
+  const { films, gens, artiste } = await (await fetch("/api/suggestions?q=" + encodeURIComponent(q))).json();
   if (n !== derniere) return; // une requête plus récente est partie entre-temps
+  const blocArtiste = [];
+  if (artiste) {
+    const titre = document.createElement("div");
+    titre.className = "sugg-titre";
+    titre.textContent = "Artiste";
+    const l = ligne("/personnes/" + artiste.id, "https://image.tmdb.org/t/p/w92" + artiste.photo, artiste.nom, true);
+    const metier = document.createElement("small");
+    metier.textContent = " · " + artiste.metier;
+    l.append(metier);
+    const tous = document.createElement("a");
+    tous.className = "sugg-tous";
+    tous.href = "/search?q=" + encodeURIComponent(q) + "&onglet=artistes";
+    tous.textContent = "Tous les artistes pour « " + q + " » →";
+    blocArtiste.push(titre, l, tous);
+  }
+
   boite.replaceChildren(
     ...gens.map(u => {
       const lien = "/u/" + encodeURIComponent(u.username);
@@ -32,7 +48,8 @@ champ.addEventListener("input", async () => {
       f.poster && "https://image.tmdb.org/t/p/w92" + f.poster,
       f.title + (f.year ? " (" + f.year + ")" : ""),
       false
-    ))
+    )),
+    ...blocArtiste
   );
 });
 

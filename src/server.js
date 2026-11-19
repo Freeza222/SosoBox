@@ -650,6 +650,7 @@ app.get("/favoris/:id/affiche", async (req, res) => {
 });
 
 const PAS_FICTION = [99, 10763, 10764, 10767];
+const METIERS = { Acting: ["Acteur", "Actrice"], Directing: ["Réalisateur", "Réalisatrice"], Writing: ["Scénariste", "Scénariste"] };
 const vraiRole = f => !(f.genre_ids || []).some(g => PAS_FICTION.includes(g))
   && !/^(self|himself|herself|themselves|lui-même|elle-même)\b/i.test(f.character || "");
 const BANNIS = new Set([]);
@@ -885,9 +886,10 @@ app.get("/api/suggestions", async (req, res) => {
   const gens = db.prepare("SELECT username FROM users WHERE username LIKE ? ORDER BY length(username) LIMIT 3")
     .all("%" + q + "%");
   if (q.length < 2) return res.json({ films: [], gens });
-  const data = q.length < 3
-    ? { results: [] } // sous 3 lettres, TMDB cherche des mots entiers ("du", "d'un"...)
-    : await tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => ({ results: [] }));
+  const [data, personnes] = await Promise.all([
+    q.length < 3 ? { results: [] } : tmdb("/search/movie?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => ({ results: [] })),
+    q.length < 4 ? null : tmdb("/search/person?language=fr-FR&query=" + encodeURIComponent(q)).catch(() => null),
+  ]);
   const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const qn = norm(q);
   const commence = f => norm(f.title).startsWith(qn) || norm(f.original_title).startsWith(qn);
@@ -897,7 +899,18 @@ app.get("/api/suggestions", async (req, res) => {
     .sort((a, b) => (commence(b) - commence(a)) || b.vote_count - a.vote_count)
     .slice(0, 3)
     .map(f => ({ id: f.id, title: f.title, year: (f.release_date || "").slice(0, 4), poster: f.poster_path }));
-  res.json({ films, gens });
+  const proche = p => norm(p.name).split(/\s+/).some(mot => mot.startsWith(qn));
+  const possibles = (personnes ? personnes.results : [])
+    .filter(p => p.profile_path && !p.adult && METIERS[p.known_for_department] && p.popularity >= 3 && proche(p))
+    .slice(0, 3);
+  let artiste = null;
+  for (const p of possibles) {
+    if (p.known_for_department === "Acting" ? await vraiActeur(p) : !BANNIS.has(p.id)) {
+      artiste = { id: p.id, nom: p.name, photo: p.profile_path, metier: METIERS[p.known_for_department][p.gender === 1 ? 1 : 0] };
+      break;
+    }
+  }
+  res.json({ films, gens, artiste });
 });
 
 app.get("/api/acteurs", async (req, res) => {
