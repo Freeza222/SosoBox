@@ -184,7 +184,6 @@ app.get("/search", async (req, res) => {
         nom: p.name,
         photo: p.profile_path,
         metier: METIERS[p.known_for_department][p.gender === 1 ? 1 : 0],
-        connu: (p.known_for || []).map(f => f.title || f.name).filter(Boolean).slice(0, 3).join(", "),
       }));
   }
   const deja = fav ? db.prepare("SELECT film_id FROM favorites WHERE user_id = ?").all(req.session.userId).map(r => r.film_id) : [];

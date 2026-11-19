@@ -30,18 +30,14 @@
 <% if (q) { %>
   <% if (onglet === "artistes") { %>
     <% if (artistes.length === 0) { %><p>Aucun acteur ni réalisateur trouvé.</p><% } %>
-    <ul class="artistes">
+        <ul class="cercles">
       <% for (const a of artistes) { %>
         <li>
-          <a href="/personnes/<%= a.id %>">
+          <a class="artiste" href="/personnes/<%= a.id %>">
             <img src="https://image.tmdb.org/t/p/w185<%= a.photo %>" alt="" loading="lazy">
-            <span class="artiste-texte">
-              <b><%= a.nom %></b>
-              <small class="metier"><%= a.metier %></small>
-              <% if (a.connu) { %><span class="connu"><%= a.connu %></span><% } %>
-            </span>
-            <svg class="fleche" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            <span class="nom"><%= a.nom %></span>
           </a>
+          <small class="metier"><%= a.metier %></small>
         </li>
       <% } %>
     </ul>
